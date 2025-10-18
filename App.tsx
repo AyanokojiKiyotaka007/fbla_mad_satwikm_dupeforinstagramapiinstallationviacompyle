@@ -1,175 +1,111 @@
+import React from 'react';
+import { NavigationContainer } from '@react-navigation/native';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { MaterialIcons } from '@expo/vector-icons';
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View, Image, TouchableOpacity, Animated } from 'react-native';
-import { useState, useEffect, useRef } from 'react';
-import { useFonts, PlayfairDisplay_400Regular, PlayfairDisplay_700Bold } from '@expo-google-fonts/playfair-display';
-import { Inter_300Light, Inter_400Regular } from '@expo-google-fonts/inter';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 
-export default function App() {
-  const [theme, setTheme] = useState('light');
-  const fadeAnim = useRef(new Animated.Value(0)).current;
-  const scaleAnim = useRef(new Animated.Value(0.9)).current;
+import DashboardScreen from './screens/DashboardScreen';
+import CalendarScreen from './screens/CalendarScreen';
+import NewsFeedScreen from './screens/NewsFeedScreen';
+import ResourcesScreen from './screens/ResourcesScreen';
+import ProfileScreen from './screens/ProfileScreen';
+import EventDetailScreen from './screens/EventDetailScreen';
 
-  const [fontsLoaded] = useFonts({
-    PlayfairDisplay_400Regular,
-    PlayfairDisplay_700Bold,
-    Inter_300Light,
-    Inter_400Regular,
-  });
+import { COLORS } from './constants/theme';
 
-  useEffect(() => {
-    if (fontsLoaded) {
-      // Fade in animation when component mounts
-      Animated.parallel([
-        Animated.timing(fadeAnim, {
-          toValue: 1,
-          duration: 1000,
-          useNativeDriver: true,
-        }),
-        Animated.spring(scaleAnim, {
-          toValue: 1,
-          friction: 4,
-          tension: 40,
-          useNativeDriver: true,
-        })
-      ]).start();
-    }
-  }, [fontsLoaded]);
+const Tab = createBottomTabNavigator();
+const Stack = createNativeStackNavigator();
 
-  const toggleTheme = () => {
-    setTheme(theme === 'light' ? 'dark' : 'light');
-  };
-
-  if (!fontsLoaded) {
-    return null;
-  }
-
+function TabNavigator() {
   return (
-    <View style={[
-      styles.container,
-      { backgroundColor: theme === 'light' ? '#ffffff' : '#1a1a2e' }
-    ]}>
-      <Animated.View style={[
-        styles.content,
-        { 
-          opacity: fadeAnim,
-          transform: [{ scale: scaleAnim }]
-        }
-      ]}>
-        <Image 
-          source={require('./assets/images/icon.png')} 
-          style={styles.logo} 
-          resizeMode="contain"
-        />
-        
-        <Text style={[
-          styles.title,
-          { 
-            color: theme === 'light' ? '#333' : '#fff',
-            fontFamily: 'PlayfairDisplay_400Regular',
-            fontWeight: '300'
-          }
-        ]}>
-          welcome to kiki
-        </Text>
-        
-        <Text style={[
-          styles.subtitle,
-          { 
-            color: theme === 'light' ? '#666' : '#ccc',
-            fontFamily: 'Inter_300Light'
-          }
-        ]}>
-          tell the ai what to make!
-        </Text>
-
-        <View style={styles.reactContainer}>
-          <Text style={[
-            styles.poweredBy,
-            { 
-              color: theme === 'light' ? '#666' : '#ccc',
-              fontFamily: 'Inter_300Light'
-            }
-          ]}>
-            powered by
-          </Text>
-          <Image 
-            source={require('./assets/images/react-logo.png')} 
-            style={styles.reactLogo} 
-            resizeMode="contain"
-          />
-        </View>
-      </Animated.View>
-
-      <TouchableOpacity 
-        style={[
-          styles.themeToggle,
-          { backgroundColor: theme === 'light' ? '#333' : '#f0f8ff' }
-        ]} 
-        onPress={toggleTheme}
-      >
-        <Text style={{ 
-          color: theme === 'light' ? '#fff' : '#333',
-          fontWeight: 'bold'
-        }}>
-          {theme === 'light' ? '🌙' : '☀️'}
-        </Text>
-      </TouchableOpacity>
-      
-      <StatusBar style={theme === 'light' ? 'dark' : 'light'} />
-    </View>
+    <Tab.Navigator
+      screenOptions={{
+        headerShown: false,
+        tabBarActiveTintColor: COLORS.primary,
+        tabBarInactiveTintColor: COLORS.textLight,
+        tabBarStyle: {
+          backgroundColor: COLORS.surface,
+          borderTopWidth: 1,
+          borderTopColor: COLORS.divider,
+          paddingBottom: 8,
+          paddingTop: 8,
+          height: 60,
+        },
+        tabBarLabelStyle: {
+          fontSize: 12,
+          fontWeight: '600',
+        },
+      }}
+    >
+      <Tab.Screen
+        name="Dashboard"
+        component={DashboardScreen}
+        options={{
+          tabBarIcon: ({ color, size }) => (
+            <MaterialIcons name="dashboard" size={size} color={color} />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="Calendar"
+        component={CalendarScreen}
+        options={{
+          tabBarIcon: ({ color, size }) => (
+            <MaterialIcons name="event" size={size} color={color} />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="NewsFeed"
+        component={NewsFeedScreen}
+        options={{
+          tabBarLabel: 'News',
+          tabBarIcon: ({ color, size }) => (
+            <MaterialIcons name="article" size={size} color={color} />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="Resources"
+        component={ResourcesScreen}
+        options={{
+          tabBarIcon: ({ color, size }) => (
+            <MaterialIcons name="folder" size={size} color={color} />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="Profile"
+        component={ProfileScreen}
+        options={{
+          tabBarIcon: ({ color, size }) => (
+            <MaterialIcons name="person" size={size} color={color} />
+          ),
+        }}
+      />
+    </Tab.Navigator>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 20,
-  },
-  content: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    width: '100%',
-  },
-  logo: {
-    width: 200,
-    height: 200,
-    marginBottom: 20,
-  },
-  title: {
-    fontSize: 32,
-    fontWeight: 'bold',
-    marginBottom: 8,
-    textAlign: 'center',
-  },
-  subtitle: {
-    fontSize: 20,
-    marginBottom: 30,
-    textAlign: 'center',
-  },
-  reactContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: 40,
-  },
-  poweredBy: {
-    fontSize: 16,
-    marginRight: 6,
-  },
-  reactLogo: {
-    width: 24,
-    height: 24,
-  },
-  themeToggle: {
-    position: 'absolute',
-    top: 50,
-    right: 20,
-    padding: 10,
-    borderRadius: 20,
-    width: 40,
-    height: 40,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
+export default function App() {
+  return (
+    <SafeAreaProvider>
+      <NavigationContainer>
+        <Stack.Navigator screenOptions={{ headerShown: false }}>
+          <Stack.Screen name="Main" component={TabNavigator} />
+          <Stack.Screen 
+            name="EventDetail" 
+            component={EventDetailScreen}
+            options={{
+              presentation: 'card',
+              animation: 'slide_from_right',
+            }}
+          />
+        </Stack.Navigator>
+      </NavigationContainer>
+      <StatusBar style="dark" />
+    </SafeAreaProvider>
+  );
+}
