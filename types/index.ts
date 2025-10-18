@@ -31,6 +31,7 @@ export interface Resource {
   size: string;
   uploadDate: string;
   downloads: number;
+  url?: string;
 }
 
 export interface UserProfile {

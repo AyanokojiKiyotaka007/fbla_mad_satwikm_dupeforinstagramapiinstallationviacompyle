@@ -5,7 +5,8 @@ import { MaterialIcons } from '@expo/vector-icons';
 import Animated, { FadeIn } from 'react-native-reanimated';
 import EventCard from '../components/EventCard';
 import { mockEvents } from '../data/mockData';
-import { COLORS, SPACING, TYPOGRAPHY, BORDER_RADIUS, SHADOWS } from '../constants/theme';
+import { useTheme } from '../contexts/ThemeContext';
+import { SPACING, TYPOGRAPHY, BORDER_RADIUS, SHADOWS } from '../constants/theme';
 
 interface CalendarScreenProps {
   navigation: any;
@@ -13,6 +14,7 @@ interface CalendarScreenProps {
 
 export default function CalendarScreen({ navigation }: CalendarScreenProps) {
   const [selectedFilter, setSelectedFilter] = useState<string>('all');
+  const { colors } = useTheme();
 
   const filters = [
     { id: 'all', label: 'All Events', icon: 'event' as const },
@@ -27,11 +29,11 @@ export default function CalendarScreen({ navigation }: CalendarScreenProps) {
     : mockEvents.filter(e => e.category === selectedFilter);
 
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['top']}>
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>Event Calendar</Text>
-        <TouchableOpacity style={styles.addButton}>
-          <MaterialIcons name="add" size={24} color={COLORS.surface} />
+        <Text style={[styles.headerTitle, { color: colors.text }]}>Event Calendar</Text>
+        <TouchableOpacity style={[styles.addButton, { backgroundColor: colors.primary }]}>
+          <MaterialIcons name="add" size={24} color="#FFFFFF" />
         </TouchableOpacity>
       </View>
 
@@ -48,7 +50,7 @@ export default function CalendarScreen({ navigation }: CalendarScreenProps) {
               key={filter.id}
               style={[
                 styles.filterChip,
-                selectedFilter === filter.id && styles.filterChipActive,
+                { backgroundColor: selectedFilter === filter.id ? colors.primary : colors.surface },
                 SHADOWS.small,
               ]}
               onPress={() => setSelectedFilter(filter.id)}
@@ -57,11 +59,11 @@ export default function CalendarScreen({ navigation }: CalendarScreenProps) {
               <MaterialIcons 
                 name={filter.icon} 
                 size={18} 
-                color={selectedFilter === filter.id ? COLORS.surface : COLORS.textSecondary} 
+                color={selectedFilter === filter.id ? '#FFFFFF' : colors.textSecondary} 
               />
               <Text style={[
                 styles.filterText,
-                selectedFilter === filter.id && styles.filterTextActive,
+                { color: selectedFilter === filter.id ? '#FFFFFF' : colors.textSecondary },
               ]}>
                 {filter.label}
               </Text>
@@ -75,7 +77,7 @@ export default function CalendarScreen({ navigation }: CalendarScreenProps) {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.eventsContainer}
       >
-        <Text style={styles.resultsText}>
+        <Text style={[styles.resultsText, { color: colors.textLight }]}>
           {filteredEvents.length} {filteredEvents.length === 1 ? 'event' : 'events'} found
         </Text>
         
@@ -95,24 +97,21 @@ export default function CalendarScreen({ navigation }: CalendarScreenProps) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.background,
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: SPACING.md,
+    paddingHorizontal: SPACING.lg,
     paddingVertical: SPACING.md,
   },
   headerTitle: {
     ...TYPOGRAPHY.h2,
-    color: COLORS.text,
   },
   addButton: {
     width: 40,
     height: 40,
     borderRadius: BORDER_RADIUS.md,
-    backgroundColor: COLORS.primary,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -120,37 +119,28 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.md,
   },
   filterContent: {
-    paddingHorizontal: SPACING.md,
+    paddingHorizontal: SPACING.lg,
   },
   filterChip: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: COLORS.surface,
     paddingHorizontal: SPACING.md,
     paddingVertical: SPACING.sm,
     borderRadius: BORDER_RADIUS.full,
     marginRight: SPACING.sm,
   },
-  filterChipActive: {
-    backgroundColor: COLORS.primary,
-  },
   filterText: {
     ...TYPOGRAPHY.bodySmall,
-    color: COLORS.textSecondary,
     marginLeft: SPACING.xs,
     fontWeight: '600',
   },
-  filterTextActive: {
-    color: COLORS.surface,
-  },
   eventsContainer: {
     paddingTop: SPACING.sm,
-    paddingBottom: SPACING.xl,
+    paddingBottom: 100,
   },
   resultsText: {
     ...TYPOGRAPHY.bodySmall,
-    color: COLORS.textLight,
-    paddingHorizontal: SPACING.md,
+    paddingHorizontal: SPACING.lg,
     marginBottom: SPACING.md,
   },
 });

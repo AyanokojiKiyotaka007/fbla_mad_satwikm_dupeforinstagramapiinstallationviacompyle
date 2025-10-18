@@ -3,20 +3,14 @@ import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import Animated, { FadeInUp } from 'react-native-reanimated';
 import { NewsItem } from '../types';
-import { COLORS, SPACING, TYPOGRAPHY, SHADOWS, BORDER_RADIUS } from '../constants/theme';
+import { useTheme } from '../contexts/ThemeContext';
+import { SPACING, TYPOGRAPHY, SHADOWS, BORDER_RADIUS } from '../constants/theme';
 
 interface NewsCardProps {
   news: NewsItem;
   onLike: () => void;
   index: number;
 }
-
-const categoryColors = {
-  announcement: COLORS.primary,
-  achievement: COLORS.success,
-  reminder: COLORS.warning,
-  update: COLORS.info,
-};
 
 const categoryIcons = {
   announcement: 'campaign' as const,
@@ -26,27 +20,36 @@ const categoryIcons = {
 };
 
 export default function NewsCard({ news, onLike, index }: NewsCardProps) {
+  const { colors } = useTheme();
+  
+  const categoryColors = {
+    announcement: colors.primary,
+    achievement: colors.success,
+    reminder: colors.warning,
+    update: colors.info,
+  };
+  
   const categoryColor = categoryColors[news.category];
   const categoryIcon = categoryIcons[news.category];
 
   return (
     <Animated.View entering={FadeInUp.delay(index * 100).springify()}>
-      <View style={[styles.container, SHADOWS.medium]}>
+      <View style={[styles.container, { backgroundColor: colors.surface }, SHADOWS.medium]}>
         <View style={styles.header}>
           <View style={[styles.categoryIcon, { backgroundColor: categoryColor + '20' }]}>
             <MaterialIcons name={categoryIcon} size={20} color={categoryColor} />
           </View>
           <View style={styles.headerText}>
-            <Text style={styles.title} numberOfLines={2}>{news.title}</Text>
-            <Text style={styles.meta}>
+            <Text style={[styles.title, { color: colors.text }]} numberOfLines={2}>{news.title}</Text>
+            <Text style={[styles.meta, { color: colors.textLight }]}>
               {news.author} • {news.date}
             </Text>
           </View>
         </View>
         
-        <Text style={styles.content} numberOfLines={3}>{news.content}</Text>
+        <Text style={[styles.content, { color: colors.textSecondary }]} numberOfLines={3}>{news.content}</Text>
         
-        <View style={styles.footer}>
+        <View style={[styles.footer, { borderTopColor: colors.divider }]}>
           <TouchableOpacity 
             style={styles.likeButton} 
             onPress={onLike}
@@ -55,15 +58,15 @@ export default function NewsCard({ news, onLike, index }: NewsCardProps) {
             <MaterialIcons 
               name={news.isLiked ? 'favorite' : 'favorite-border'} 
               size={20} 
-              color={news.isLiked ? COLORS.error : COLORS.textLight} 
+              color={news.isLiked ? colors.error : colors.textLight} 
             />
-            <Text style={[styles.likeText, news.isLiked && styles.likedText]}>
+            <Text style={[styles.likeText, { color: news.isLiked ? colors.error : colors.textLight }]}>
               {news.likes}
             </Text>
           </TouchableOpacity>
           
           <TouchableOpacity style={styles.shareButton}>
-            <MaterialIcons name="share" size={20} color={COLORS.textLight} />
+            <MaterialIcons name="share" size={20} color={colors.textLight} />
           </TouchableOpacity>
         </View>
       </View>
@@ -73,10 +76,9 @@ export default function NewsCard({ news, onLike, index }: NewsCardProps) {
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: COLORS.surface,
     borderRadius: BORDER_RADIUS.md,
     padding: SPACING.md,
-    marginHorizontal: SPACING.md,
+    marginHorizontal: SPACING.lg,
     marginBottom: SPACING.md,
   },
   header: {
@@ -97,16 +99,13 @@ const styles = StyleSheet.create({
   title: {
     ...TYPOGRAPHY.h3,
     fontSize: 18,
-    color: COLORS.text,
     marginBottom: SPACING.xs,
   },
   meta: {
     ...TYPOGRAPHY.caption,
-    color: COLORS.textLight,
   },
   content: {
     ...TYPOGRAPHY.body,
-    color: COLORS.textSecondary,
     marginBottom: SPACING.md,
     lineHeight: 22,
   },
@@ -115,7 +114,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingTop: SPACING.sm,
     borderTopWidth: 1,
-    borderTopColor: COLORS.divider,
   },
   likeButton: {
     flexDirection: 'row',
@@ -124,12 +122,7 @@ const styles = StyleSheet.create({
   },
   likeText: {
     ...TYPOGRAPHY.bodySmall,
-    color: COLORS.textLight,
     marginLeft: SPACING.xs,
-  },
-  likedText: {
-    color: COLORS.error,
-    fontWeight: '600',
   },
   shareButton: {
     padding: SPACING.xs,

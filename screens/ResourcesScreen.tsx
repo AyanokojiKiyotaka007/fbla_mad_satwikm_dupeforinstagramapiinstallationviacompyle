@@ -1,14 +1,16 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Linking } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import Animated, { FadeIn } from 'react-native-reanimated';
 import ResourceCard from '../components/ResourceCard';
 import { mockResources } from '../data/mockData';
-import { COLORS, SPACING, TYPOGRAPHY, BORDER_RADIUS } from '../constants/theme';
+import { useTheme } from '../contexts/ThemeContext';
+import { SPACING, TYPOGRAPHY, BORDER_RADIUS } from '../constants/theme';
 
 export default function ResourcesScreen() {
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const { colors } = useTheme();
 
   const categories = [
     { id: 'all', label: 'All Files' },
@@ -18,12 +20,10 @@ export default function ResourcesScreen() {
     { id: 'document', label: 'Documents' },
   ];
 
-  const handleDownload = (resourceTitle: string) => {
-    Alert.alert(
-      'Download Started',
-      `Downloading "${resourceTitle}"...`,
-      [{ text: 'OK' }]
-    );
+  const handleDownload = (url?: string) => {
+    if (url) {
+      Linking.openURL(url);
+    }
   };
 
   const filteredResources = selectedCategory === 'all'
@@ -31,11 +31,11 @@ export default function ResourcesScreen() {
     : mockResources.filter(r => r.category === selectedCategory);
 
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['top']}>
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>Resources</Text>
-        <TouchableOpacity style={styles.uploadButton}>
-          <MaterialIcons name="cloud-upload" size={24} color={COLORS.surface} />
+        <Text style={[styles.headerTitle, { color: colors.text }]}>Resources</Text>
+        <TouchableOpacity style={[styles.uploadButton, { backgroundColor: colors.accent }]}>
+          <MaterialIcons name="cloud-upload" size={24} color="#FFFFFF" />
         </TouchableOpacity>
       </View>
 
@@ -52,14 +52,14 @@ export default function ResourcesScreen() {
               key={category.id}
               style={[
                 styles.categoryChip,
-                selectedCategory === category.id && styles.categoryChipActive,
+                { backgroundColor: selectedCategory === category.id ? colors.accent : colors.surface },
               ]}
               onPress={() => setSelectedCategory(category.id)}
               activeOpacity={0.7}
             >
               <Text style={[
                 styles.categoryText,
-                selectedCategory === category.id && styles.categoryTextActive,
+                { color: selectedCategory === category.id ? '#FFFFFF' : colors.textSecondary },
               ]}>
                 {category.label}
               </Text>
@@ -73,7 +73,7 @@ export default function ResourcesScreen() {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.resourcesContainer}
       >
-        <Text style={styles.resultsText}>
+        <Text style={[styles.resultsText, { color: colors.textLight }]}>
           {filteredResources.length} {filteredResources.length === 1 ? 'file' : 'files'} available
         </Text>
 
@@ -81,7 +81,7 @@ export default function ResourcesScreen() {
           <ResourceCard
             key={resource.id}
             resource={resource}
-            onDownload={() => handleDownload(resource.title)}
+            onDownload={() => handleDownload(resource.url)}
             index={index}
           />
         ))}
@@ -93,24 +93,21 @@ export default function ResourcesScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.background,
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: SPACING.md,
+    paddingHorizontal: SPACING.lg,
     paddingVertical: SPACING.md,
   },
   headerTitle: {
     ...TYPOGRAPHY.h2,
-    color: COLORS.text,
   },
   uploadButton: {
     width: 40,
     height: 40,
     borderRadius: BORDER_RADIUS.md,
-    backgroundColor: COLORS.accent,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -118,34 +115,25 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.md,
   },
   categoryContent: {
-    paddingHorizontal: SPACING.md,
+    paddingHorizontal: SPACING.lg,
   },
   categoryChip: {
-    backgroundColor: COLORS.surface,
     paddingHorizontal: SPACING.md,
     paddingVertical: SPACING.sm,
     borderRadius: BORDER_RADIUS.full,
     marginRight: SPACING.sm,
   },
-  categoryChipActive: {
-    backgroundColor: COLORS.accent,
-  },
   categoryText: {
     ...TYPOGRAPHY.bodySmall,
-    color: COLORS.textSecondary,
     fontWeight: '600',
-  },
-  categoryTextActive: {
-    color: COLORS.surface,
   },
   resourcesContainer: {
     paddingTop: SPACING.sm,
-    paddingBottom: SPACING.xl,
+    paddingBottom: 100,
   },
   resultsText: {
     ...TYPOGRAPHY.bodySmall,
-    color: COLORS.textLight,
-    paddingHorizontal: SPACING.md,
+    paddingHorizontal: SPACING.lg,
     marginBottom: SPACING.md,
   },
 });

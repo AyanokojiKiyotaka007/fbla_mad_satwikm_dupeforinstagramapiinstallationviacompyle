@@ -6,11 +6,13 @@ import Animated, { FadeIn } from 'react-native-reanimated';
 import NewsCard from '../components/NewsCard';
 import { mockNews } from '../data/mockData';
 import { NewsItem } from '../types';
-import { COLORS, SPACING, TYPOGRAPHY, BORDER_RADIUS } from '../constants/theme';
+import { useTheme } from '../contexts/ThemeContext';
+import { SPACING, TYPOGRAPHY, BORDER_RADIUS } from '../constants/theme';
 
 export default function NewsFeedScreen() {
   const [newsItems, setNewsItems] = useState<NewsItem[]>(mockNews);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const { colors } = useTheme();
 
   const categories = [
     { id: 'all', label: 'All' },
@@ -38,11 +40,11 @@ export default function NewsFeedScreen() {
     : newsItems.filter(item => item.category === selectedCategory);
 
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['top']}>
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>News Feed</Text>
+        <Text style={[styles.headerTitle, { color: colors.text }]}>News Feed</Text>
         <TouchableOpacity style={styles.searchButton}>
-          <MaterialIcons name="search" size={24} color={COLORS.text} />
+          <MaterialIcons name="search" size={24} color={colors.text} />
         </TouchableOpacity>
       </View>
 
@@ -59,14 +61,14 @@ export default function NewsFeedScreen() {
               key={category.id}
               style={[
                 styles.categoryChip,
-                selectedCategory === category.id && styles.categoryChipActive,
+                { backgroundColor: selectedCategory === category.id ? colors.primary : colors.surface },
               ]}
               onPress={() => setSelectedCategory(category.id)}
               activeOpacity={0.7}
             >
               <Text style={[
                 styles.categoryText,
-                selectedCategory === category.id && styles.categoryTextActive,
+                { color: selectedCategory === category.id ? '#FFFFFF' : colors.textSecondary },
               ]}>
                 {category.label}
               </Text>
@@ -96,18 +98,16 @@ export default function NewsFeedScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.background,
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: SPACING.md,
+    paddingHorizontal: SPACING.lg,
     paddingVertical: SPACING.md,
   },
   headerTitle: {
     ...TYPOGRAPHY.h2,
-    color: COLORS.text,
   },
   searchButton: {
     padding: SPACING.xs,
@@ -116,28 +116,20 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.md,
   },
   categoryContent: {
-    paddingHorizontal: SPACING.md,
+    paddingHorizontal: SPACING.lg,
   },
   categoryChip: {
-    backgroundColor: COLORS.surface,
     paddingHorizontal: SPACING.md,
     paddingVertical: SPACING.sm,
     borderRadius: BORDER_RADIUS.full,
     marginRight: SPACING.sm,
   },
-  categoryChipActive: {
-    backgroundColor: COLORS.primary,
-  },
   categoryText: {
     ...TYPOGRAPHY.bodySmall,
-    color: COLORS.textSecondary,
     fontWeight: '600',
-  },
-  categoryTextActive: {
-    color: COLORS.surface,
   },
   feedContainer: {
     paddingTop: SPACING.sm,
-    paddingBottom: SPACING.xl,
+    paddingBottom: 100,
   },
 });

@@ -2,7 +2,8 @@ import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import Animated, { FadeInDown } from 'react-native-reanimated';
-import { COLORS, SPACING, TYPOGRAPHY, SHADOWS, BORDER_RADIUS } from '../constants/theme';
+import { useTheme } from '../contexts/ThemeContext';
+import { SPACING, TYPOGRAPHY, SHADOWS, BORDER_RADIUS } from '../constants/theme';
 
 interface StatCardProps {
   icon: keyof typeof MaterialIcons.glyphMap;
@@ -13,16 +14,18 @@ interface StatCardProps {
 }
 
 export default function StatCard({ icon, value, label, color, index }: StatCardProps) {
+  const { colors } = useTheme();
+  
   return (
     <Animated.View 
       entering={FadeInDown.delay(index * 100).springify()}
-      style={[styles.container, SHADOWS.medium]}
+      style={[styles.container, { backgroundColor: colors.surface }, SHADOWS.medium]}
     >
       <View style={[styles.iconContainer, { backgroundColor: color + '20' }]}>
         <MaterialIcons name={icon} size={24} color={color} />
       </View>
-      <Text style={styles.value}>{value}</Text>
-      <Text style={styles.label}>{label}</Text>
+      <Text style={[styles.value, { color: colors.text }]}>{value}</Text>
+      <Text style={[styles.label, { color: colors.textSecondary }]}>{label}</Text>
     </Animated.View>
   );
 }
@@ -30,7 +33,6 @@ export default function StatCard({ icon, value, label, color, index }: StatCardP
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.surface,
     borderRadius: BORDER_RADIUS.md,
     padding: SPACING.md,
     alignItems: 'center',
@@ -46,12 +48,10 @@ const styles = StyleSheet.create({
   },
   value: {
     ...TYPOGRAPHY.h2,
-    color: COLORS.text,
     marginBottom: SPACING.xs,
   },
   label: {
     ...TYPOGRAPHY.caption,
-    color: COLORS.textSecondary,
     textAlign: 'center',
   },
 });

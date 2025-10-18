@@ -3,20 +3,14 @@ import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import Animated, { FadeInRight } from 'react-native-reanimated';
 import { Event } from '../types';
-import { COLORS, SPACING, TYPOGRAPHY, SHADOWS, BORDER_RADIUS } from '../constants/theme';
+import { useTheme } from '../contexts/ThemeContext';
+import { SPACING, TYPOGRAPHY, SHADOWS, BORDER_RADIUS } from '../constants/theme';
 
 interface EventCardProps {
   event: Event;
   onPress: () => void;
   index: number;
 }
-
-const categoryColors = {
-  meeting: COLORS.info,
-  competition: COLORS.primary,
-  workshop: COLORS.accent,
-  social: COLORS.secondary,
-};
 
 const categoryIcons = {
   meeting: 'groups' as const,
@@ -26,48 +20,57 @@ const categoryIcons = {
 };
 
 export default function EventCard({ event, onPress, index }: EventCardProps) {
+  const { colors } = useTheme();
+  
+  const categoryColors = {
+    meeting: colors.info,
+    competition: colors.primary,
+    workshop: colors.accent,
+    social: colors.secondary,
+  };
+  
   const categoryColor = categoryColors[event.category];
   const categoryIcon = categoryIcons[event.category];
 
   return (
     <Animated.View entering={FadeInRight.delay(index * 100).springify()}>
       <TouchableOpacity 
-        style={[styles.container, SHADOWS.medium]} 
+        style={[styles.container, { backgroundColor: colors.surface }, SHADOWS.medium]} 
         onPress={onPress}
         activeOpacity={0.7}
       >
         <View style={[styles.categoryBadge, { backgroundColor: categoryColor }]}>
-          <MaterialIcons name={categoryIcon} size={20} color={COLORS.surface} />
+          <MaterialIcons name={categoryIcon} size={20} color="#FFFFFF" />
         </View>
         
         <View style={styles.content}>
-          <Text style={styles.title} numberOfLines={2}>{event.title}</Text>
+          <Text style={[styles.title, { color: colors.text }]} numberOfLines={2}>{event.title}</Text>
           
           <View style={styles.infoRow}>
-            <MaterialIcons name="calendar-today" size={14} color={COLORS.textSecondary} />
-            <Text style={styles.infoText}>{event.date}</Text>
+            <MaterialIcons name="calendar-today" size={14} color={colors.textSecondary} />
+            <Text style={[styles.infoText, { color: colors.textSecondary }]}>{event.date}</Text>
           </View>
           
           <View style={styles.infoRow}>
-            <MaterialIcons name="access-time" size={14} color={COLORS.textSecondary} />
-            <Text style={styles.infoText}>{event.time}</Text>
+            <MaterialIcons name="access-time" size={14} color={colors.textSecondary} />
+            <Text style={[styles.infoText, { color: colors.textSecondary }]}>{event.time}</Text>
           </View>
           
           <View style={styles.infoRow}>
-            <MaterialIcons name="location-on" size={14} color={COLORS.textSecondary} />
-            <Text style={styles.infoText} numberOfLines={1}>{event.location}</Text>
+            <MaterialIcons name="location-on" size={14} color={colors.textSecondary} />
+            <Text style={[styles.infoText, { color: colors.textSecondary }]} numberOfLines={1}>{event.location}</Text>
           </View>
           
           <View style={styles.footer}>
             <View style={styles.attendeesContainer}>
-              <MaterialIcons name="people" size={16} color={COLORS.textLight} />
-              <Text style={styles.attendeesText}>{event.attendees} attending</Text>
+              <MaterialIcons name="people" size={16} color={colors.textLight} />
+              <Text style={[styles.attendeesText, { color: colors.textLight }]}>{event.attendees} attending</Text>
             </View>
             
             {event.isRegistered && (
-              <View style={styles.registeredBadge}>
-                <MaterialIcons name="check-circle" size={14} color={COLORS.success} />
-                <Text style={styles.registeredText}>Registered</Text>
+              <View style={[styles.registeredBadge, { backgroundColor: colors.success + '20' }]}>
+                <MaterialIcons name="check-circle" size={14} color={colors.success} />
+                <Text style={[styles.registeredText, { color: colors.success }]}>Registered</Text>
               </View>
             )}
           </View>
@@ -79,9 +82,8 @@ export default function EventCard({ event, onPress, index }: EventCardProps) {
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: COLORS.surface,
     borderRadius: BORDER_RADIUS.md,
-    marginHorizontal: SPACING.md,
+    marginHorizontal: SPACING.lg,
     marginBottom: SPACING.md,
     overflow: 'hidden',
   },
@@ -101,7 +103,6 @@ const styles = StyleSheet.create({
   },
   title: {
     ...TYPOGRAPHY.h3,
-    color: COLORS.text,
     marginBottom: SPACING.sm,
     paddingRight: 48,
   },
@@ -112,7 +113,6 @@ const styles = StyleSheet.create({
   },
   infoText: {
     ...TYPOGRAPHY.bodySmall,
-    color: COLORS.textSecondary,
     marginLeft: SPACING.xs,
     flex: 1,
   },
@@ -123,7 +123,7 @@ const styles = StyleSheet.create({
     marginTop: SPACING.sm,
     paddingTop: SPACING.sm,
     borderTopWidth: 1,
-    borderTopColor: COLORS.divider,
+    borderTopColor: 'rgba(0,0,0,0.1)',
   },
   attendeesContainer: {
     flexDirection: 'row',
@@ -131,20 +131,17 @@ const styles = StyleSheet.create({
   },
   attendeesText: {
     ...TYPOGRAPHY.caption,
-    color: COLORS.textLight,
     marginLeft: SPACING.xs,
   },
   registeredBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: COLORS.success + '20',
     paddingHorizontal: SPACING.sm,
     paddingVertical: SPACING.xs,
     borderRadius: BORDER_RADIUS.sm,
   },
   registeredText: {
     ...TYPOGRAPHY.caption,
-    color: COLORS.success,
     marginLeft: SPACING.xs,
     fontWeight: '600',
   },

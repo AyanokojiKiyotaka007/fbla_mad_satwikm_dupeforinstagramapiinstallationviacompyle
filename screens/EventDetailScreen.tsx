@@ -4,7 +4,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
 import { Event } from '../types';
-import { COLORS, SPACING, TYPOGRAPHY, BORDER_RADIUS, SHADOWS } from '../constants/theme';
+import { useTheme } from '../contexts/ThemeContext';
+import { SPACING, TYPOGRAPHY, BORDER_RADIUS, SHADOWS } from '../constants/theme';
 
 interface EventDetailScreenProps {
   route: {
@@ -15,16 +16,18 @@ interface EventDetailScreenProps {
   navigation: any;
 }
 
-const categoryColors = {
-  meeting: COLORS.info,
-  competition: COLORS.primary,
-  workshop: COLORS.accent,
-  social: COLORS.secondary,
-};
-
 export default function EventDetailScreen({ route, navigation }: EventDetailScreenProps) {
   const { event } = route.params;
   const [isRegistered, setIsRegistered] = useState(event.isRegistered);
+  const { colors } = useTheme();
+  
+  const categoryColors = {
+    meeting: colors.info,
+    competition: colors.primary,
+    workshop: colors.accent,
+    social: colors.secondary,
+  };
+  
   const categoryColor = categoryColors[event.category];
 
   const handleRegister = () => {
@@ -39,17 +42,17 @@ export default function EventDetailScreen({ route, navigation }: EventDetailScre
   };
 
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['top']}>
       <View style={styles.header}>
         <TouchableOpacity 
           style={styles.backButton}
           onPress={() => navigation.goBack()}
         >
-          <MaterialIcons name="arrow-back" size={24} color={COLORS.text} />
+          <MaterialIcons name="arrow-back" size={24} color={colors.text} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Event Details</Text>
+        <Text style={[styles.headerTitle, { color: colors.text }]}>Event Details</Text>
         <TouchableOpacity style={styles.shareButton}>
-          <MaterialIcons name="share" size={24} color={COLORS.text} />
+          <MaterialIcons name="share" size={24} color={colors.text} />
         </TouchableOpacity>
       </View>
 
@@ -60,28 +63,28 @@ export default function EventDetailScreen({ route, navigation }: EventDetailScre
         {/* Event Header */}
         <Animated.View 
           entering={FadeIn.duration(600)} 
-          style={[styles.eventHeader, SHADOWS.large, { borderTopColor: categoryColor }]}
+          style={[styles.eventHeader, { backgroundColor: colors.surface, borderTopColor: categoryColor }, SHADOWS.large]}
         >
-          <View style={styles.categoryBadge}>
+          <View style={[styles.categoryBadge, { backgroundColor: colors.background }]}>
             <Text style={[styles.categoryText, { color: categoryColor }]}>
               {event.category.toUpperCase()}
             </Text>
           </View>
-          <Text style={styles.eventTitle}>{event.title}</Text>
+          <Text style={[styles.eventTitle, { color: colors.text }]}>{event.title}</Text>
         </Animated.View>
 
         {/* Event Info */}
         <Animated.View 
           entering={FadeInDown.delay(200).springify()} 
-          style={[styles.infoCard, SHADOWS.medium]}
+          style={[styles.infoCard, { backgroundColor: colors.surface }, SHADOWS.medium]}
         >
           <View style={styles.infoRow}>
             <View style={[styles.iconCircle, { backgroundColor: categoryColor + '20' }]}>
               <MaterialIcons name="calendar-today" size={24} color={categoryColor} />
             </View>
             <View style={styles.infoText}>
-              <Text style={styles.infoLabel}>Date</Text>
-              <Text style={styles.infoValue}>{event.date}</Text>
+              <Text style={[styles.infoLabel, { color: colors.textLight }]}>Date</Text>
+              <Text style={[styles.infoValue, { color: colors.text }]}>{event.date}</Text>
             </View>
           </View>
 
@@ -90,8 +93,8 @@ export default function EventDetailScreen({ route, navigation }: EventDetailScre
               <MaterialIcons name="access-time" size={24} color={categoryColor} />
             </View>
             <View style={styles.infoText}>
-              <Text style={styles.infoLabel}>Time</Text>
-              <Text style={styles.infoValue}>{event.time}</Text>
+              <Text style={[styles.infoLabel, { color: colors.textLight }]}>Time</Text>
+              <Text style={[styles.infoValue, { color: colors.text }]}>{event.time}</Text>
             </View>
           </View>
 
@@ -100,8 +103,8 @@ export default function EventDetailScreen({ route, navigation }: EventDetailScre
               <MaterialIcons name="location-on" size={24} color={categoryColor} />
             </View>
             <View style={styles.infoText}>
-              <Text style={styles.infoLabel}>Location</Text>
-              <Text style={styles.infoValue}>{event.location}</Text>
+              <Text style={[styles.infoLabel, { color: colors.textLight }]}>Location</Text>
+              <Text style={[styles.infoValue, { color: colors.text }]}>{event.location}</Text>
             </View>
           </View>
 
@@ -110,8 +113,8 @@ export default function EventDetailScreen({ route, navigation }: EventDetailScre
               <MaterialIcons name="people" size={24} color={categoryColor} />
             </View>
             <View style={styles.infoText}>
-              <Text style={styles.infoLabel}>Attendees</Text>
-              <Text style={styles.infoValue}>{event.attendees} registered</Text>
+              <Text style={[styles.infoLabel, { color: colors.textLight }]}>Attendees</Text>
+              <Text style={[styles.infoValue, { color: colors.text }]}>{event.attendees} registered</Text>
             </View>
           </View>
         </Animated.View>
@@ -119,10 +122,10 @@ export default function EventDetailScreen({ route, navigation }: EventDetailScre
         {/* Description */}
         <Animated.View 
           entering={FadeInDown.delay(300).springify()} 
-          style={[styles.descriptionCard, SHADOWS.medium]}
+          style={[styles.descriptionCard, { backgroundColor: colors.surface }, SHADOWS.medium]}
         >
-          <Text style={styles.sectionTitle}>About This Event</Text>
-          <Text style={styles.description}>{event.description}</Text>
+          <Text style={[styles.sectionTitle, { color: colors.text }]}>About This Event</Text>
+          <Text style={[styles.description, { color: colors.textSecondary }]}>{event.description}</Text>
         </Animated.View>
 
         {/* Action Buttons */}
@@ -134,7 +137,7 @@ export default function EventDetailScreen({ route, navigation }: EventDetailScre
             style={[
               styles.registerButton, 
               SHADOWS.medium,
-              { backgroundColor: isRegistered ? COLORS.error : categoryColor }
+              { backgroundColor: isRegistered ? colors.error : categoryColor }
             ]}
             onPress={handleRegister}
             activeOpacity={0.8}
@@ -142,7 +145,7 @@ export default function EventDetailScreen({ route, navigation }: EventDetailScre
             <MaterialIcons 
               name={isRegistered ? 'cancel' : 'check-circle'} 
               size={24} 
-              color={COLORS.surface} 
+              color="#FFFFFF"
             />
             <Text style={styles.registerButtonText}>
               {isRegistered ? 'Unregister' : 'Register Now'}
@@ -150,7 +153,7 @@ export default function EventDetailScreen({ route, navigation }: EventDetailScre
           </TouchableOpacity>
 
           <TouchableOpacity 
-            style={[styles.calendarButton, SHADOWS.medium]}
+            style={[styles.calendarButton, { backgroundColor: colors.surface }, SHADOWS.medium]}
             activeOpacity={0.8}
           >
             <MaterialIcons name="event" size={24} color={categoryColor} />
@@ -167,13 +170,12 @@ export default function EventDetailScreen({ route, navigation }: EventDetailScre
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.background,
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: SPACING.md,
+    paddingHorizontal: SPACING.lg,
     paddingVertical: SPACING.md,
   },
   backButton: {
@@ -181,17 +183,15 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     ...TYPOGRAPHY.h3,
-    color: COLORS.text,
   },
   shareButton: {
     padding: SPACING.xs,
   },
   content: {
-    paddingHorizontal: SPACING.md,
-    paddingBottom: SPACING.xl,
+    paddingHorizontal: SPACING.lg,
+    paddingBottom: 100,
   },
   eventHeader: {
-    backgroundColor: COLORS.surface,
     borderRadius: BORDER_RADIUS.lg,
     padding: SPACING.lg,
     marginBottom: SPACING.md,
@@ -202,7 +202,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: SPACING.md,
     paddingVertical: SPACING.xs,
     borderRadius: BORDER_RADIUS.full,
-    backgroundColor: COLORS.background,
     marginBottom: SPACING.md,
   },
   categoryText: {
@@ -211,10 +210,8 @@ const styles = StyleSheet.create({
   },
   eventTitle: {
     ...TYPOGRAPHY.h2,
-    color: COLORS.text,
   },
   infoCard: {
-    backgroundColor: COLORS.surface,
     borderRadius: BORDER_RADIUS.lg,
     padding: SPACING.lg,
     marginBottom: SPACING.md,
@@ -237,28 +234,23 @@ const styles = StyleSheet.create({
   },
   infoLabel: {
     ...TYPOGRAPHY.caption,
-    color: COLORS.textLight,
     marginBottom: SPACING.xs,
   },
   infoValue: {
     ...TYPOGRAPHY.body,
-    color: COLORS.text,
     fontWeight: '600',
   },
   descriptionCard: {
-    backgroundColor: COLORS.surface,
     borderRadius: BORDER_RADIUS.lg,
     padding: SPACING.lg,
     marginBottom: SPACING.md,
   },
   sectionTitle: {
     ...TYPOGRAPHY.h3,
-    color: COLORS.text,
     marginBottom: SPACING.md,
   },
   description: {
     ...TYPOGRAPHY.body,
-    color: COLORS.textSecondary,
     lineHeight: 24,
   },
   actionButtons: {
@@ -273,7 +265,7 @@ const styles = StyleSheet.create({
   },
   registerButtonText: {
     ...TYPOGRAPHY.body,
-    color: COLORS.surface,
+    color: '#FFFFFF',
     fontWeight: '700',
     marginLeft: SPACING.sm,
   },
@@ -283,7 +275,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     padding: SPACING.md,
     borderRadius: BORDER_RADIUS.md,
-    backgroundColor: COLORS.surface,
   },
   calendarButtonText: {
     ...TYPOGRAPHY.body,
