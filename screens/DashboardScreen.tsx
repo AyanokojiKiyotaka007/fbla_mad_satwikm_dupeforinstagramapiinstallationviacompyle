@@ -1,14 +1,14 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Dimensions, Animated as RNAnimated, Linking } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Dimensions, Animated as RNAnimated, Share, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
-import Animated, { FadeIn, FadeInDown, FadeInUp } from 'react-native-reanimated';
-import { BlurView } from 'expo-blur';
+import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';
+import * as Calendar from 'expo-calendar';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { mockEvents } from '../data/mockData';
-import { SPACING, TYPOGRAPHY } from '../constants/theme';
+import { SPACING, TYPOGRAPHY, SHADOWS } from '../constants/theme';
 
 const { width, height } = Dimensions.get('window');
 
@@ -28,23 +28,51 @@ export default function DashboardScreen({ navigation }: DashboardScreenProps) {
   const { user } = useAuth();
   const { colors, isDarkMode } = useTheme();
   const [currentQuoteIndex, setCurrentQuoteIndex] = useState(0);
+  const [currentDate, setCurrentDate] = useState('');
   const waveAnim = useRef(new RNAnimated.Value(0)).current;
   const quoteOpacity = useRef(new RNAnimated.Value(1)).current;
+  const glowPulse = useRef(new RNAnimated.Value(1)).current;
 
   const upcomingEvent = mockEvents.find(e => e.isRegistered);
 
   useEffect(() => {
+    // Set current date
+    const date = new Date();
+    const options: Intl.DateTimeFormatOptions = { 
+      weekday: 'long', 
+      year: 'numeric', 
+      month: 'long', 
+      day: 'numeric' 
+    };
+    setCurrentDate(date.toLocaleDateString('en-US', options));
+
     // Wave animation
     RNAnimated.loop(
       RNAnimated.sequence([
         RNAnimated.timing(waveAnim, {
           toValue: 1,
-          duration: 8000,
+          duration: 10000,
           useNativeDriver: true,
         }),
         RNAnimated.timing(waveAnim, {
           toValue: 0,
-          duration: 8000,
+          duration: 10000,
+          useNativeDriver: true,
+        }),
+      ])
+    ).start();
+
+    // Glow pulse animation
+    RNAnimated.loop(
+      RNAnimated.sequence([
+        RNAnimated.timing(glowPulse, {
+          toValue: 1.2,
+          duration: 2000,
+          useNativeDriver: true,
+        }),
+        RNAnimated.timing(glowPulse, {
+          toValue: 1,
+          duration: 2000,
           useNativeDriver: true,
         }),
       ])
@@ -55,40 +83,78 @@ export default function DashboardScreen({ navigation }: DashboardScreenProps) {
       RNAnimated.sequence([
         RNAnimated.timing(quoteOpacity, {
           toValue: 0,
-          duration: 500,
+          duration: 600,
           useNativeDriver: true,
         }),
         RNAnimated.timing(quoteOpacity, {
           toValue: 1,
-          duration: 500,
+          duration: 600,
           useNativeDriver: true,
         }),
       ]).start();
 
       setCurrentQuoteIndex((prev) => (prev + 1) % QUOTES.length);
-    }, 5000);
+    }, 6000);
 
     return () => clearInterval(quoteInterval);
-  }, []);
+  }, [waveAnim, quoteOpacity, glowPulse]);
 
   const waveTranslate = waveAnim.interpolate({
     inputRange: [0, 1],
-    outputRange: [0, 30],
+    outputRange: [0, 40],
   });
 
-  const openSocialMedia = (url: string) => {
-    Linking.openURL(url).catch(err => console.error('Error opening URL:', err));
+  const addToCalendar = async () => {
+    if (!upcomingEvent) return;
+
+    try {
+      const { status } = await Calendar.requestCalendarPermissionsAsync();
+      if (status === 'granted') {
+        const calendars = await Calendar.getCalendarsAsync(Calendar.EntityTypes.EVENT);
+        const defaultCalendar = calendars.find(cal => cal.allowsModifications) || calendars[0];
+
+        if (defaultCalendar) {
+          const eventDate = new Date(upcomingEvent.date);
+          await Calendar.createEventAsync(defaultCalendar.id, {
+            title: upcomingEvent.title,
+            startDate: eventDate,
+            endDate: new Date(eventDate.getTime() + 2 * 60 * 60 * 1000),
+            location: upcomingEvent.location,
+            notes: upcomingEvent.description,
+          });
+          alert('Event added to calendar!');
+        }
+      }
+    } catch (error) {
+      console.error('Error adding to calendar:', error);
+      alert('Could not add event to calendar');
+    }
+  };
+
+  const shareEvent = async () => {
+    if (!upcomingEvent) return;
+
+    try {
+      await Share.share({
+        message: `${upcomingEvent.title}\n\nDate: ${upcomingEvent.date}\nTime: ${upcomingEvent.time}\nLocation: ${upcomingEvent.location}\n\n${upcomingEvent.description}`,
+        title: upcomingEvent.title,
+      });
+    } catch (error) {
+      console.error('Error sharing:', error);
+    }
   };
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.background }]}>
-      {/* Animated Background */}
+    <View style={styles.container}>
+      {/* Cohesive Gradient Background */}
       <LinearGradient
         colors={isDarkMode 
-          ? ['#0F1419', '#1A1F2E', '#0F1419']
-          : ['#E8F0FE', '#F0F7FF', '#FFFFFF']
+          ? [colors.backgroundGradient1, colors.backgroundGradient2, colors.backgroundGradient3]
+          : [colors.backgroundGradient1, colors.backgroundGradient2, colors.backgroundGradient3]
         }
         style={StyleSheet.absoluteFillObject}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 0, y: 1 }}
       />
 
       {/* Animated Wave Overlay */}
@@ -97,12 +163,12 @@ export default function DashboardScreen({ navigation }: DashboardScreenProps) {
           styles.waveOverlay,
           {
             transform: [{ translateY: waveTranslate }],
-            opacity: 0.3,
+            opacity: isDarkMode ? 0.15 : 0.08,
           },
         ]}
       >
         <LinearGradient
-          colors={[colors.primary + '40', colors.accent + '40', colors.primary + '40']}
+          colors={[colors.primary + '60', colors.secondary + '60', colors.accent + '60']}
           style={StyleSheet.absoluteFillObject}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
@@ -114,178 +180,109 @@ export default function DashboardScreen({ navigation }: DashboardScreenProps) {
           showsVerticalScrollIndicator={false}
           contentContainerStyle={styles.scrollContent}
         >
-          {/* Personal Greeting */}
+          {/* Centered Greeting Section */}
           <Animated.View entering={FadeInUp.duration(800)} style={styles.greetingSection}>
             <Text style={[styles.greeting, { color: colors.text }]}>
-              Welcome back, {user?.name?.split(' ')[0] || 'Member'} 👋
+              Welcome back, {user?.name?.split(' ')[0] || 'Member'}
             </Text>
             <Text style={[styles.subGreeting, { color: colors.textSecondary }]}>
               Ready to make an impact today?
             </Text>
+            <Text style={[styles.dateText, { color: colors.textLight }]}>
+              {currentDate}
+            </Text>
           </Animated.View>
 
-          {/* Floating Quote */}
+          {/* Floating Quote Section with Glow */}
           <Animated.View entering={FadeInDown.delay(200).springify()}>
-            <BlurView intensity={isDarkMode ? 20 : 80} style={styles.quoteContainer}>
-              <RNAnimated.View style={{ opacity: quoteOpacity }}>
-                <Text style={[styles.quote, { color: colors.primary }]}>
-                  "{QUOTES[currentQuoteIndex]}"
-                </Text>
-              </RNAnimated.View>
-              <View style={styles.quoteIndicators}>
-                {QUOTES.map((_, index) => (
-                  <View
-                    key={index}
-                    style={[
-                      styles.indicator,
-                      {
-                        backgroundColor: index === currentQuoteIndex ? colors.primary : colors.textLight,
-                        opacity: index === currentQuoteIndex ? 1 : 0.3,
-                      },
-                    ]}
-                  />
-                ))}
+            <RNAnimated.View style={[styles.quoteContainer, { transform: [{ scale: glowPulse }] }]}>
+              <View style={[styles.quoteGlass, { backgroundColor: colors.surfaceGlass }]}>
+                <RNAnimated.View style={{ opacity: quoteOpacity }}>
+                  <Text style={[styles.quote, { color: colors.primary }]}>
+                    {QUOTES[currentQuoteIndex]}
+                  </Text>
+                </RNAnimated.View>
+                <View style={styles.quoteIndicators}>
+                  {QUOTES.map((_, index) => (
+                    <View
+                      key={index}
+                      style={[
+                        styles.indicator,
+                        {
+                          backgroundColor: index === currentQuoteIndex ? colors.primary : colors.textLight,
+                          opacity: index === currentQuoteIndex ? 1 : 0.3,
+                        },
+                      ]}
+                    />
+                  ))}
+                </View>
               </View>
-            </BlurView>
+            </RNAnimated.View>
           </Animated.View>
 
-          {/* Upcoming Event */}
+          {/* Upcoming Event Panel - Flowing Design */}
           {upcomingEvent && (
             <Animated.View entering={FadeInDown.delay(400).springify()}>
               <TouchableOpacity
-                activeOpacity={0.9}
+                activeOpacity={0.95}
                 onPress={() => navigation.navigate('EventDetail', { event: upcomingEvent })}
               >
-                <BlurView intensity={isDarkMode ? 20 : 80} style={styles.eventCard}>
-                  <LinearGradient
-                    colors={[colors.primary + '20', colors.accent + '20']}
-                    style={styles.eventGradient}
-                    start={{ x: 0, y: 0 }}
-                    end={{ x: 1, y: 1 }}
-                  >
+                <View style={[styles.eventCard, { backgroundColor: colors.surfaceGlass }]}>
+                  <View style={styles.eventContent}>
                     <View style={styles.eventHeader}>
                       <View style={[styles.eventIconContainer, { backgroundColor: colors.primary }]}>
-                        <MaterialIcons name="event" size={24} color="#FFFFFF" />
+                        <MaterialIcons name="event" size={20} color="#FFFFFF" />
                       </View>
-                      <View style={styles.eventHeaderText}>
-                        <Text style={[styles.eventLabel, { color: colors.textLight }]}>
-                          Next Event
-                        </Text>
-                        <Text style={[styles.eventTitle, { color: colors.text }]} numberOfLines={2}>
-                          {upcomingEvent.title}
-                        </Text>
-                      </View>
+                      <Text style={[styles.eventLabel, { color: colors.textLight }]}>
+                        UPCOMING EVENT
+                      </Text>
                     </View>
+                    
+                    <Text style={[styles.eventTitle, { color: colors.text }]} numberOfLines={2}>
+                      {upcomingEvent.title}
+                    </Text>
+                    
                     <View style={styles.eventDetails}>
                       <View style={styles.eventDetailRow}>
-                        <MaterialIcons name="calendar-today" size={16} color={colors.textSecondary} />
+                        <MaterialIcons name="calendar-today" size={14} color={colors.textSecondary} />
                         <Text style={[styles.eventDetailText, { color: colors.textSecondary }]}>
                           {upcomingEvent.date}
                         </Text>
                       </View>
                       <View style={styles.eventDetailRow}>
-                        <MaterialIcons name="access-time" size={16} color={colors.textSecondary} />
+                        <MaterialIcons name="access-time" size={14} color={colors.textSecondary} />
                         <Text style={[styles.eventDetailText, { color: colors.textSecondary }]}>
                           {upcomingEvent.time}
                         </Text>
                       </View>
                     </View>
-                  </LinearGradient>
-                </BlurView>
+
+                    <View style={styles.eventActions}>
+                      <TouchableOpacity 
+                        style={[styles.eventActionButton, { backgroundColor: colors.primary }]}
+                        onPress={addToCalendar}
+                        activeOpacity={0.8}
+                      >
+                        <MaterialIcons name="event-available" size={16} color="#FFFFFF" />
+                        <Text style={styles.eventActionText}>Add to Calendar</Text>
+                      </TouchableOpacity>
+                      
+                      <TouchableOpacity 
+                        style={[styles.shareButton, { backgroundColor: colors.surface }]}
+                        onPress={shareEvent}
+                        activeOpacity={0.8}
+                      >
+                        <MaterialIcons name="share" size={18} color={colors.primary} />
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+                </View>
               </TouchableOpacity>
             </Animated.View>
           )}
-
-          {/* Notifications Strip */}
-          <Animated.View entering={FadeInDown.delay(600).springify()}>
-            <BlurView intensity={isDarkMode ? 20 : 80} style={styles.notificationStrip}>
-              <View style={[styles.notificationDot, { backgroundColor: colors.secondary }]} />
-              <Text style={[styles.notificationText, { color: colors.text }]}>
-                1 new announcement
-              </Text>
-              <MaterialIcons name="chevron-right" size={20} color={colors.textLight} />
-            </BlurView>
-          </Animated.View>
-
-          {/* Quick Actions */}
-          <Animated.View entering={FadeInDown.delay(800).springify()} style={styles.quickActionsSection}>
-            <Text style={[styles.sectionTitle, { color: colors.text }]}>Quick Actions</Text>
-            <View style={styles.quickActions}>
-              <QuickActionButton
-                icon="event"
-                label="Calendar"
-                color={colors.primary}
-                onPress={() => navigation.navigate('Calendar')}
-                colors={colors}
-                isDarkMode={isDarkMode}
-              />
-              <QuickActionButton
-                icon="article"
-                label="News"
-                color={colors.secondary}
-                onPress={() => navigation.navigate('NewsFeed')}
-                colors={colors}
-                isDarkMode={isDarkMode}
-              />
-              <QuickActionButton
-                icon="folder"
-                label="Resources"
-                color={colors.accent}
-                onPress={() => navigation.navigate('Resources')}
-                colors={colors}
-                isDarkMode={isDarkMode}
-              />
-            </View>
-          </Animated.View>
-
-          {/* Social Media Section */}
-          <Animated.View entering={FadeInDown.delay(1000).springify()} style={styles.socialSection}>
-            <Text style={[styles.sectionTitle, { color: colors.text }]}>Connect With Us</Text>
-            <View style={styles.socialButtons}>
-              <TouchableOpacity
-                style={[styles.socialButton, { backgroundColor: colors.surface }]}
-                onPress={() => openSocialMedia('https://www.instagram.com/fbla_pbl/')}
-                activeOpacity={0.7}
-              >
-                <LinearGradient
-                  colors={['#833AB4', '#FD1D1D', '#F77737']}
-                  style={styles.socialIconGradient}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 1 }}
-                >
-                  <MaterialIcons name="camera-alt" size={24} color="#FFFFFF" />
-                </LinearGradient>
-                <Text style={[styles.socialLabel, { color: colors.text }]}>Instagram</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                style={[styles.socialButton, { backgroundColor: colors.surface }]}
-                onPress={() => openSocialMedia('https://twitter.com/FBLA_PBL')}
-                activeOpacity={0.7}
-              >
-                <View style={[styles.socialIconGradient, { backgroundColor: '#1DA1F2' }]}>
-                  <MaterialIcons name="tag" size={24} color="#FFFFFF" />
-                </View>
-                <Text style={[styles.socialLabel, { color: colors.text }]}>Twitter/X</Text>
-              </TouchableOpacity>
-            </View>
-          </Animated.View>
         </ScrollView>
       </SafeAreaView>
     </View>
-  );
-}
-
-function QuickActionButton({ icon, label, color, onPress, colors, isDarkMode }: any) {
-  return (
-    <TouchableOpacity onPress={onPress} activeOpacity={0.8} style={styles.quickActionButton}>
-      <BlurView intensity={isDarkMode ? 20 : 80} style={styles.quickActionBlur}>
-        <View style={[styles.quickActionIcon, { backgroundColor: color + '20' }]}>
-          <MaterialIcons name={icon} size={28} color={color} />
-        </View>
-        <Text style={[styles.quickActionLabel, { color: colors.text }]}>{label}</Text>
-      </BlurView>
-    </TouchableOpacity>
   );
 }
 
@@ -295,50 +292,65 @@ const styles = StyleSheet.create({
   },
   waveOverlay: {
     position: 'absolute',
-    top: 0,
-    left: -50,
-    right: -50,
-    height: height * 0.6,
-    borderBottomLeftRadius: width,
-    borderBottomRightRadius: width,
+    top: -100,
+    left: -100,
+    right: -100,
+    height: height * 0.7,
+    borderBottomLeftRadius: width * 1.5,
+    borderBottomRightRadius: width * 1.5,
   },
   safeArea: {
     flex: 1,
   },
   scrollContent: {
-    paddingHorizontal: SPACING.lg,
+    paddingHorizontal: SPACING.xl,
     paddingBottom: 120,
+    alignItems: 'center',
   },
   greetingSection: {
-    marginTop: SPACING.xl,
-    marginBottom: SPACING.lg,
+    marginTop: SPACING.xxl,
+    marginBottom: SPACING.xl,
+    alignItems: 'center',
   },
   greeting: {
     ...TYPOGRAPHY.h1,
-    fontSize: 28,
-    marginBottom: SPACING.xs,
+    fontSize: 34,
+    textAlign: 'center',
+    marginBottom: SPACING.sm,
   },
   subGreeting: {
     ...TYPOGRAPHY.body,
-    fontSize: 16,
+    fontSize: 17,
+    textAlign: 'center',
+    marginBottom: SPACING.md,
+  },
+  dateText: {
+    ...TYPOGRAPHY.elegant,
+    fontSize: 13,
+    textAlign: 'center',
   },
   quoteContainer: {
-    borderRadius: 24,
-    padding: SPACING.lg,
-    marginBottom: SPACING.lg,
-    overflow: 'hidden',
+    width: width - SPACING.xl * 2,
+    marginBottom: SPACING.xl,
+  },
+  quoteGlass: {
+    borderRadius: 28,
+    padding: SPACING.xl,
     alignItems: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.2)',
   },
   quote: {
     ...TYPOGRAPHY.h3,
-    fontSize: 22,
+    fontSize: 20,
     textAlign: 'center',
-    fontStyle: 'italic',
-    marginBottom: SPACING.md,
+    fontWeight: '500',
+    marginBottom: SPACING.lg,
+    letterSpacing: 0.3,
   },
   quoteIndicators: {
     flexDirection: 'row',
-    gap: SPACING.xs,
+    gap: SPACING.sm,
   },
   indicator: {
     width: 6,
@@ -346,12 +358,15 @@ const styles = StyleSheet.create({
     borderRadius: 3,
   },
   eventCard: {
-    borderRadius: 24,
+    width: width - SPACING.xl * 2,
+    borderRadius: 32,
     overflow: 'hidden',
-    marginBottom: SPACING.lg,
+    marginBottom: SPACING.xl,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.2)',
   },
-  eventGradient: {
-    padding: SPACING.lg,
+  eventContent: {
+    padding: SPACING.xl,
   },
   eventHeader: {
     flexDirection: 'row',
@@ -359,28 +374,27 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.md,
   },
   eventIconContainer: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
     alignItems: 'center',
     justifyContent: 'center',
-    marginRight: SPACING.md,
-  },
-  eventHeaderText: {
-    flex: 1,
+    marginRight: SPACING.sm,
   },
   eventLabel: {
     ...TYPOGRAPHY.caption,
     textTransform: 'uppercase',
-    letterSpacing: 1,
-    marginBottom: SPACING.xs,
+    letterSpacing: 1.2,
+    fontWeight: '600',
   },
   eventTitle: {
-    ...TYPOGRAPHY.h3,
-    fontSize: 18,
+    ...TYPOGRAPHY.h2,
+    fontSize: 22,
+    marginBottom: SPACING.md,
   },
   eventDetails: {
     gap: SPACING.sm,
+    marginBottom: SPACING.lg,
   },
   eventDetailRow: {
     flexDirection: 'row',
@@ -390,80 +404,33 @@ const styles = StyleSheet.create({
   eventDetailText: {
     ...TYPOGRAPHY.bodySmall,
   },
-  notificationStrip: {
+  eventActions: {
+    flexDirection: 'row',
+    gap: SPACING.md,
+    alignItems: 'center',
+  },
+  eventActionButton: {
+    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: SPACING.md,
+    paddingHorizontal: SPACING.lg,
     borderRadius: 16,
-    padding: SPACING.md,
-    marginBottom: SPACING.lg,
-    overflow: 'hidden',
+    gap: SPACING.sm,
   },
-  notificationDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    marginRight: SPACING.sm,
-  },
-  notificationText: {
+  eventActionText: {
     ...TYPOGRAPHY.bodySmall,
-    flex: 1,
-  },
-  quickActionsSection: {
-    marginBottom: SPACING.lg,
-  },
-  sectionTitle: {
-    ...TYPOGRAPHY.h3,
-    marginBottom: SPACING.md,
-    paddingLeft: SPACING.xs,
-  },
-  quickActions: {
-    flexDirection: 'row',
-    gap: SPACING.md,
-  },
-  quickActionButton: {
-    flex: 1,
-  },
-  quickActionBlur: {
-    borderRadius: 20,
-    padding: SPACING.md,
-    alignItems: 'center',
-    overflow: 'hidden',
-  },
-  quickActionIcon: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: SPACING.sm,
-  },
-  quickActionLabel: {
-    ...TYPOGRAPHY.bodySmall,
+    color: '#FFFFFF',
     fontWeight: '600',
   },
-  socialSection: {
-    marginBottom: SPACING.lg,
-  },
-  socialButtons: {
-    flexDirection: 'row',
-    gap: SPACING.md,
-  },
-  socialButton: {
-    flex: 1,
-    borderRadius: 20,
-    padding: SPACING.md,
-    alignItems: 'center',
-  },
-  socialIconGradient: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
+  shareButton: {
+    width: 48,
+    height: 48,
+    borderRadius: 16,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: SPACING.sm,
-  },
-  socialLabel: {
-    ...TYPOGRAPHY.bodySmall,
-    fontWeight: '600',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.2)',
   },
 });
