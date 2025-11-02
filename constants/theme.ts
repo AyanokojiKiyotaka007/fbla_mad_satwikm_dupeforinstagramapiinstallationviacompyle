@@ -1,78 +1,60 @@
-// Cohesive gradient theme colors - White → Violet → Blue
+// Light and Dark theme colors
 export const LIGHT_COLORS = {
-  // Primary gradient colors
-  primary: '#5B7FDB', // Soft blue
-  primaryDark: '#4A6BC4',
-  primaryLight: '#7B9FE8',
-  secondary: '#9B8FDB', // Soft violet
-  secondaryDark: '#8A7EC4',
-  accent: '#6BA3E8', // Light blue
+  primary: '#003DA5',
+  primaryDark: '#002D7A',
+  primaryLight: '#1E5BC6',
+  secondary: '#FFB81C',
+  secondaryDark: '#E6A519',
+  accent: '#00A3E0',
   
-  // Gradient backgrounds
-  background: '#FFFFFF',
-  backgroundGradient1: '#FFFFFF', // White
-  backgroundGradient2: '#E8E4F3', // Light violet
-  backgroundGradient3: '#D6E4F8', // Soft blue
-  surface: 'rgba(255, 255, 255, 0.85)',
-  surfaceGlass: 'rgba(255, 255, 255, 0.6)',
-  card: 'rgba(255, 255, 255, 0.9)',
+  background: '#F8F9FA',
+  backgroundGradient1: '#E8F0FE',
+  backgroundGradient2: '#F0F7FF',
+  surface: '#FFFFFF',
+  card: '#FFFFFF',
   
-  // Text colors
-  text: '#2D3748',
-  textSecondary: '#718096',
-  textLight: '#A0AEC0',
+  text: '#1A1A1A',
+  textSecondary: '#6B7280',
+  textLight: '#9CA3AF',
   
-  // Borders and dividers
-  border: 'rgba(203, 213, 225, 0.3)',
-  divider: 'rgba(226, 232, 240, 0.5)',
+  border: '#E5E7EB',
+  divider: '#F3F4F6',
   
-  // Status colors
-  success: '#48BB78',
-  warning: '#ED8936',
-  error: '#F56565',
-  info: '#4299E1',
+  success: '#10B981',
+  warning: '#F59E0B',
+  error: '#EF4444',
+  info: '#3B82F6',
   
-  // Effects
-  glow: 'rgba(91, 127, 219, 0.3)',
-  shadow: 'rgba(91, 127, 219, 0.15)',
-  overlay: 'rgba(0, 0, 0, 0.4)',
+  shadow: 'rgba(0, 0, 0, 0.1)',
+  overlay: 'rgba(0, 0, 0, 0.5)',
 };
 
 export const DARK_COLORS = {
-  // Primary gradient colors
-  primary: '#7B9FE8',
-  primaryDark: '#6B8FD8',
-  primaryLight: '#8BAFF8',
-  secondary: '#B8ACEB',
-  secondaryDark: '#A89CDB',
-  accent: '#8BB3F8',
+  primary: '#4A90E2',
+  primaryDark: '#357ABD',
+  primaryLight: '#6BA3E8',
+  secondary: '#FFB81C',
+  secondaryDark: '#E6A519',
+  accent: '#00A3E0',
   
-  // Gradient backgrounds
   background: '#0F1419',
   backgroundGradient1: '#1A1F2E',
-  backgroundGradient2: '#1E2235',
-  backgroundGradient3: '#1A2332',
-  surface: 'rgba(26, 31, 46, 0.85)',
-  surfaceGlass: 'rgba(26, 31, 46, 0.6)',
-  card: 'rgba(30, 34, 53, 0.9)',
+  backgroundGradient2: '#0F1419',
+  surface: '#1A1F2E',
+  card: '#252A35',
   
-  // Text colors
-  text: '#F7FAFC',
-  textSecondary: '#CBD5E0',
-  textLight: '#A0AEC0',
+  text: '#FFFFFF',
+  textSecondary: '#9CA3AF',
+  textLight: '#6B7280',
   
-  // Borders and dividers
-  border: 'rgba(74, 85, 104, 0.3)',
-  divider: 'rgba(45, 55, 72, 0.5)',
+  border: '#2D3748',
+  divider: '#252A35',
   
-  // Status colors
-  success: '#48BB78',
-  warning: '#ED8936',
-  error: '#F56565',
-  info: '#4299E1',
+  success: '#10B981',
+  warning: '#F59E0B',
+  error: '#EF4444',
+  info: '#3B82F6',
   
-  // Effects
-  glow: 'rgba(123, 159, 232, 0.3)',
   shadow: 'rgba(0, 0, 0, 0.3)',
   overlay: 'rgba(0, 0, 0, 0.7)',
 };
@@ -84,90 +66,61 @@ export const SPACING = {
   lg: 24,
   xl: 32,
   xxl: 48,
-  xxxl: 64,
 };
 
 export const TYPOGRAPHY = {
-  // Headers - Bold modern sans-serif (Poppins/Inter style)
   h1: {
     fontSize: 32,
     fontWeight: '700' as const,
     lineHeight: 40,
-    letterSpacing: -0.5,
   },
   h2: {
-    fontSize: 26,
+    fontSize: 24,
     fontWeight: '700' as const,
-    lineHeight: 34,
-    letterSpacing: -0.3,
+    lineHeight: 32,
   },
   h3: {
     fontSize: 20,
     fontWeight: '600' as const,
     lineHeight: 28,
-    letterSpacing: -0.2,
   },
-  // Body text - Lighter weights
   body: {
     fontSize: 16,
     fontWeight: '400' as const,
     lineHeight: 24,
-    letterSpacing: 0,
-  },
-  bodyMedium: {
-    fontSize: 16,
-    fontWeight: '500' as const,
-    lineHeight: 24,
-    letterSpacing: 0,
   },
   bodySmall: {
     fontSize: 14,
     fontWeight: '400' as const,
     lineHeight: 20,
-    letterSpacing: 0,
   },
   caption: {
     fontSize: 12,
     fontWeight: '400' as const,
     lineHeight: 16,
-    letterSpacing: 0.3,
-  },
-  // Special styles
-  elegant: {
-    fontSize: 14,
-    fontWeight: '300' as const,
-    lineHeight: 20,
-    letterSpacing: 0.5,
   },
 };
 
 export const SHADOWS = {
-  none: {
-    shadowColor: 'transparent',
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0,
-    shadowRadius: 0,
-    elevation: 0,
-  },
-  soft: {
-    shadowColor: '#5B7FDB',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 8,
+  small: {
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
     elevation: 2,
   },
   medium: {
-    shadowColor: '#5B7FDB',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.12,
-    shadowRadius: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 4,
     elevation: 4,
   },
-  glow: {
-    shadowColor: '#5B7FDB',
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.3,
-    shadowRadius: 16,
+  large: {
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.12,
+    shadowRadius: 8,
     elevation: 8,
   },
 };

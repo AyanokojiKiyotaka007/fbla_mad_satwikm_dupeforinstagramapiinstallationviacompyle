@@ -5,7 +5,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { MaterialIcons } from '@expo/vector-icons';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-import { Platform, Animated as RNAnimated } from 'react-native';
+import { Platform } from 'react-native';
 
 import { ThemeProvider, useTheme } from './contexts/ThemeContext';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
@@ -28,55 +28,70 @@ function TabNavigator() {
   
   return (
     <Tab.Navigator
-      screenOptions={({ route }) => ({
+      screenOptions={{
         headerShown: false,
         tabBarActiveTintColor: colors.primary,
         tabBarInactiveTintColor: colors.textLight,
-        tabBarShowLabel: false, // Hide labels, icons only
         tabBarStyle: {
-          backgroundColor: isDarkMode ? 'rgba(26, 31, 46, 0.95)' : 'rgba(255, 255, 255, 0.95)',
-          borderTopWidth: 0,
-          position: 'absolute',
-          bottom: Platform.OS === 'ios' ? 20 : 16,
-          left: 20,
-          right: 20,
-          borderRadius: 24,
-          height: 64,
-          paddingBottom: 0,
-          paddingTop: 0,
-          shadowColor: colors.primary,
-          shadowOffset: { width: 0, height: 4 },
-          shadowOpacity: 0.15,
-          shadowRadius: 12,
-          elevation: 8,
+          backgroundColor: colors.surface,
+          borderTopWidth: 1,
+          borderTopColor: colors.divider,
+          paddingBottom: Platform.OS === 'ios' ? 20 : 8,
+          paddingTop: 8,
+          height: Platform.OS === 'ios' ? 88 : 68,
         },
-        tabBarIcon: ({ focused, color, size }) => {
-          let iconName: keyof typeof MaterialIcons.glyphMap = 'home';
-          
-          if (route.name === 'Dashboard') {
-            iconName = 'home';
-          } else if (route.name === 'Calendar') {
-            iconName = 'event';
-          } else if (route.name === 'NewsFeed') {
-            iconName = 'notifications';
-          } else if (route.name === 'Profile') {
-            iconName = 'person';
-          }
-
-          return (
-            <RNAnimated.View style={{
-              transform: [{ scale: focused ? 1.1 : 1 }],
-            }}>
-              <MaterialIcons name={iconName} size={focused ? 28 : 24} color={color} />
-            </RNAnimated.View>
-          );
+        tabBarLabelStyle: {
+          fontSize: 12,
+          fontWeight: '600',
         },
-      })}
+      }}
     >
-      <Tab.Screen name="Dashboard" component={DashboardScreen} />
-      <Tab.Screen name="Calendar" component={CalendarScreen} />
-      <Tab.Screen name="NewsFeed" component={NewsFeedScreen} />
-      <Tab.Screen name="Profile" component={ProfileScreen} />
+      <Tab.Screen
+        name="Dashboard"
+        component={DashboardScreen}
+        options={{
+          tabBarIcon: ({ color, size }) => (
+            <MaterialIcons name="dashboard" size={size} color={color} />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="Calendar"
+        component={CalendarScreen}
+        options={{
+          tabBarIcon: ({ color, size }) => (
+            <MaterialIcons name="event" size={size} color={color} />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="NewsFeed"
+        component={NewsFeedScreen}
+        options={{
+          tabBarLabel: 'News',
+          tabBarIcon: ({ color, size }) => (
+            <MaterialIcons name="article" size={size} color={color} />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="Resources"
+        component={ResourcesScreen}
+        options={{
+          tabBarIcon: ({ color, size }) => (
+            <MaterialIcons name="folder" size={size} color={color} />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="Profile"
+        component={ProfileScreen}
+        options={{
+          tabBarIcon: ({ color, size }) => (
+            <MaterialIcons name="person" size={size} color={color} />
+          ),
+        }}
+      />
     </Tab.Navigator>
   );
 }

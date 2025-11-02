@@ -2,11 +2,10 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TextInput, TouchableOpacity, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
-import { LinearGradient } from 'expo-linear-gradient';
 import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
-import { SPACING, TYPOGRAPHY, BORDER_RADIUS } from '../constants/theme';
+import { SPACING, TYPOGRAPHY, BORDER_RADIUS, SHADOWS } from '../constants/theme';
 
 export default function ProfileScreen() {
   const { user, signOut } = useAuth();
@@ -38,132 +37,165 @@ export default function ProfileScreen() {
     );
   };
 
-  return (
-    <View style={styles.container}>
-      {/* Cohesive Gradient Background */}
-      <LinearGradient
-        colors={isDarkMode 
-          ? [colors.backgroundGradient1, colors.backgroundGradient2, colors.backgroundGradient3]
-          : [colors.backgroundGradient1, colors.backgroundGradient2, colors.backgroundGradient3]
-        }
-        style={StyleSheet.absoluteFillObject}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 0, y: 1 }}
-      />
-
-      <SafeAreaView style={styles.safeArea} edges={['top']}>
-        <View style={styles.header}>
-          <Text style={[styles.headerTitle, { color: colors.text }]}>Profile</Text>
-          <TouchableOpacity 
-            style={[styles.editButton, { backgroundColor: colors.primary }]}
-            onPress={() => isEditing ? handleSave() : setIsEditing(true)}
-          >
-            <MaterialIcons 
-              name={isEditing ? 'check' : 'edit'} 
-              size={20} 
-              color="#FFFFFF" 
-            />
-          </TouchableOpacity>
+  function InfoField({ 
+    icon, 
+    label, 
+    value, 
+    editable = false,
+    multiline = false,
+    colors,
+    isEditing,
+    profile,
+    setProfile,
+  }: any) {
+    return (
+      <View style={styles.infoField}>
+        <View style={styles.fieldHeader}>
+          <MaterialIcons name={icon} size={20} color={colors.primary} />
+          <Text style={[styles.fieldLabel, { color: colors.textSecondary }]}>{label}</Text>
         </View>
-
-        <ScrollView 
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={styles.content}
-        >
-          {/* Profile Header */}
-          <Animated.View 
-            entering={FadeIn.duration(600)} 
-            style={[styles.profileHeader, { backgroundColor: colors.surfaceGlass }]}
-          >
-            <View style={styles.avatarContainer}>
-              <View style={[styles.avatarCircle, { backgroundColor: colors.primary + '20' }]}>
-                <MaterialIcons name="person" size={48} color={colors.primary} />
-              </View>
-            </View>
-            <Text style={[styles.profileName, { color: colors.text }]}>{profile.name}</Text>
-            <Text style={[styles.profilePosition, { color: colors.textSecondary }]}>{profile.position}</Text>
-            <View style={[styles.chapterBadge, { backgroundColor: colors.primary + '15' }]}>
-              <MaterialIcons name="school" size={14} color={colors.primary} />
-              <Text style={[styles.chapterText, { color: colors.primary }]}>{profile.chapter}</Text>
-            </View>
-          </Animated.View>
-
-          {/* Profile Information */}
-          <Animated.View 
-            entering={FadeInDown.delay(200).springify()} 
-            style={[styles.infoCard, { backgroundColor: colors.surfaceGlass }]}
-          >
-            <Text style={[styles.sectionTitle, { color: colors.text }]}>Information</Text>
-            
-            <InfoField icon="email" label="Email" value={profile.email} editable colors={colors} isEditing={isEditing} profile={profile} setProfile={setProfile} />
-            <InfoField icon="phone" label="Phone" value={profile.phone} editable colors={colors} isEditing={isEditing} profile={profile} setProfile={setProfile} />
-            <InfoField icon="calendar-today" label="Member Since" value={profile.memberSince} colors={colors} isEditing={false} profile={profile} setProfile={setProfile} />
-            <InfoField icon="info" label="Bio" value={profile.bio} editable multiline colors={colors} isEditing={isEditing} profile={profile} setProfile={setProfile} />
-          </Animated.View>
-
-          {/* Settings */}
-          <Animated.View 
-            entering={FadeInDown.delay(300).springify()} 
-            style={[styles.settingsCard, { backgroundColor: colors.surfaceGlass }]}
-          >
-            <Text style={[styles.sectionTitle, { color: colors.text }]}>Settings</Text>
-            
-            <TouchableOpacity style={[styles.settingItem, { borderBottomColor: colors.border }]} onPress={toggleTheme}>
-              <View style={styles.settingLeft}>
-                <MaterialIcons name={isDarkMode ? 'dark-mode' : 'light-mode'} size={22} color={colors.textSecondary} />
-                <Text style={[styles.settingText, { color: colors.text }]}>Dark Mode</Text>
-              </View>
-              <View style={[styles.toggle, { backgroundColor: isDarkMode ? colors.primary : colors.border }]}>
-                <View style={[styles.toggleThumb, { transform: [{ translateX: isDarkMode ? 20 : 0 }] }]} />
-              </View>
-            </TouchableOpacity>
-
-            <TouchableOpacity style={[styles.settingItem, styles.logoutItem]} onPress={handleSignOut}>
-              <View style={styles.settingLeft}>
-                <MaterialIcons name="logout" size={22} color={colors.error} />
-                <Text style={[styles.settingText, { color: colors.error }]}>Sign Out</Text>
-              </View>
-            </TouchableOpacity>
-          </Animated.View>
-        </ScrollView>
-      </SafeAreaView>
-    </View>
-  );
-}
-
-function InfoField({ 
-  icon, 
-  label, 
-  value, 
-  editable = false,
-  multiline = false,
-  colors,
-  isEditing,
-  profile,
-  setProfile,
-}: any) {
-  return (
-    <View style={styles.infoField}>
-      <View style={styles.fieldHeader}>
-        <MaterialIcons name={icon} size={18} color={colors.primary} />
-        <Text style={[styles.fieldLabel, { color: colors.textSecondary }]}>{label}</Text>
+        {isEditing && editable ? (
+          <TextInput
+            style={[
+              styles.fieldInput, 
+              { color: colors.text, backgroundColor: colors.background, borderColor: colors.border },
+              multiline && styles.fieldInputMultiline
+            ]}
+            value={value}
+            onChangeText={(text) => setProfile({ ...profile, [label.toLowerCase()]: text })}
+            multiline={multiline}
+          />
+        ) : (
+          <Text style={[styles.fieldValue, { color: colors.text }]}>{value}</Text>
+        )}
       </View>
-      {isEditing && editable ? (
-        <TextInput
-          style={[
-            styles.fieldInput, 
-            { color: colors.text, backgroundColor: colors.background + '40', borderColor: colors.border },
-            multiline && styles.fieldInputMultiline
-          ]}
-          value={value}
-          onChangeText={(text) => setProfile({ ...profile, [label.toLowerCase()]: text })}
-          multiline={multiline}
-          placeholderTextColor={colors.textLight}
-        />
-      ) : (
-        <Text style={[styles.fieldValue, { color: colors.text }]}>{value}</Text>
-      )}
-    </View>
+    );
+  }
+
+  return (
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['top']}>
+      <View style={styles.header}>
+        <Text style={[styles.headerTitle, { color: colors.text }]}>Profile</Text>
+        <TouchableOpacity 
+          style={[styles.editButton, { backgroundColor: colors.primary }]}
+          onPress={() => isEditing ? handleSave() : setIsEditing(true)}
+        >
+          <MaterialIcons 
+            name={isEditing ? 'check' : 'edit'} 
+            size={24} 
+            color="#FFFFFF" 
+          />
+        </TouchableOpacity>
+      </View>
+
+      <ScrollView 
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.content}
+      >
+        {/* Profile Header */}
+        <Animated.View 
+          entering={FadeIn.duration(600)} 
+          style={[styles.profileHeader, { backgroundColor: colors.surface }, SHADOWS.medium]}
+        >
+          <View style={styles.avatarContainer}>
+            <MaterialIcons name="account-circle" size={80} color={colors.primary} />
+            {isEditing && (
+              <TouchableOpacity style={[styles.avatarEditButton, { backgroundColor: colors.primary }]}>
+                <MaterialIcons name="camera-alt" size={20} color="#FFFFFF" />
+              </TouchableOpacity>
+            )}
+          </View>
+          <Text style={[styles.profileName, { color: colors.text }]}>{profile.name}</Text>
+          <Text style={[styles.profilePosition, { color: colors.textSecondary }]}>{profile.position}</Text>
+          <View style={[styles.chapterBadge, { backgroundColor: colors.primary + '20' }]}>
+            <MaterialIcons name="school" size={16} color={colors.primary} />
+            <Text style={[styles.chapterText, { color: colors.primary }]}>{profile.chapter}</Text>
+          </View>
+        </Animated.View>
+
+        {/* Stats */}
+        <Animated.View 
+          entering={FadeInDown.delay(200).springify()} 
+          style={[styles.statsCard, { backgroundColor: colors.surface }, SHADOWS.medium]}
+        >
+          <View style={styles.statItem}>
+            <Text style={[styles.statValue, { color: colors.primary }]}>
+              {user?.eventsAttended || 0}
+            </Text>
+            <Text style={[styles.statLabel, { color: colors.textSecondary }]}>Events Attended</Text>
+          </View>
+          <View style={[styles.statDivider, { backgroundColor: colors.divider }]} />
+          <View style={styles.statItem}>
+            <Text style={[styles.statValue, { color: colors.primary }]}>
+              {profile.memberSince ? Math.floor((Date.now() - new Date(profile.memberSince).getTime()) / (1000 * 60 * 60 * 24)) : 0}
+            </Text>
+            <Text style={[styles.statLabel, { color: colors.textSecondary }]}>Days as Member</Text>
+          </View>
+        </Animated.View>
+
+        {/* Profile Information */}
+        <Animated.View 
+          entering={FadeInDown.delay(300).springify()} 
+          style={[styles.infoCard, { backgroundColor: colors.surface }, SHADOWS.medium]}
+        >
+          <Text style={[styles.sectionTitle, { color: colors.text }]}>Personal Information</Text>
+          
+          <InfoField icon="email" label="Email" value={profile.email} editable colors={colors} isEditing={isEditing} profile={profile} setProfile={setProfile} />
+          <InfoField icon="phone" label="Phone" value={profile.phone} editable colors={colors} isEditing={isEditing} profile={profile} setProfile={setProfile} />
+          <InfoField icon="calendar-today" label="Member Since" value={profile.memberSince} colors={colors} isEditing={false} profile={profile} setProfile={setProfile} />
+          <InfoField icon="info" label="Bio" value={profile.bio} editable multiline colors={colors} isEditing={isEditing} profile={profile} setProfile={setProfile} />
+        </Animated.View>
+
+        {/* Settings */}
+        <Animated.View 
+          entering={FadeInDown.delay(400).springify()} 
+          style={[styles.settingsCard, { backgroundColor: colors.surface }, SHADOWS.medium]}
+        >
+          <Text style={[styles.sectionTitle, { color: colors.text }]}>Settings</Text>
+          
+          <TouchableOpacity style={[styles.settingItem, { borderBottomColor: colors.divider }]} onPress={toggleTheme}>
+            <View style={styles.settingLeft}>
+              <MaterialIcons name={isDarkMode ? 'dark-mode' : 'light-mode'} size={24} color={colors.textSecondary} />
+              <Text style={[styles.settingText, { color: colors.text }]}>Dark Mode</Text>
+            </View>
+            <View style={[styles.toggle, { backgroundColor: isDarkMode ? colors.primary : colors.border }]}>
+              <View style={[styles.toggleThumb, { transform: [{ translateX: isDarkMode ? 20 : 0 }] }]} />
+            </View>
+          </TouchableOpacity>
+
+          <TouchableOpacity style={[styles.settingItem, { borderBottomColor: colors.divider }]}>
+            <View style={styles.settingLeft}>
+              <MaterialIcons name="notifications" size={24} color={colors.textSecondary} />
+              <Text style={[styles.settingText, { color: colors.text }]}>Notifications</Text>
+            </View>
+            <MaterialIcons name="chevron-right" size={24} color={colors.textLight} />
+          </TouchableOpacity>
+
+          <TouchableOpacity style={[styles.settingItem, { borderBottomColor: colors.divider }]}>
+            <View style={styles.settingLeft}>
+              <MaterialIcons name="lock" size={24} color={colors.textSecondary} />
+              <Text style={[styles.settingText, { color: colors.text }]}>Privacy</Text>
+            </View>
+            <MaterialIcons name="chevron-right" size={24} color={colors.textLight} />
+          </TouchableOpacity>
+
+          <TouchableOpacity style={[styles.settingItem, { borderBottomColor: colors.divider }]}>
+            <View style={styles.settingLeft}>
+              <MaterialIcons name="help" size={24} color={colors.textSecondary} />
+              <Text style={[styles.settingText, { color: colors.text }]}>Help & Support</Text>
+            </View>
+            <MaterialIcons name="chevron-right" size={24} color={colors.textLight} />
+          </TouchableOpacity>
+
+          <TouchableOpacity style={[styles.settingItem, styles.logoutItem]} onPress={handleSignOut}>
+            <View style={styles.settingLeft}>
+              <MaterialIcons name="logout" size={24} color={colors.error} />
+              <Text style={[styles.settingText, styles.logoutText, { color: colors.error }]}>Log Out</Text>
+            </View>
+          </TouchableOpacity>
+        </Animated.View>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
@@ -171,19 +203,15 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  safeArea: {
-    flex: 1,
-  },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: SPACING.xl,
-    paddingVertical: SPACING.lg,
+    paddingHorizontal: SPACING.lg,
+    paddingVertical: SPACING.md,
   },
   headerTitle: {
-    ...TYPOGRAPHY.h1,
-    fontSize: 28,
+    ...TYPOGRAPHY.h2,
   },
   editButton: {
     width: 40,
@@ -193,24 +221,26 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   content: {
-    paddingHorizontal: SPACING.xl,
-    paddingBottom: 120,
+    paddingHorizontal: SPACING.lg,
+    paddingBottom: 100,
   },
   profileHeader: {
-    borderRadius: BORDER_RADIUS.xl,
-    padding: SPACING.xl,
+    borderRadius: BORDER_RADIUS.lg,
+    padding: SPACING.lg,
     alignItems: 'center',
-    marginBottom: SPACING.lg,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.2)',
-  },
-  avatarContainer: {
     marginBottom: SPACING.md,
   },
-  avatarCircle: {
-    width: 96,
-    height: 96,
-    borderRadius: 48,
+  avatarContainer: {
+    position: 'relative',
+    marginBottom: SPACING.md,
+  },
+  avatarEditButton: {
+    position: 'absolute',
+    bottom: 0,
+    right: 0,
+    width: 32,
+    height: 32,
+    borderRadius: BORDER_RADIUS.full,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -220,7 +250,7 @@ const styles = StyleSheet.create({
   },
   profilePosition: {
     ...TYPOGRAPHY.body,
-    marginBottom: SPACING.md,
+    marginBottom: SPACING.sm,
   },
   chapterBadge: {
     flexDirection: 'row',
@@ -228,18 +258,38 @@ const styles = StyleSheet.create({
     paddingHorizontal: SPACING.md,
     paddingVertical: SPACING.xs,
     borderRadius: BORDER_RADIUS.full,
-    gap: SPACING.xs,
   },
   chapterText: {
     ...TYPOGRAPHY.bodySmall,
-    fontWeight: '500',
+    marginLeft: SPACING.xs,
+    fontWeight: '600',
+  },
+  statsCard: {
+    borderRadius: BORDER_RADIUS.lg,
+    padding: SPACING.lg,
+    flexDirection: 'row',
+    marginBottom: SPACING.md,
+  },
+  statItem: {
+    flex: 1,
+    alignItems: 'center',
+  },
+  statValue: {
+    ...TYPOGRAPHY.h2,
+    marginBottom: SPACING.xs,
+  },
+  statLabel: {
+    ...TYPOGRAPHY.caption,
+    textAlign: 'center',
+  },
+  statDivider: {
+    width: 1,
+    marginHorizontal: SPACING.md,
   },
   infoCard: {
-    borderRadius: BORDER_RADIUS.xl,
+    borderRadius: BORDER_RADIUS.lg,
     padding: SPACING.lg,
-    marginBottom: SPACING.lg,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.2)',
+    marginBottom: SPACING.md,
   },
   sectionTitle: {
     ...TYPOGRAPHY.h3,
@@ -252,21 +302,21 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: SPACING.xs,
-    gap: SPACING.xs,
   },
   fieldLabel: {
     ...TYPOGRAPHY.bodySmall,
-    fontWeight: '500',
+    marginLeft: SPACING.xs,
+    fontWeight: '600',
   },
   fieldValue: {
     ...TYPOGRAPHY.body,
-    marginLeft: 26,
+    marginLeft: 28,
   },
   fieldInput: {
     ...TYPOGRAPHY.body,
     borderRadius: BORDER_RADIUS.sm,
     padding: SPACING.sm,
-    marginLeft: 26,
+    marginLeft: 28,
     borderWidth: 1,
   },
   fieldInputMultiline: {
@@ -274,10 +324,8 @@ const styles = StyleSheet.create({
     textAlignVertical: 'top',
   },
   settingsCard: {
-    borderRadius: BORDER_RADIUS.xl,
+    borderRadius: BORDER_RADIUS.lg,
     padding: SPACING.lg,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.2)',
   },
   settingItem: {
     flexDirection: 'row',
@@ -289,10 +337,10 @@ const styles = StyleSheet.create({
   settingLeft: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: SPACING.md,
   },
   settingText: {
     ...TYPOGRAPHY.body,
+    marginLeft: SPACING.md,
   },
   toggle: {
     width: 48,
@@ -309,5 +357,8 @@ const styles = StyleSheet.create({
   },
   logoutItem: {
     borderBottomWidth: 0,
+  },
+  logoutText: {
+    fontWeight: '600',
   },
 });
