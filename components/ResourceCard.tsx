@@ -65,7 +65,7 @@ export default function ResourceCard({ resource, onDownload, index }: ResourceCa
           onPress={onDownload}
           activeOpacity={0.7}
         >
-          <MaterialIcons name="open-in-new" size={24} color={colors.primary} />
+          <MaterialIcons name="download" size={24} color={colors.primary} />
         </TouchableOpacity>
       </View>
     </Animated.View>

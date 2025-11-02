@@ -1,20 +1,29 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { UserProfile } from '../types';
+
+interface User {
+  id: string;
+  name: string;
+  email: string;
+  chapter: string;
+  position: string;
+  phone: string;
+  bio: string;
+  memberSince: string;
+}
 
 interface AuthContextType {
-  user: UserProfile | null;
+  user: User | null;
   isLoading: boolean;
-  signIn: (email: string, password: string) => Promise<boolean>;
-  signUp: (userData: Partial<UserProfile> & { password: string }) => Promise<boolean>;
+  signIn: (email: string, password: string) => Promise<void>;
+  signUp: (userData: Omit<User, 'id' | 'memberSince'> & { password: string }) => Promise<void>;
   signOut: () => Promise<void>;
-  updateProfile: (updates: Partial<UserProfile>) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<UserProfile | null>(null);
+export function AuthProvider({ children }: { children: React.ReactNode }) {
+  const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -34,68 +43,56 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const signIn = async (email: string, password: string): Promise<boolean> => {
+  const signIn = async (email: string, password: string) => {
     try {
-      // Get stored users
-      const usersData = await AsyncStorage.getItem('users');
-      const users = usersData ? JSON.parse(usersData) : [];
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1000));
       
-      // Find user with matching email and password
-      const foundUser = users.find(
-        (u: any) => u.email === email && u.password === password
-      );
-
+      // Check if user exists
+      const storedUsers = await AsyncStorage.getItem('users');
+      const users = storedUsers ? JSON.parse(storedUsers) : [];
+      
+      const foundUser = users.find((u: any) => u.email === email && u.password === password);
+      
       if (foundUser) {
         const { password: _, ...userWithoutPassword } = foundUser;
         setUser(userWithoutPassword);
         await AsyncStorage.setItem('user', JSON.stringify(userWithoutPassword));
-        return true;
+      } else {
+        throw new Error('Invalid email or password');
       }
-      return false;
     } catch (error) {
-      console.error('Error signing in:', error);
-      return false;
+      throw error;
     }
   };
 
-  const signUp = async (userData: Partial<UserProfile> & { password: string }): Promise<boolean> => {
+  const signUp = async (userData: Omit<User, 'id' | 'memberSince'> & { password: string }) => {
     try {
-      // Get existing users
-      const usersData = await AsyncStorage.getItem('users');
-      const users = usersData ? JSON.parse(usersData) : [];
-
-      // Check if email already exists
-      if (users.some((u: any) => u.email === userData.email)) {
-        return false;
-      }
-
-      // Create new user
-      const newUser = {
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      const newUser: User = {
         id: Date.now().toString(),
-        name: userData.name || '',
-        email: userData.email || '',
-        chapter: userData.chapter || '',
-        position: userData.position || 'Member',
+        name: userData.name,
+        email: userData.email,
+        chapter: userData.chapter,
+        position: userData.position,
+        phone: userData.phone,
+        bio: userData.bio,
         memberSince: new Date().toISOString().split('T')[0],
-        eventsAttended: 0,
-        bio: userData.bio || '',
-        phone: userData.phone || '',
-        password: userData.password,
       };
 
-      // Save to users list
-      users.push(newUser);
+      // Store user in users list
+      const storedUsers = await AsyncStorage.getItem('users');
+      const users = storedUsers ? JSON.parse(storedUsers) : [];
+      users.push({ ...newUser, password: userData.password });
       await AsyncStorage.setItem('users', JSON.stringify(users));
 
-      // Set as current user
-      const { password: _, ...userWithoutPassword } = newUser;
-      setUser(userWithoutPassword);
-      await AsyncStorage.setItem('user', JSON.stringify(userWithoutPassword));
-
-      return true;
+      // Set current user
+      setUser(newUser);
+      await AsyncStorage.setItem('user', JSON.stringify(newUser));
     } catch (error) {
-      console.error('Error signing up:', error);
-      return false;
+      throw error;
     }
   };
 
@@ -108,29 +105,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const updateProfile = async (updates: Partial<UserProfile>) => {
-    if (!user) return;
-
-    try {
-      const updatedUser = { ...user, ...updates };
-      setUser(updatedUser);
-      await AsyncStorage.setItem('user', JSON.stringify(updatedUser));
-
-      // Update in users list
-      const usersData = await AsyncStorage.getItem('users');
-      const users = usersData ? JSON.parse(usersData) : [];
-      const userIndex = users.findIndex((u: any) => u.id === user.id);
-      if (userIndex !== -1) {
-        users[userIndex] = { ...users[userIndex], ...updates };
-        await AsyncStorage.setItem('users', JSON.stringify(users));
-      }
-    } catch (error) {
-      console.error('Error updating profile:', error);
-    }
-  };
-
   return (
-    <AuthContext.Provider value={{ user, isLoading, signIn, signUp, signOut, updateProfile }}>
+    <AuthContext.Provider value={{ user, isLoading, signIn, signUp, signOut }}>
       {children}
     </AuthContext.Provider>
   );

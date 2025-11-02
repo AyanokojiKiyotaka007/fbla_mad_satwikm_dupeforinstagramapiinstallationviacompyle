@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, Animated, Dimensions } from 'react-native';
-import { MaterialIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
+import { MaterialIcons } from '@expo/vector-icons';
 
 const { width, height } = Dimensions.get('window');
 
@@ -16,9 +16,7 @@ export default function SplashScreen({ onFinish }: SplashScreenProps) {
   const rotateAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
-    // Complex animation sequence
     Animated.sequence([
-      // Logo entrance
       Animated.parallel([
         Animated.timing(fadeAnim, {
           toValue: 1,
@@ -33,24 +31,28 @@ export default function SplashScreen({ onFinish }: SplashScreenProps) {
         }),
         Animated.timing(rotateAnim, {
           toValue: 1,
-          duration: 800,
+          duration: 1000,
           useNativeDriver: true,
         }),
       ]),
-      // Text slide up
       Animated.timing(slideAnim, {
         toValue: 0,
         duration: 600,
         useNativeDriver: true,
       }),
-      // Hold for a moment
       Animated.delay(800),
-      // Fade out
-      Animated.timing(fadeAnim, {
-        toValue: 0,
-        duration: 500,
-        useNativeDriver: true,
-      }),
+      Animated.parallel([
+        Animated.timing(fadeAnim, {
+          toValue: 0,
+          duration: 500,
+          useNativeDriver: true,
+        }),
+        Animated.timing(scaleAnim, {
+          toValue: 1.2,
+          duration: 500,
+          useNativeDriver: true,
+        }),
+      ]),
     ]).start(() => {
       onFinish();
     });
@@ -73,29 +75,29 @@ export default function SplashScreen({ onFinish }: SplashScreenProps) {
           styles.content,
           {
             opacity: fadeAnim,
-            transform: [
-              { scale: scaleAnim },
-              { rotate: spin },
-            ],
+            transform: [{ scale: scaleAnim }],
           },
         ]}
       >
-        <View style={styles.logoContainer}>
+        <Animated.View style={{ transform: [{ rotate: spin }] }}>
           <MaterialIcons name="business-center" size={100} color="#FFFFFF" />
-        </View>
-      </Animated.View>
+        </Animated.View>
 
-      <Animated.View
-        style={[
-          styles.textContainer,
-          {
-            opacity: fadeAnim,
-            transform: [{ translateY: slideAnim }],
-          },
-        ]}
-      >
-        <Text style={styles.title}>FBLA Connect</Text>
-        <Text style={styles.subtitle}>Future Business Leaders of America</Text>
+        <Animated.View
+          style={[
+            styles.textContainer,
+            {
+              opacity: fadeAnim,
+              transform: [{ translateY: slideAnim }],
+            },
+          ]}
+        >
+          <Text style={styles.title}>FBLA Connect</Text>
+          <Text style={styles.subtitle}>Connecting Creativity</Text>
+          <View style={styles.tagline}>
+            <Text style={styles.taglineText}>Future Business Leaders of America</Text>
+          </View>
+        </Animated.View>
       </Animated.View>
 
       <Animated.View
@@ -106,7 +108,7 @@ export default function SplashScreen({ onFinish }: SplashScreenProps) {
           },
         ]}
       >
-        <Text style={styles.footerText}>Empowering Tomorrow\'s Leaders</Text>
+        <Text style={styles.footerText}>Building Leaders of Tomorrow</Text>
       </Animated.View>
     </LinearGradient>
   );
@@ -122,36 +124,34 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  logoContainer: {
-    width: 160,
-    height: 160,
-    borderRadius: 80,
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.3,
-    shadowRadius: 20,
-    elevation: 10,
-  },
   textContainer: {
-    position: 'absolute',
-    bottom: height * 0.3,
     alignItems: 'center',
+    marginTop: 40,
   },
   title: {
     fontSize: 42,
     fontWeight: '800',
     color: '#FFFFFF',
-    marginBottom: 8,
     letterSpacing: 1,
+    marginBottom: 8,
   },
   subtitle: {
-    fontSize: 16,
-    color: 'rgba(255, 255, 255, 0.9)',
-    fontWeight: '500',
-    textAlign: 'center',
+    fontSize: 18,
+    fontWeight: '400',
+    color: '#E8F0FE',
+    letterSpacing: 2,
+    marginBottom: 20,
+  },
+  tagline: {
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    paddingHorizontal: 20,
+    paddingVertical: 8,
+    borderRadius: 20,
+  },
+  taglineText: {
+    fontSize: 14,
+    color: '#FFFFFF',
+    fontWeight: '600',
   },
   footer: {
     position: 'absolute',
@@ -159,7 +159,7 @@ const styles = StyleSheet.create({
   },
   footerText: {
     fontSize: 14,
-    color: 'rgba(255, 255, 255, 0.8)',
-    fontWeight: '600',
+    color: '#E8F0FE',
+    fontWeight: '500',
   },
 });

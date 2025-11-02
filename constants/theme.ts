@@ -1,4 +1,5 @@
-export const COLORS = {
+// Light and Dark theme colors
+export const LIGHT_COLORS = {
   primary: '#003DA5',
   primaryDark: '#002D7A',
   primaryLight: '#1E5BC6',
@@ -7,6 +8,8 @@ export const COLORS = {
   accent: '#00A3E0',
   
   background: '#F8F9FA',
+  backgroundGradient1: '#E8F0FE',
+  backgroundGradient2: '#F0F7FF',
   surface: '#FFFFFF',
   card: '#FFFFFF',
   
@@ -23,6 +26,37 @@ export const COLORS = {
   info: '#3B82F6',
   
   shadow: 'rgba(0, 0, 0, 0.1)',
+  overlay: 'rgba(0, 0, 0, 0.5)',
+};
+
+export const DARK_COLORS = {
+  primary: '#4A90E2',
+  primaryDark: '#357ABD',
+  primaryLight: '#6BA3E8',
+  secondary: '#FFB81C',
+  secondaryDark: '#E6A519',
+  accent: '#00A3E0',
+  
+  background: '#0F1419',
+  backgroundGradient1: '#1A1F2E',
+  backgroundGradient2: '#0F1419',
+  surface: '#1A1F2E',
+  card: '#252A35',
+  
+  text: '#FFFFFF',
+  textSecondary: '#9CA3AF',
+  textLight: '#6B7280',
+  
+  border: '#2D3748',
+  divider: '#252A35',
+  
+  success: '#10B981',
+  warning: '#F59E0B',
+  error: '#EF4444',
+  info: '#3B82F6',
+  
+  shadow: 'rgba(0, 0, 0, 0.3)',
+  overlay: 'rgba(0, 0, 0, 0.7)',
 };
 
 export const SPACING = {
@@ -96,5 +130,6 @@ export const BORDER_RADIUS = {
   md: 12,
   lg: 16,
   xl: 24,
+  xxl: 32,
   full: 9999,
 };

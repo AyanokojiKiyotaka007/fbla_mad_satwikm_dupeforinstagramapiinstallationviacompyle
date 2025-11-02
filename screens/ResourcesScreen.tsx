@@ -20,9 +20,9 @@ export default function ResourcesScreen() {
     { id: 'document', label: 'Documents' },
   ];
 
-  const handleDownload = (url?: string) => {
-    if (url) {
-      Linking.openURL(url);
+  const handleDownload = (resource: any) => {
+    if (resource.url) {
+      Linking.openURL(resource.url).catch(err => console.error('Error opening URL:', err));
     }
   };
 
@@ -81,7 +81,7 @@ export default function ResourcesScreen() {
           <ResourceCard
             key={resource.id}
             resource={resource}
-            onDownload={() => handleDownload(resource.url)}
+            onDownload={() => handleDownload(resource)}
             index={index}
           />
         ))}

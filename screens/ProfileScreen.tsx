@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TextInput, TouchableOpacity, Alert, Switch, Linking } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TextInput, TouchableOpacity, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
@@ -8,18 +8,20 @@ import { useTheme } from '../contexts/ThemeContext';
 import { SPACING, TYPOGRAPHY, BORDER_RADIUS, SHADOWS } from '../constants/theme';
 
 export default function ProfileScreen() {
-  const { user, signOut, updateProfile } = useAuth();
+  const { user, signOut } = useAuth();
   const { colors, isDarkMode, toggleTheme } = useTheme();
   const [isEditing, setIsEditing] = useState(false);
-  const [formData, setFormData] = useState({
-    name: user?.name || '',
-    email: user?.email || '',
-    phone: user?.phone || '',
-    bio: user?.bio || '',
+  const [profile, setProfile] = useState(user || {
+    name: '',
+    email: '',
+    chapter: '',
+    position: '',
+    phone: '',
+    bio: '',
+    memberSince: '',
   });
 
-  const handleSave = async () => {
-    await updateProfile(formData);
+  const handleSave = () => {
     setIsEditing(false);
     Alert.alert('Success', 'Profile updated successfully!');
   };
@@ -35,51 +37,40 @@ export default function ProfileScreen() {
     );
   };
 
-  const openSocialMedia = (url: string) => {
-    Linking.openURL(url);
-  };
-
-  const InfoField = ({ 
+  function InfoField({ 
     icon, 
     label, 
     value, 
     editable = false,
     multiline = false,
-    field,
-  }: { 
-    icon: keyof typeof MaterialIcons.glyphMap; 
-    label: string; 
-    value: string;
-    editable?: boolean;
-    multiline?: boolean;
-    field?: string;
-  }) => (
-    <View style={styles.infoField}>
-      <View style={styles.fieldHeader}>
-        <MaterialIcons name={icon} size={20} color={colors.primary} />
-        <Text style={[styles.fieldLabel, { color: colors.textSecondary }]}>{label}</Text>
+    colors,
+    isEditing,
+    profile,
+    setProfile,
+  }: any) {
+    return (
+      <View style={styles.infoField}>
+        <View style={styles.fieldHeader}>
+          <MaterialIcons name={icon} size={20} color={colors.primary} />
+          <Text style={[styles.fieldLabel, { color: colors.textSecondary }]}>{label}</Text>
+        </View>
+        {isEditing && editable ? (
+          <TextInput
+            style={[
+              styles.fieldInput, 
+              { color: colors.text, backgroundColor: colors.background, borderColor: colors.border },
+              multiline && styles.fieldInputMultiline
+            ]}
+            value={value}
+            onChangeText={(text) => setProfile({ ...profile, [label.toLowerCase()]: text })}
+            multiline={multiline}
+          />
+        ) : (
+          <Text style={[styles.fieldValue, { color: colors.text }]}>{value}</Text>
+        )}
       </View>
-      {isEditing && editable && field ? (
-        <TextInput
-          style={[
-            styles.fieldInput, 
-            { 
-              color: colors.text, 
-              backgroundColor: colors.background,
-              borderColor: colors.border,
-            },
-            multiline && styles.fieldInputMultiline
-          ]}
-          value={value}
-          onChangeText={(text) => setFormData({ ...formData, [field]: text })}
-          multiline={multiline}
-          placeholderTextColor={colors.textLight}
-        />
-      ) : (
-        <Text style={[styles.fieldValue, { color: colors.text }]}>{value}</Text>
-      )}
-    </View>
-  );
+    );
+  }
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['top']}>
@@ -92,7 +83,7 @@ export default function ProfileScreen() {
           <MaterialIcons 
             name={isEditing ? 'check' : 'edit'} 
             size={24} 
-            color="#FFFFFF"
+            color="#FFFFFF" 
           />
         </TouchableOpacity>
       </View>
@@ -114,11 +105,11 @@ export default function ProfileScreen() {
               </TouchableOpacity>
             )}
           </View>
-          <Text style={[styles.profileName, { color: colors.text }]}>{user?.name}</Text>
-          <Text style={[styles.profilePosition, { color: colors.textSecondary }]}>{user?.position}</Text>
+          <Text style={[styles.profileName, { color: colors.text }]}>{profile.name}</Text>
+          <Text style={[styles.profilePosition, { color: colors.textSecondary }]}>{profile.position}</Text>
           <View style={[styles.chapterBadge, { backgroundColor: colors.primary + '20' }]}>
             <MaterialIcons name="school" size={16} color={colors.primary} />
-            <Text style={[styles.chapterText, { color: colors.primary }]}>{user?.chapter}</Text>
+            <Text style={[styles.chapterText, { color: colors.primary }]}>{profile.chapter}</Text>
           </View>
         </Animated.View>
 
@@ -128,13 +119,15 @@ export default function ProfileScreen() {
           style={[styles.statsCard, { backgroundColor: colors.surface }, SHADOWS.medium]}
         >
           <View style={styles.statItem}>
-            <Text style={[styles.statValue, { color: colors.primary }]}>{user?.eventsAttended || 0}</Text>
+            <Text style={[styles.statValue, { color: colors.primary }]}>
+              {user?.eventsAttended || 0}
+            </Text>
             <Text style={[styles.statLabel, { color: colors.textSecondary }]}>Events Attended</Text>
           </View>
           <View style={[styles.statDivider, { backgroundColor: colors.divider }]} />
           <View style={styles.statItem}>
             <Text style={[styles.statValue, { color: colors.primary }]}>
-              {user?.memberSince ? Math.floor((Date.now() - new Date(user.memberSince).getTime()) / (1000 * 60 * 60 * 24)) : 0}
+              {profile.memberSince ? Math.floor((Date.now() - new Date(profile.memberSince).getTime()) / (1000 * 60 * 60 * 24)) : 0}
             </Text>
             <Text style={[styles.statLabel, { color: colors.textSecondary }]}>Days as Member</Text>
           </View>
@@ -147,45 +140,10 @@ export default function ProfileScreen() {
         >
           <Text style={[styles.sectionTitle, { color: colors.text }]}>Personal Information</Text>
           
-          <InfoField icon="person" label="Name" value={formData.name} editable field="name" />
-          <InfoField icon="email" label="Email" value={formData.email} editable field="email" />
-          <InfoField icon="phone" label="Phone" value={formData.phone} editable field="phone" />
-          <InfoField icon="calendar-today" label="Member Since" value={user?.memberSince || 'N/A'} />
-          <InfoField icon="info" label="Bio" value={formData.bio} editable multiline field="bio" />
-        </Animated.View>
-
-        {/* Social Media */}
-        <Animated.View 
-          entering={FadeInDown.delay(350).springify()} 
-          style={[styles.socialCard, { backgroundColor: colors.surface }, SHADOWS.medium]}
-        >
-          <Text style={[styles.sectionTitle, { color: colors.text }]}>Connect with FBLA</Text>
-          
-          <TouchableOpacity 
-            style={[styles.socialItem, { borderBottomColor: colors.divider }]}
-            onPress={() => openSocialMedia('https://www.instagram.com/fbla_pbl/')}
-          >
-            <View style={styles.socialLeft}>
-              <View style={[styles.socialIconContainer, { backgroundColor: '#E1306C20' }]}>
-                <MaterialIcons name="camera-alt" size={24} color="#E1306C" />
-              </View>
-              <Text style={[styles.socialText, { color: colors.text }]}>Instagram</Text>
-            </View>
-            <MaterialIcons name="open-in-new" size={20} color={colors.textLight} />
-          </TouchableOpacity>
-
-          <TouchableOpacity 
-            style={[styles.socialItem, { borderBottomWidth: 0 }]}
-            onPress={() => openSocialMedia('https://twitter.com/FBLA_PBL')}
-          >
-            <View style={styles.socialLeft}>
-              <View style={[styles.socialIconContainer, { backgroundColor: '#1DA1F220' }]}>
-                <MaterialIcons name="tag" size={24} color="#1DA1F2" />
-              </View>
-              <Text style={[styles.socialText, { color: colors.text }]}>Twitter/X</Text>
-            </View>
-            <MaterialIcons name="open-in-new" size={20} color={colors.textLight} />
-          </TouchableOpacity>
+          <InfoField icon="email" label="Email" value={profile.email} editable colors={colors} isEditing={isEditing} profile={profile} setProfile={setProfile} />
+          <InfoField icon="phone" label="Phone" value={profile.phone} editable colors={colors} isEditing={isEditing} profile={profile} setProfile={setProfile} />
+          <InfoField icon="calendar-today" label="Member Since" value={profile.memberSince} colors={colors} isEditing={false} profile={profile} setProfile={setProfile} />
+          <InfoField icon="info" label="Bio" value={profile.bio} editable multiline colors={colors} isEditing={isEditing} profile={profile} setProfile={setProfile} />
         </Animated.View>
 
         {/* Settings */}
@@ -195,18 +153,15 @@ export default function ProfileScreen() {
         >
           <Text style={[styles.sectionTitle, { color: colors.text }]}>Settings</Text>
           
-          <View style={[styles.settingItem, { borderBottomColor: colors.divider }]}>
+          <TouchableOpacity style={[styles.settingItem, { borderBottomColor: colors.divider }]} onPress={toggleTheme}>
             <View style={styles.settingLeft}>
               <MaterialIcons name={isDarkMode ? 'dark-mode' : 'light-mode'} size={24} color={colors.textSecondary} />
               <Text style={[styles.settingText, { color: colors.text }]}>Dark Mode</Text>
             </View>
-            <Switch
-              value={isDarkMode}
-              onValueChange={toggleTheme}
-              trackColor={{ false: colors.border, true: colors.primary }}
-              thumbColor="#FFFFFF"
-            />
-          </View>
+            <View style={[styles.toggle, { backgroundColor: isDarkMode ? colors.primary : colors.border }]}>
+              <View style={[styles.toggleThumb, { transform: [{ translateX: isDarkMode ? 20 : 0 }] }]} />
+            </View>
+          </TouchableOpacity>
 
           <TouchableOpacity style={[styles.settingItem, { borderBottomColor: colors.divider }]}>
             <View style={styles.settingLeft}>
@@ -232,13 +187,10 @@ export default function ProfileScreen() {
             <MaterialIcons name="chevron-right" size={24} color={colors.textLight} />
           </TouchableOpacity>
 
-          <TouchableOpacity 
-            style={[styles.settingItem, styles.logoutItem]}
-            onPress={handleSignOut}
-          >
+          <TouchableOpacity style={[styles.settingItem, styles.logoutItem]} onPress={handleSignOut}>
             <View style={styles.settingLeft}>
               <MaterialIcons name="logout" size={24} color={colors.error} />
-              <Text style={[styles.settingText, { color: colors.error }]}>Log Out</Text>
+              <Text style={[styles.settingText, styles.logoutText, { color: colors.error }]}>Log Out</Text>
             </View>
           </TouchableOpacity>
         </Animated.View>
@@ -339,11 +291,6 @@ const styles = StyleSheet.create({
     padding: SPACING.lg,
     marginBottom: SPACING.md,
   },
-  socialCard: {
-    borderRadius: BORDER_RADIUS.lg,
-    padding: SPACING.lg,
-    marginBottom: SPACING.md,
-  },
   sectionTitle: {
     ...TYPOGRAPHY.h3,
     marginBottom: SPACING.md,
@@ -376,32 +323,9 @@ const styles = StyleSheet.create({
     minHeight: 80,
     textAlignVertical: 'top',
   },
-  socialItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingVertical: SPACING.md,
-    borderBottomWidth: 1,
-  },
-  socialLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  socialIconContainer: {
-    width: 40,
-    height: 40,
-    borderRadius: BORDER_RADIUS.md,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: SPACING.md,
-  },
-  socialText: {
-    ...TYPOGRAPHY.body,
-  },
   settingsCard: {
     borderRadius: BORDER_RADIUS.lg,
     padding: SPACING.lg,
-    marginBottom: SPACING.md,
   },
   settingItem: {
     flexDirection: 'row',
@@ -418,7 +342,23 @@ const styles = StyleSheet.create({
     ...TYPOGRAPHY.body,
     marginLeft: SPACING.md,
   },
+  toggle: {
+    width: 48,
+    height: 28,
+    borderRadius: 14,
+    padding: 2,
+    justifyContent: 'center',
+  },
+  toggleThumb: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: '#FFFFFF',
+  },
   logoutItem: {
     borderBottomWidth: 0,
+  },
+  logoutText: {
+    fontWeight: '600',
   },
 });

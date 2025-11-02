@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform, ScrollView, Alert } from 'react-native';
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, Alert, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialIcons } from '@expo/vector-icons';
 import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';
-import { LinearGradient } from 'expo-linear-gradient';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
+import { SPACING, TYPOGRAPHY, BORDER_RADIUS } from '../constants/theme';
 
 interface SignInScreenProps {
   navigation: any;
@@ -15,7 +16,9 @@ export default function SignInScreen({ navigation }: SignInScreenProps) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState({ email: '', password: '' });
+  
   const { signIn } = useAuth();
   const { colors } = useTheme();
 
@@ -24,79 +27,74 @@ export default function SignInScreen({ navigation }: SignInScreenProps) {
     return emailRegex.test(email);
   };
 
-  const handleSignIn = async () => {
-    // Reset errors
-    setErrors({ email: '', password: '' });
-
-    // Validation
-    let hasError = false;
+  const validateForm = () => {
+    let valid = true;
     const newErrors = { email: '', password: '' };
 
-    if (!email) {
+    if (!email.trim()) {
       newErrors.email = 'Email is required';
-      hasError = true;
+      valid = false;
     } else if (!validateEmail(email)) {
       newErrors.email = 'Please enter a valid email';
-      hasError = true;
+      valid = false;
     }
 
     if (!password) {
       newErrors.password = 'Password is required';
-      hasError = true;
+      valid = false;
     } else if (password.length < 6) {
       newErrors.password = 'Password must be at least 6 characters';
-      hasError = true;
+      valid = false;
     }
 
-    if (hasError) {
-      setErrors(newErrors);
-      return;
-    }
+    setErrors(newErrors);
+    return valid;
+  };
 
-    // Attempt sign in
-    const success = await signIn(email, password);
-    if (!success) {
-      Alert.alert('Error', 'Invalid email or password');
+  const handleSignIn = async () => {
+    if (!validateForm()) return;
+
+    setIsLoading(true);
+    try {
+      await signIn(email, password);
+    } catch (error: any) {
+      Alert.alert('Sign In Failed', error.message || 'Invalid email or password');
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['top']}>
+      <LinearGradient
+        colors={[colors.primary, colors.primaryLight, colors.accent]}
+        style={styles.headerGradient}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+      >
+        <Animated.View entering={FadeInUp.duration(800)} style={styles.header}>
+          <MaterialIcons name="business-center" size={60} color="#FFFFFF" />
+          <Text style={styles.headerTitle}>Welcome Back</Text>
+          <Text style={styles.headerSubtitle}>Sign in to continue your journey</Text>
+        </Animated.View>
+      </LinearGradient>
+
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.keyboardView}
       >
-        <ScrollView
-          contentContainerStyle={styles.scrollContent}
+        <ScrollView 
+          contentContainerStyle={styles.formContainer}
           showsVerticalScrollIndicator={false}
-          keyboardShouldPersistTaps="handled"
         >
-          {/* Header */}
-          <Animated.View entering={FadeInUp.duration(600)} style={styles.header}>
-            <LinearGradient
-              colors={['#003DA5', '#1E5BC6']}
-              style={styles.logoContainer}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
-            >
-              <MaterialIcons name="business-center" size={50} color="#FFFFFF" />
-            </LinearGradient>
-            <Text style={[styles.title, { color: colors.text }]}>Welcome Back</Text>
-            <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
-              Sign in to continue to FBLA Connect
-            </Text>
-          </Animated.View>
-
-          {/* Form */}
-          <Animated.View entering={FadeInDown.delay(200).duration(600)} style={styles.form}>
-            {/* Email Input */}
+          <Animated.View entering={FadeInDown.delay(200).springify()} style={styles.form}>
             <View style={styles.inputContainer}>
               <Text style={[styles.label, { color: colors.text }]}>Email</Text>
               <View style={[styles.inputWrapper, { backgroundColor: colors.surface, borderColor: errors.email ? colors.error : colors.border }]}>
                 <MaterialIcons name="email" size={20} color={colors.textLight} />
                 <TextInput
                   style={[styles.input, { color: colors.text }]}
-                  placeholder="Enter your email"
+                  placeholder="your.email@school.edu"
                   placeholderTextColor={colors.textLight}
                   value={email}
                   onChangeText={(text) => {
@@ -111,7 +109,6 @@ export default function SignInScreen({ navigation }: SignInScreenProps) {
               {errors.email ? <Text style={styles.errorText}>{errors.email}</Text> : null}
             </View>
 
-            {/* Password Input */}
             <View style={styles.inputContainer}>
               <Text style={[styles.label, { color: colors.text }]}>Password</Text>
               <View style={[styles.inputWrapper, { backgroundColor: colors.surface, borderColor: errors.password ? colors.error : colors.border }]}>
@@ -129,55 +126,42 @@ export default function SignInScreen({ navigation }: SignInScreenProps) {
                   autoCapitalize="none"
                 />
                 <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
-                  <MaterialIcons
-                    name={showPassword ? 'visibility' : 'visibility-off'}
-                    size={20}
-                    color={colors.textLight}
+                  <MaterialIcons 
+                    name={showPassword ? 'visibility' : 'visibility-off'} 
+                    size={20} 
+                    color={colors.textLight} 
                   />
                 </TouchableOpacity>
               </View>
               {errors.password ? <Text style={styles.errorText}>{errors.password}</Text> : null}
             </View>
 
-            {/* Sign In Button */}
-            <TouchableOpacity onPress={handleSignIn} activeOpacity={0.8}>
-              <LinearGradient
-                colors={['#003DA5', '#1E5BC6']}
-                style={styles.signInButton}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 0 }}
-              >
-                <Text style={styles.signInButtonText}>Sign In</Text>
-                <MaterialIcons name="arrow-forward" size={20} color="#FFFFFF" />
-              </LinearGradient>
+            <TouchableOpacity
+              style={[styles.signInButton, { backgroundColor: colors.primary }]}
+              onPress={handleSignIn}
+              disabled={isLoading}
+              activeOpacity={0.8}
+            >
+              <Text style={styles.signInButtonText}>
+                {isLoading ? 'Signing In...' : 'Sign In'}
+              </Text>
             </TouchableOpacity>
 
-            {/* Divider */}
             <View style={styles.divider}>
               <View style={[styles.dividerLine, { backgroundColor: colors.divider }]} />
               <Text style={[styles.dividerText, { color: colors.textLight }]}>OR</Text>
               <View style={[styles.dividerLine, { backgroundColor: colors.divider }]} />
             </View>
 
-            {/* Social Sign In */}
-            <View style={styles.socialContainer}>
-              <TouchableOpacity style={[styles.socialButton, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-                <MaterialIcons name="facebook" size={24} color="#1877F2" />
-              </TouchableOpacity>
-              <TouchableOpacity style={[styles.socialButton, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-                <MaterialIcons name="g-translate" size={24} color="#DB4437" />
-              </TouchableOpacity>
-            </View>
-
-            {/* Sign Up Link */}
-            <View style={styles.signUpContainer}>
-              <Text style={[styles.signUpText, { color: colors.textSecondary }]}>
-                Don\'t have an account?{' '}
+            <TouchableOpacity
+              style={[styles.signUpButton, { borderColor: colors.primary }]}
+              onPress={() => navigation.navigate('SignUp')}
+              activeOpacity={0.8}
+            >
+              <Text style={[styles.signUpButtonText, { color: colors.primary }]}>
+                Create New Account
               </Text>
-              <TouchableOpacity onPress={() => navigation.navigate('SignUp')}>
-                <Text style={styles.signUpLink}>Sign Up</Text>
-              </TouchableOpacity>
-            </View>
+            </TouchableOpacity>
           </Animated.View>
         </ScrollView>
       </KeyboardAvoidingView>
@@ -189,128 +173,94 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  keyboardView: {
-    flex: 1,
-  },
-  scrollContent: {
-    flexGrow: 1,
-    paddingHorizontal: 24,
-    paddingBottom: 24,
+  headerGradient: {
+    paddingVertical: SPACING.xxl,
+    paddingHorizontal: SPACING.lg,
+    borderBottomLeftRadius: BORDER_RADIUS.xxl,
+    borderBottomRightRadius: BORDER_RADIUS.xxl,
   },
   header: {
     alignItems: 'center',
-    marginTop: 40,
-    marginBottom: 40,
   },
-  logoContainer: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 24,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
-    elevation: 8,
+  headerTitle: {
+    ...TYPOGRAPHY.h1,
+    color: '#FFFFFF',
+    marginTop: SPACING.md,
   },
-  title: {
-    fontSize: 32,
-    fontWeight: '800',
-    marginBottom: 8,
+  headerSubtitle: {
+    ...TYPOGRAPHY.body,
+    color: '#E8F0FE',
+    marginTop: SPACING.xs,
   },
-  subtitle: {
-    fontSize: 16,
-    textAlign: 'center',
-  },
-  form: {
+  keyboardView: {
     flex: 1,
   },
+  formContainer: {
+    padding: SPACING.lg,
+  },
+  form: {
+    marginTop: SPACING.lg,
+  },
   inputContainer: {
-    marginBottom: 20,
+    marginBottom: SPACING.lg,
   },
   label: {
-    fontSize: 14,
+    ...TYPOGRAPHY.bodySmall,
     fontWeight: '600',
-    marginBottom: 8,
+    marginBottom: SPACING.sm,
   },
   inputWrapper: {
     flexDirection: 'row',
     alignItems: 'center',
     borderWidth: 1,
-    borderRadius: 12,
-    paddingHorizontal: 16,
+    borderRadius: BORDER_RADIUS.md,
+    paddingHorizontal: SPACING.md,
     height: 56,
   },
   input: {
     flex: 1,
-    fontSize: 16,
-    marginLeft: 12,
+    ...TYPOGRAPHY.body,
+    marginLeft: SPACING.sm,
   },
   errorText: {
+    ...TYPOGRAPHY.caption,
     color: '#EF4444',
-    fontSize: 12,
-    marginTop: 4,
-    marginLeft: 4,
+    marginTop: SPACING.xs,
   },
   signInButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
     height: 56,
-    borderRadius: 12,
-    marginTop: 8,
-    shadowColor: '#003DA5',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 8,
+    borderRadius: BORDER_RADIUS.md,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: SPACING.md,
   },
   signInButtonText: {
+    ...TYPOGRAPHY.body,
     color: '#FFFFFF',
-    fontSize: 18,
     fontWeight: '700',
-    marginRight: 8,
   },
   divider: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginVertical: 32,
+    marginVertical: SPACING.lg,
   },
   dividerLine: {
     flex: 1,
     height: 1,
   },
   dividerText: {
-    marginHorizontal: 16,
-    fontSize: 14,
-    fontWeight: '600',
+    ...TYPOGRAPHY.caption,
+    marginHorizontal: SPACING.md,
   },
-  socialContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    gap: 16,
-  },
-  socialButton: {
-    width: 56,
+  signUpButton: {
     height: 56,
-    borderRadius: 12,
-    borderWidth: 1,
+    borderRadius: BORDER_RADIUS.md,
     justifyContent: 'center',
     alignItems: 'center',
+    borderWidth: 2,
   },
-  signUpContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    marginTop: 32,
-  },
-  signUpText: {
-    fontSize: 14,
-  },
-  signUpLink: {
-    fontSize: 14,
+  signUpButtonText: {
+    ...TYPOGRAPHY.body,
     fontWeight: '700',
-    color: '#003DA5',
   },
 });

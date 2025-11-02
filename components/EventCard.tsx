@@ -61,7 +61,7 @@ export default function EventCard({ event, onPress, index }: EventCardProps) {
             <Text style={[styles.infoText, { color: colors.textSecondary }]} numberOfLines={1}>{event.location}</Text>
           </View>
           
-          <View style={styles.footer}>
+          <View style={[styles.footer, { borderTopColor: colors.divider }]}>
             <View style={styles.attendeesContainer}>
               <MaterialIcons name="people" size={16} color={colors.textLight} />
               <Text style={[styles.attendeesText, { color: colors.textLight }]}>{event.attendees} attending</Text>
@@ -123,7 +123,6 @@ const styles = StyleSheet.create({
     marginTop: SPACING.sm,
     paddingTop: SPACING.sm,
     borderTopWidth: 1,
-    borderTopColor: 'rgba(0,0,0,0.1)',
   },
   attendeesContainer: {
     flexDirection: 'row',

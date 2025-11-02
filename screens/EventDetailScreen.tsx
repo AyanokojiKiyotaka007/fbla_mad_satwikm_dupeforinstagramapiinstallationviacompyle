@@ -145,7 +145,7 @@ export default function EventDetailScreen({ route, navigation }: EventDetailScre
             <MaterialIcons 
               name={isRegistered ? 'cancel' : 'check-circle'} 
               size={24} 
-              color="#FFFFFF"
+              color="#FFFFFF" 
             />
             <Text style={styles.registerButtonText}>
               {isRegistered ? 'Unregister' : 'Register Now'}

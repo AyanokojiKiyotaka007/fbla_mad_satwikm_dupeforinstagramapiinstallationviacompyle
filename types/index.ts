@@ -41,7 +41,7 @@ export interface UserProfile {
   chapter: string;
   position: string;
   memberSince: string;
-  eventsAttended: number;
+  eventsAttended?: number;
   avatar?: string;
   bio: string;
   phone: string;
