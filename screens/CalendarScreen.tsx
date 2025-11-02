@@ -6,7 +6,7 @@ import Animated, { FadeIn } from 'react-native-reanimated';
 import EventCard from '../components/EventCard';
 import { mockEvents } from '../data/mockData';
 import { useTheme } from '../contexts/ThemeContext';
-import { SPACING, TYPOGRAPHY, BORDER_RADIUS } from '../constants/theme';
+import { SPACING, TYPOGRAPHY, BORDER_RADIUS, SHADOWS } from '../constants/theme';
 
 interface CalendarScreenProps {
   navigation: any;
@@ -14,7 +14,7 @@ interface CalendarScreenProps {
 
 export default function CalendarScreen({ navigation }: CalendarScreenProps) {
   const [selectedFilter, setSelectedFilter] = useState<string>('all');
-  const { colors, shadows } = useTheme();
+  const { colors } = useTheme();
 
   const filters = [
     { id: 'all', label: 'All Events', icon: 'event' as const },
@@ -32,7 +32,7 @@ export default function CalendarScreen({ navigation }: CalendarScreenProps) {
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['top']}>
       <View style={styles.header}>
         <Text style={[styles.headerTitle, { color: colors.text }]}>Event Calendar</Text>
-        <TouchableOpacity style={[styles.addButton, { backgroundColor: colors.primary }, shadows.medium]}>
+        <TouchableOpacity style={[styles.addButton, { backgroundColor: colors.primary }]}>
           <MaterialIcons name="add" size={24} color="#FFFFFF" />
         </TouchableOpacity>
       </View>
@@ -50,8 +50,8 @@ export default function CalendarScreen({ navigation }: CalendarScreenProps) {
               key={filter.id}
               style={[
                 styles.filterChip,
-                { backgroundColor: selectedFilter === filter.id ? colors.primary : colors.surfaceTint },
-                shadows.small,
+                { backgroundColor: selectedFilter === filter.id ? colors.primary : colors.surface },
+                SHADOWS.small,
               ]}
               onPress={() => setSelectedFilter(filter.id)}
               activeOpacity={0.7}

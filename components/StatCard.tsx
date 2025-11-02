@@ -3,7 +3,7 @@ import { View, Text, StyleSheet } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useTheme } from '../contexts/ThemeContext';
-import { SPACING, TYPOGRAPHY, BORDER_RADIUS } from '../constants/theme';
+import { SPACING, TYPOGRAPHY, SHADOWS, BORDER_RADIUS } from '../constants/theme';
 
 interface StatCardProps {
   icon: keyof typeof MaterialIcons.glyphMap;
@@ -14,12 +14,12 @@ interface StatCardProps {
 }
 
 export default function StatCard({ icon, value, label, color, index }: StatCardProps) {
-  const { colors, shadows } = useTheme();
+  const { colors } = useTheme();
   
   return (
     <Animated.View 
       entering={FadeInDown.delay(index * 100).springify()}
-      style={[styles.container, { backgroundColor: colors.surface }, shadows.medium]}
+      style={[styles.container, { backgroundColor: colors.surface }, SHADOWS.medium]}
     >
       <View style={[styles.iconContainer, { backgroundColor: color + '20' }]}>
         <MaterialIcons name={icon} size={24} color={color} />

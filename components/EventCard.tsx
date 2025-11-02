@@ -1,11 +1,10 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
-import { LinearGradient } from 'expo-linear-gradient';
 import Animated, { FadeInRight } from 'react-native-reanimated';
 import { Event } from '../types';
 import { useTheme } from '../contexts/ThemeContext';
-import { SPACING, TYPOGRAPHY, BORDER_RADIUS } from '../constants/theme';
+import { SPACING, TYPOGRAPHY, SHADOWS, BORDER_RADIUS } from '../constants/theme';
 
 interface EventCardProps {
   event: Event;
@@ -21,13 +20,13 @@ const categoryIcons = {
 };
 
 export default function EventCard({ event, onPress, index }: EventCardProps) {
-  const { colors, shadows } = useTheme();
+  const { colors } = useTheme();
   
   const categoryColors = {
     meeting: colors.info,
     competition: colors.primary,
-    workshop: colors.secondary,
-    social: colors.accent,
+    workshop: colors.accent,
+    social: colors.secondary,
   };
   
   const categoryColor = categoryColors[event.category];
@@ -36,16 +35,13 @@ export default function EventCard({ event, onPress, index }: EventCardProps) {
   return (
     <Animated.View entering={FadeInRight.delay(index * 100).springify()}>
       <TouchableOpacity 
-        style={[styles.container, { backgroundColor: colors.surfaceTint }, shadows.medium]} 
+        style={[styles.container, { backgroundColor: colors.surface }, SHADOWS.medium]} 
         onPress={onPress}
         activeOpacity={0.7}
       >
-        <LinearGradient
-          colors={[categoryColor, categoryColor]}
-          style={styles.categoryBadge}
-        >
+        <View style={[styles.categoryBadge, { backgroundColor: categoryColor }]}>
           <MaterialIcons name={categoryIcon} size={20} color="#FFFFFF" />
-        </LinearGradient>
+        </View>
         
         <View style={styles.content}>
           <Text style={[styles.title, { color: colors.text }]} numberOfLines={2}>{event.title}</Text>
