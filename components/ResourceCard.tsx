@@ -1,10 +1,11 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 import Animated, { FadeInLeft } from 'react-native-reanimated';
 import { Resource } from '../types';
 import { useTheme } from '../contexts/ThemeContext';
-import { SPACING, TYPOGRAPHY, SHADOWS, BORDER_RADIUS } from '../constants/theme';
+import { SPACING, TYPOGRAPHY, BORDER_RADIUS } from '../constants/theme';
 
 interface ResourceCardProps {
   resource: Resource;
@@ -27,16 +28,19 @@ const fileTypeColors = {
 };
 
 export default function ResourceCard({ resource, onDownload, index }: ResourceCardProps) {
-  const { colors } = useTheme();
+  const { colors, shadows } = useTheme();
   const fileIcon = fileTypeIcons[resource.fileType];
   const fileColor = fileTypeColors[resource.fileType];
 
   return (
     <Animated.View entering={FadeInLeft.delay(index * 100).springify()}>
-      <View style={[styles.container, { backgroundColor: colors.surface }, SHADOWS.medium]}>
-        <View style={[styles.fileIcon, { backgroundColor: fileColor + '20' }]}>
-          <MaterialIcons name={fileIcon} size={32} color={fileColor} />
-        </View>
+      <View style={[styles.container, { backgroundColor: colors.surfaceTint }, shadows.medium]}>
+        <LinearGradient
+          colors={[fileColor, fileColor]}
+          style={styles.fileIcon}
+        >
+          <MaterialIcons name={fileIcon} size={32} color="#FFFFFF" />
+        </LinearGradient>
         
         <View style={styles.content}>
           <Text style={[styles.title, { color: colors.text }]} numberOfLines={2}>{resource.title}</Text>

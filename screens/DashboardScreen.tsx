@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Dimensions, Anima
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
-import Animated, { FadeIn, FadeInDown, FadeInUp } from 'react-native-reanimated';
+import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';
 import { BlurView } from 'expo-blur';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
@@ -26,7 +26,7 @@ interface DashboardScreenProps {
 
 export default function DashboardScreen({ navigation }: DashboardScreenProps) {
   const { user } = useAuth();
-  const { colors, isDarkMode } = useTheme();
+  const { colors, isDarkMode, shadows } = useTheme();
   const [currentQuoteIndex, setCurrentQuoteIndex] = useState(0);
   const waveAnim = useRef(new RNAnimated.Value(0)).current;
   const quoteOpacity = useRef(new RNAnimated.Value(1)).current;
@@ -69,7 +69,7 @@ export default function DashboardScreen({ navigation }: DashboardScreenProps) {
     }, 5000);
 
     return () => clearInterval(quoteInterval);
-  }, []);
+  }, [waveAnim, quoteOpacity]);
 
   const waveTranslate = waveAnim.interpolate({
     inputRange: [0, 1],
@@ -81,14 +81,16 @@ export default function DashboardScreen({ navigation }: DashboardScreenProps) {
   };
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.background }]}>
-      {/* Animated Background */}
+    <View style={styles.container}>
+      {/* Animated Background Gradient */}
       <LinearGradient
         colors={isDarkMode 
-          ? ['#0F1419', '#1A1F2E', '#0F1419']
-          : ['#E8F0FE', '#F0F7FF', '#FFFFFF']
+          ? [colors.backgroundGradient1, colors.backgroundGradient2, colors.backgroundGradient3]
+          : [colors.backgroundGradient1, colors.backgroundGradient2, colors.backgroundGradient3]
         }
         style={StyleSheet.absoluteFillObject}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
       />
 
       {/* Animated Wave Overlay */}
@@ -97,12 +99,15 @@ export default function DashboardScreen({ navigation }: DashboardScreenProps) {
           styles.waveOverlay,
           {
             transform: [{ translateY: waveTranslate }],
-            opacity: 0.3,
+            opacity: isDarkMode ? 0.2 : 0.15,
           },
         ]}
       >
         <LinearGradient
-          colors={[colors.primary + '40', colors.accent + '40', colors.primary + '40']}
+          colors={isDarkMode 
+            ? [colors.primary + '30', colors.secondary + '30', colors.primary + '30']
+            : [colors.primary + '20', colors.secondary + '20', colors.primary + '20']
+          }
           style={StyleSheet.absoluteFillObject}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
@@ -114,8 +119,14 @@ export default function DashboardScreen({ navigation }: DashboardScreenProps) {
           showsVerticalScrollIndicator={false}
           contentContainerStyle={styles.scrollContent}
         >
-          {/* Personal Greeting */}
-          <Animated.View entering={FadeInUp.duration(800)} style={styles.greetingSection}>
+          {/* Personal Greeting with Glow */}
+          <Animated.View 
+            entering={FadeInUp.duration(800)} 
+            style={[
+              styles.greetingSection,
+              !isDarkMode && shadows.glow,
+            ]}
+          >
             <Text style={[styles.greeting, { color: colors.text }]}>
               Welcome back, {user?.name?.split(' ')[0] || 'Member'} 👋
             </Text>
@@ -124,49 +135,77 @@ export default function DashboardScreen({ navigation }: DashboardScreenProps) {
             </Text>
           </Animated.View>
 
-          {/* Floating Quote */}
+          {/* Floating Quote with Gradient Border */}
           <Animated.View entering={FadeInDown.delay(200).springify()}>
-            <BlurView intensity={isDarkMode ? 20 : 80} style={styles.quoteContainer}>
-              <RNAnimated.View style={{ opacity: quoteOpacity }}>
-                <Text style={[styles.quote, { color: colors.primary }]}>
-                  "{QUOTES[currentQuoteIndex]}"
-                </Text>
-              </RNAnimated.View>
-              <View style={styles.quoteIndicators}>
-                {QUOTES.map((_, index) => (
-                  <View
-                    key={index}
-                    style={[
-                      styles.indicator,
-                      {
-                        backgroundColor: index === currentQuoteIndex ? colors.primary : colors.textLight,
-                        opacity: index === currentQuoteIndex ? 1 : 0.3,
-                      },
-                    ]}
-                  />
-                ))}
-              </View>
-            </BlurView>
+            <View style={[styles.quoteWrapper, !isDarkMode && shadows.glow]}>
+              <LinearGradient
+                colors={[colors.primary, colors.secondary]}
+                style={styles.quoteBorder}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+              >
+                <View style={[styles.quoteContainer, { backgroundColor: colors.surfaceTint }]}>
+                  <RNAnimated.View style={{ opacity: quoteOpacity }}>
+                    <LinearGradient
+                      colors={[colors.primary, colors.secondary]}
+                      style={styles.quoteGradient}
+                      start={{ x: 0, y: 0 }}
+                      end={{ x: 1, y: 0 }}
+                    >
+                      <Text style={styles.quote}>
+                        &ldquo;{QUOTES[currentQuoteIndex]}&rdquo;
+                      </Text>
+                    </LinearGradient>
+                  </RNAnimated.View>
+                  <View style={styles.quoteIndicators}>
+                    {QUOTES.map((_, index) => (
+                      <LinearGradient
+                        key={index}
+                        colors={index === currentQuoteIndex 
+                          ? [colors.primary, colors.secondary]
+                          : [colors.textLight, colors.textLight]
+                        }
+                        style={[
+                          styles.indicator,
+                          { opacity: index === currentQuoteIndex ? 1 : 0.3 }
+                        ]}
+                        start={{ x: 0, y: 0 }}
+                        end={{ x: 1, y: 0 }}
+                      />
+                    ))}
+                  </View>
+                </View>
+              </LinearGradient>
+            </View>
           </Animated.View>
 
-          {/* Upcoming Event */}
+          {/* Upcoming Event with Glow */}
           {upcomingEvent && (
             <Animated.View entering={FadeInDown.delay(400).springify()}>
               <TouchableOpacity
                 activeOpacity={0.9}
                 onPress={() => navigation.navigate('EventDetail', { event: upcomingEvent })}
+                style={[!isDarkMode && shadows.glow]}
               >
-                <BlurView intensity={isDarkMode ? 20 : 80} style={styles.eventCard}>
+                <View style={[styles.eventCard, { backgroundColor: colors.surfaceTint }, shadows.medium]}>
                   <LinearGradient
-                    colors={[colors.primary + '20', colors.accent + '20']}
+                    colors={isDarkMode 
+                      ? [colors.primary + '20', colors.secondary + '20']
+                      : [colors.primary + '10', colors.secondary + '10']
+                    }
                     style={styles.eventGradient}
                     start={{ x: 0, y: 0 }}
                     end={{ x: 1, y: 1 }}
                   >
                     <View style={styles.eventHeader}>
-                      <View style={[styles.eventIconContainer, { backgroundColor: colors.primary }]}>
+                      <LinearGradient
+                        colors={[colors.primary, colors.primaryLight]}
+                        style={styles.eventIconContainer}
+                        start={{ x: 0, y: 0 }}
+                        end={{ x: 1, y: 1 }}
+                      >
                         <MaterialIcons name="event" size={24} color="#FFFFFF" />
-                      </View>
+                      </LinearGradient>
                       <View style={styles.eventHeaderText}>
                         <Text style={[styles.eventLabel, { color: colors.textLight }]}>
                           Next Event
@@ -191,49 +230,55 @@ export default function DashboardScreen({ navigation }: DashboardScreenProps) {
                       </View>
                     </View>
                   </LinearGradient>
-                </BlurView>
+                </View>
               </TouchableOpacity>
             </Animated.View>
           )}
 
           {/* Notifications Strip */}
           <Animated.View entering={FadeInDown.delay(600).springify()}>
-            <BlurView intensity={isDarkMode ? 20 : 80} style={styles.notificationStrip}>
-              <View style={[styles.notificationDot, { backgroundColor: colors.secondary }]} />
+            <View style={[styles.notificationStrip, { backgroundColor: colors.surfaceTint }, shadows.small]}>
+              <LinearGradient
+                colors={[colors.accent, colors.accent]}
+                style={styles.notificationDot}
+              />
               <Text style={[styles.notificationText, { color: colors.text }]}>
                 1 new announcement
               </Text>
               <MaterialIcons name="chevron-right" size={20} color={colors.textLight} />
-            </BlurView>
+            </View>
           </Animated.View>
 
-          {/* Quick Actions */}
+          {/* Quick Actions with Glow */}
           <Animated.View entering={FadeInDown.delay(800).springify()} style={styles.quickActionsSection}>
             <Text style={[styles.sectionTitle, { color: colors.text }]}>Quick Actions</Text>
             <View style={styles.quickActions}>
               <QuickActionButton
                 icon="event"
                 label="Calendar"
-                color={colors.primary}
+                gradientColors={[colors.primary, colors.primaryLight]}
                 onPress={() => navigation.navigate('Calendar')}
                 colors={colors}
                 isDarkMode={isDarkMode}
+                shadows={shadows}
               />
               <QuickActionButton
                 icon="article"
                 label="News"
-                color={colors.secondary}
+                gradientColors={[colors.secondary, colors.secondaryLight]}
                 onPress={() => navigation.navigate('NewsFeed')}
                 colors={colors}
                 isDarkMode={isDarkMode}
+                shadows={shadows}
               />
               <QuickActionButton
                 icon="folder"
                 label="Resources"
-                color={colors.accent}
+                gradientColors={[colors.accent, '#FFD700']}
                 onPress={() => navigation.navigate('Resources')}
                 colors={colors}
                 isDarkMode={isDarkMode}
+                shadows={shadows}
               />
             </View>
           </Animated.View>
@@ -243,7 +288,7 @@ export default function DashboardScreen({ navigation }: DashboardScreenProps) {
             <Text style={[styles.sectionTitle, { color: colors.text }]}>Connect With Us</Text>
             <View style={styles.socialButtons}>
               <TouchableOpacity
-                style={[styles.socialButton, { backgroundColor: colors.surface }]}
+                style={[styles.socialButton, { backgroundColor: colors.surfaceTint }, shadows.medium]}
                 onPress={() => openSocialMedia('https://www.instagram.com/fbla_pbl/')}
                 activeOpacity={0.7}
               >
@@ -259,13 +304,18 @@ export default function DashboardScreen({ navigation }: DashboardScreenProps) {
               </TouchableOpacity>
 
               <TouchableOpacity
-                style={[styles.socialButton, { backgroundColor: colors.surface }]}
+                style={[styles.socialButton, { backgroundColor: colors.surfaceTint }, shadows.medium]}
                 onPress={() => openSocialMedia('https://twitter.com/FBLA_PBL')}
                 activeOpacity={0.7}
               >
-                <View style={[styles.socialIconGradient, { backgroundColor: '#1DA1F2' }]}>
+                <LinearGradient
+                  colors={['#1DA1F2', '#0C85D0']}
+                  style={styles.socialIconGradient}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                >
                   <MaterialIcons name="tag" size={24} color="#FFFFFF" />
-                </View>
+                </LinearGradient>
                 <Text style={[styles.socialLabel, { color: colors.text }]}>Twitter/X</Text>
               </TouchableOpacity>
             </View>
@@ -276,15 +326,24 @@ export default function DashboardScreen({ navigation }: DashboardScreenProps) {
   );
 }
 
-function QuickActionButton({ icon, label, color, onPress, colors, isDarkMode }: any) {
+function QuickActionButton({ icon, label, gradientColors, onPress, colors, isDarkMode, shadows }: any) {
   return (
-    <TouchableOpacity onPress={onPress} activeOpacity={0.8} style={styles.quickActionButton}>
-      <BlurView intensity={isDarkMode ? 20 : 80} style={styles.quickActionBlur}>
-        <View style={[styles.quickActionIcon, { backgroundColor: color + '20' }]}>
-          <MaterialIcons name={icon} size={28} color={color} />
-        </View>
+    <TouchableOpacity 
+      onPress={onPress} 
+      activeOpacity={0.8} 
+      style={[styles.quickActionButton, !isDarkMode && shadows.glow]}
+    >
+      <View style={[styles.quickActionContainer, { backgroundColor: colors.surfaceTint }, shadows.medium]}>
+        <LinearGradient
+          colors={gradientColors}
+          style={styles.quickActionIcon}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+        >
+          <MaterialIcons name={icon} size={28} color="#FFFFFF" />
+        </LinearGradient>
         <Text style={[styles.quickActionLabel, { color: colors.text }]}>{label}</Text>
-      </BlurView>
+      </View>
     </TouchableOpacity>
   );
 }
@@ -322,12 +381,20 @@ const styles = StyleSheet.create({
     ...TYPOGRAPHY.body,
     fontSize: 16,
   },
-  quoteContainer: {
-    borderRadius: 24,
-    padding: SPACING.lg,
+  quoteWrapper: {
     marginBottom: SPACING.lg,
-    overflow: 'hidden',
+  },
+  quoteBorder: {
+    borderRadius: 24,
+    padding: 2,
+  },
+  quoteContainer: {
+    borderRadius: 22,
+    padding: SPACING.lg,
     alignItems: 'center',
+  },
+  quoteGradient: {
+    borderRadius: 12,
   },
   quote: {
     ...TYPOGRAPHY.h3,
@@ -335,6 +402,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontStyle: 'italic',
     marginBottom: SPACING.md,
+    color: 'transparent',
   },
   quoteIndicators: {
     flexDirection: 'row',
@@ -396,7 +464,6 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     padding: SPACING.md,
     marginBottom: SPACING.lg,
-    overflow: 'hidden',
   },
   notificationDot: {
     width: 8,
@@ -423,11 +490,10 @@ const styles = StyleSheet.create({
   quickActionButton: {
     flex: 1,
   },
-  quickActionBlur: {
+  quickActionContainer: {
     borderRadius: 20,
     padding: SPACING.md,
     alignItems: 'center',
-    overflow: 'hidden',
   },
   quickActionIcon: {
     width: 56,

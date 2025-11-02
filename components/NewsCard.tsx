@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 import Animated, { FadeInUp } from 'react-native-reanimated';
 import { NewsItem } from '../types';
 import { useTheme } from '../contexts/ThemeContext';
@@ -20,12 +21,12 @@ const categoryIcons = {
 };
 
 export default function NewsCard({ news, onLike, index }: NewsCardProps) {
-  const { colors } = useTheme();
+  const { colors, shadows } = useTheme();
   
   const categoryColors = {
     announcement: colors.primary,
     achievement: colors.success,
-    reminder: colors.warning,
+    reminder: colors.accent,
     update: colors.info,
   };
   
@@ -34,11 +35,14 @@ export default function NewsCard({ news, onLike, index }: NewsCardProps) {
 
   return (
     <Animated.View entering={FadeInUp.delay(index * 100).springify()}>
-      <View style={[styles.container, { backgroundColor: colors.surface }, SHADOWS.medium]}>
+      <View style={[styles.container, { backgroundColor: colors.surfaceTint }, SHADOWS.medium]}>
         <View style={styles.header}>
-          <View style={[styles.categoryIcon, { backgroundColor: categoryColor + '20' }]}>
-            <MaterialIcons name={categoryIcon} size={20} color={categoryColor} />
-          </View>
+          <LinearGradient
+            colors={[categoryColor, categoryColor]}
+            style={styles.categoryIcon}
+          >
+            <MaterialIcons name={categoryIcon} size={20} color="#FFFFFF" />
+          </LinearGradient>
           <View style={styles.headerText}>
             <Text style={[styles.title, { color: colors.text }]} numberOfLines={2}>{news.title}</Text>
             <Text style={[styles.meta, { color: colors.textLight }]}>
