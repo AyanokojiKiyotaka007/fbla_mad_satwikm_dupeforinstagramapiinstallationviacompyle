@@ -2,13 +2,11 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
-import { BlurView } from 'expo-blur';
-import { LinearGradient } from 'expo-linear-gradient';
-import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
+import Animated, { FadeIn } from 'react-native-reanimated';
 import EventCard from '../components/EventCard';
 import { mockEvents } from '../data/mockData';
 import { useTheme } from '../contexts/ThemeContext';
-import { SPACING, TYPOGRAPHY, BORDER_RADIUS } from '../constants/theme';
+import { SPACING, TYPOGRAPHY, BORDER_RADIUS, SHADOWS } from '../constants/theme';
 
 interface CalendarScreenProps {
   navigation: any;
@@ -16,7 +14,7 @@ interface CalendarScreenProps {
 
 export default function CalendarScreen({ navigation }: CalendarScreenProps) {
   const [selectedFilter, setSelectedFilter] = useState<string>('all');
-  const { colors, isDarkMode } = useTheme();
+  const { colors } = useTheme();
 
   const filters = [
     { id: 'all', label: 'All Events', icon: 'event' as const },
@@ -31,109 +29,73 @@ export default function CalendarScreen({ navigation }: CalendarScreenProps) {
     : mockEvents.filter(e => e.category === selectedFilter);
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.background }]}>
-      <LinearGradient
-        colors={isDarkMode 
-          ? ['#0F1419', '#1A1F2E', '#0F1419']
-          : ['#E8F0FE', '#F0F7FF', '#FFFFFF']
-        }
-        style={StyleSheet.absoluteFillObject}
-      />
-      
-      <SafeAreaView style={styles.safeArea} edges={['top']}>
-        <Animated.View entering={FadeInDown.duration(600)} style={styles.header}>
-          <View>
-            <Text style={[styles.headerTitle, { color: colors.text }]}>Event Calendar</Text>
-            <Text style={[styles.headerSubtitle, { color: colors.textSecondary }]}>
-              {filteredEvents.length} upcoming events
-            </Text>
-          </View>
-          <TouchableOpacity style={styles.addButtonContainer}>
-            <BlurView intensity={isDarkMode ? 30 : 90} style={styles.addButtonBlur}>
-              <LinearGradient
-                colors={[colors.primary, colors.primaryLight]}
-                style={styles.addButton}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-              >
-                <MaterialIcons name="add" size={24} color="#FFFFFF" />
-              </LinearGradient>
-            </BlurView>
-          </TouchableOpacity>
-        </Animated.View>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['top']}>
+      <View style={styles.header}>
+        <Text style={[styles.headerTitle, { color: colors.text }]}>Event Calendar</Text>
+        <TouchableOpacity style={[styles.addButton, { backgroundColor: colors.primary }]}>
+          <MaterialIcons name="add" size={24} color="#FFFFFF" />
+        </TouchableOpacity>
+      </View>
 
-        {/* Filter Chips */}
-        <Animated.View entering={FadeIn.delay(200).duration(600)}>
-          <ScrollView 
-            horizontal 
-            showsHorizontalScrollIndicator={false}
-            style={styles.filterContainer}
-            contentContainerStyle={styles.filterContent}
-          >
-            {filters.map((filter, index) => (
-              <Animated.View key={filter.id} entering={FadeInDown.delay(300 + index * 50).springify()}>
-                <TouchableOpacity
-                  style={styles.filterChipContainer}
-                  onPress={() => setSelectedFilter(filter.id)}
-                  activeOpacity={0.8}
-                >
-                  <BlurView 
-                    intensity={isDarkMode ? 30 : 90} 
-                    style={[
-                      styles.filterChip,
-                      selectedFilter === filter.id && styles.filterChipActive
-                    ]}
-                  >
-                    {selectedFilter === filter.id && (
-                      <LinearGradient
-                        colors={[colors.primary, colors.primaryLight]}
-                        style={StyleSheet.absoluteFillObject}
-                        start={{ x: 0, y: 0 }}
-                        end={{ x: 1, y: 1 }}
-                      />
-                    )}
-                    <MaterialIcons 
-                      name={filter.icon} 
-                      size={18} 
-                      color={selectedFilter === filter.id ? '#FFFFFF' : colors.textSecondary} 
-                    />
-                    <Text style={[
-                      styles.filterText,
-                      { color: selectedFilter === filter.id ? '#FFFFFF' : colors.textSecondary },
-                    ]}>
-                      {filter.label}
-                    </Text>
-                  </BlurView>
-                </TouchableOpacity>
-              </Animated.View>
-            ))}
-          </ScrollView>
-        </Animated.View>
-
-        {/* Events List */}
+      {/* Filter Chips */}
+      <Animated.View entering={FadeIn.duration(600)}>
         <ScrollView 
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={styles.eventsContainer}
+          horizontal 
+          showsHorizontalScrollIndicator={false}
+          style={styles.filterContainer}
+          contentContainerStyle={styles.filterContent}
         >
-          {filteredEvents.map((event, index) => (
-            <EventCard
-              key={event.id}
-              event={event}
-              onPress={() => navigation.navigate('EventDetail', { event })}
-              index={index}
-            />
+          {filters.map((filter) => (
+            <TouchableOpacity
+              key={filter.id}
+              style={[
+                styles.filterChip,
+                { backgroundColor: selectedFilter === filter.id ? colors.primary : colors.surface },
+                SHADOWS.small,
+              ]}
+              onPress={() => setSelectedFilter(filter.id)}
+              activeOpacity={0.7}
+            >
+              <MaterialIcons 
+                name={filter.icon} 
+                size={18} 
+                color={selectedFilter === filter.id ? '#FFFFFF' : colors.textSecondary} 
+              />
+              <Text style={[
+                styles.filterText,
+                { color: selectedFilter === filter.id ? '#FFFFFF' : colors.textSecondary },
+              ]}>
+                {filter.label}
+              </Text>
+            </TouchableOpacity>
           ))}
         </ScrollView>
-      </SafeAreaView>
-    </View>
+      </Animated.View>
+
+      {/* Events List */}
+      <ScrollView 
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.eventsContainer}
+      >
+        <Text style={[styles.resultsText, { color: colors.textLight }]}>
+          {filteredEvents.length} {filteredEvents.length === 1 ? 'event' : 'events'} found
+        </Text>
+        
+        {filteredEvents.map((event, index) => (
+          <EventCard
+            key={event.id}
+            event={event}
+            onPress={() => navigation.navigate('EventDetail', { event })}
+            index={index}
+          />
+        ))}
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-  },
-  safeArea: {
     flex: 1,
   },
   header: {
@@ -146,22 +108,10 @@ const styles = StyleSheet.create({
   headerTitle: {
     ...TYPOGRAPHY.h2,
   },
-  headerSubtitle: {
-    ...TYPOGRAPHY.bodySmall,
-    marginTop: SPACING.xs,
-  },
-  addButtonContainer: {
-    borderRadius: 20,
-    overflow: 'hidden',
-  },
-  addButtonBlur: {
-    borderRadius: 20,
-    overflow: 'hidden',
-  },
   addButton: {
-    width: 48,
-    height: 48,
-    borderRadius: 20,
+    width: 40,
+    height: 40,
+    borderRadius: BORDER_RADIUS.md,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -170,10 +120,6 @@ const styles = StyleSheet.create({
   },
   filterContent: {
     paddingHorizontal: SPACING.lg,
-    gap: SPACING.sm,
-  },
-  filterChipContainer: {
-    marginRight: SPACING.sm,
   },
   filterChip: {
     flexDirection: 'row',
@@ -181,20 +127,20 @@ const styles = StyleSheet.create({
     paddingHorizontal: SPACING.md,
     paddingVertical: SPACING.sm,
     borderRadius: BORDER_RADIUS.full,
-    gap: SPACING.xs,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.2)',
-    overflow: 'hidden',
-  },
-  filterChipActive: {
-    borderColor: 'transparent',
+    marginRight: SPACING.sm,
   },
   filterText: {
     ...TYPOGRAPHY.bodySmall,
+    marginLeft: SPACING.xs,
     fontWeight: '600',
   },
   eventsContainer: {
     paddingTop: SPACING.sm,
-    paddingBottom: 120,
+    paddingBottom: 100,
+  },
+  resultsText: {
+    ...TYPOGRAPHY.bodySmall,
+    paddingHorizontal: SPACING.lg,
+    marginBottom: SPACING.md,
   },
 });

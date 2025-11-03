@@ -5,8 +5,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { MaterialIcons } from '@expo/vector-icons';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-import { Platform, StyleSheet } from 'react-native';
-import { BlurView } from 'expo-blur';
+import { Platform } from 'react-native';
 
 import { ThemeProvider, useTheme } from './contexts/ThemeContext';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
@@ -34,25 +33,13 @@ function TabNavigator() {
         tabBarActiveTintColor: colors.primary,
         tabBarInactiveTintColor: colors.textLight,
         tabBarStyle: {
-          position: 'absolute',
-          bottom: 20,
-          left: 20,
-          right: 20,
-          height: Platform.OS === 'ios' ? 88 : 68,
-          borderRadius: 28,
+          backgroundColor: colors.surface,
+          borderTopWidth: 1,
+          borderTopColor: colors.divider,
           paddingBottom: Platform.OS === 'ios' ? 20 : 8,
           paddingTop: 8,
-          borderTopWidth: 0,
-          backgroundColor: 'transparent',
-          elevation: 0,
+          height: Platform.OS === 'ios' ? 88 : 68,
         },
-        tabBarBackground: () => (
-          <BlurView
-            intensity={isDarkMode ? 80 : 100}
-            style={StyleSheet.absoluteFill}
-            tint={isDarkMode ? 'dark' : 'light'}
-          />
-        ),
         tabBarLabelStyle: {
           fontSize: 12,
           fontWeight: '600',
