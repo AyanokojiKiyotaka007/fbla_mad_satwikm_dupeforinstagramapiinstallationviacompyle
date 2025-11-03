@@ -1,10 +1,12 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
-import Animated, { FadeInLeft } from 'react-native-reanimated';
+import { BlurView } from 'expo-blur';
+import { LinearGradient } from 'expo-linear-gradient';
+import Animated, { FadeInLeft, useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
 import { Resource } from '../types';
 import { useTheme } from '../contexts/ThemeContext';
-import { SPACING, TYPOGRAPHY, SHADOWS, BORDER_RADIUS } from '../constants/theme';
+import { SPACING, TYPOGRAPHY, BORDER_RADIUS } from '../constants/theme';
 
 interface ResourceCardProps {
   resource: Resource;
@@ -27,46 +29,83 @@ const fileTypeColors = {
 };
 
 export default function ResourceCard({ resource, onDownload, index }: ResourceCardProps) {
-  const { colors } = useTheme();
+  const { colors, isDarkMode } = useTheme();
+  const scale = useSharedValue(1);
+  const downloadScale = useSharedValue(1);
+  
   const fileIcon = fileTypeIcons[resource.fileType];
   const fileColor = fileTypeColors[resource.fileType];
 
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: scale.value }],
+  }));
+
+  const downloadAnimatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: downloadScale.value }],
+  }));
+
+  const handleDownload = () => {
+    downloadScale.value = withSpring(0.9, {}, () => {
+      downloadScale.value = withSpring(1);
+    });
+    onDownload();
+  };
+
   return (
-    <Animated.View entering={FadeInLeft.delay(index * 100).springify()}>
-      <View style={[styles.container, { backgroundColor: colors.surface }, SHADOWS.medium]}>
-        <View style={[styles.fileIcon, { backgroundColor: fileColor + '20' }]}>
-          <MaterialIcons name={fileIcon} size={32} color={fileColor} />
-        </View>
-        
-        <View style={styles.content}>
-          <Text style={[styles.title, { color: colors.text }]} numberOfLines={2}>{resource.title}</Text>
-          <Text style={[styles.description, { color: colors.textSecondary }]} numberOfLines={2}>{resource.description}</Text>
-          
-          <View style={styles.metaRow}>
-            <View style={styles.metaItem}>
-              <MaterialIcons name="insert-drive-file" size={14} color={colors.textLight} />
-              <Text style={[styles.metaText, { color: colors.textLight }]}>{resource.fileType.toUpperCase()}</Text>
+    <Animated.View entering={FadeInLeft.delay(index * 100).springify()} style={animatedStyle}>
+      <View style={styles.container}>
+        <BlurView intensity={isDarkMode ? 30 : 90} style={styles.blurContainer}>
+          <LinearGradient
+            colors={isDarkMode 
+              ? ['rgba(255, 255, 255, 0.05)', 'rgba(255, 255, 255, 0.02)']
+              : ['rgba(255, 255, 255, 0.9)', 'rgba(255, 255, 255, 0.6)']
+            }
+            style={styles.gradient}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+          >
+            <LinearGradient
+              colors={[fileColor, fileColor + 'DD']}
+              style={styles.fileIcon}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+            >
+              <MaterialIcons name={fileIcon} size={36} color="#FFFFFF" />
+            </LinearGradient>
+            
+            <View style={styles.content}>
+              <Text style={[styles.title, { color: colors.text }]} numberOfLines={2}>{resource.title}</Text>
+              <Text style={[styles.description, { color: colors.textSecondary }]} numberOfLines={2}>{resource.description}</Text>
+              
+              <View style={styles.metaRow}>
+                <View style={[styles.metaBadge, { backgroundColor: fileColor + '20' }]}>
+                  <MaterialIcons name="insert-drive-file" size={12} color={fileColor} />
+                  <Text style={[styles.metaText, { color: fileColor }]}>{resource.fileType.toUpperCase()}</Text>
+                </View>
+                
+                <View style={[styles.metaBadge, { backgroundColor: colors.info + '20' }]}>
+                  <MaterialIcons name="storage" size={12} color={colors.info} />
+                  <Text style={[styles.metaText, { color: colors.info }]}>{resource.size}</Text>
+                </View>
+                
+                <View style={[styles.metaBadge, { backgroundColor: colors.success + '20' }]}>
+                  <MaterialIcons name="download" size={12} color={colors.success} />
+                  <Text style={[styles.metaText, { color: colors.success }]}>{resource.downloads}</Text>
+                </View>
+              </View>
             </View>
             
-            <View style={styles.metaItem}>
-              <MaterialIcons name="storage" size={14} color={colors.textLight} />
-              <Text style={[styles.metaText, { color: colors.textLight }]}>{resource.size}</Text>
-            </View>
-            
-            <View style={styles.metaItem}>
-              <MaterialIcons name="download" size={14} color={colors.textLight} />
-              <Text style={[styles.metaText, { color: colors.textLight }]}>{resource.downloads}</Text>
-            </View>
-          </View>
-        </View>
-        
-        <TouchableOpacity 
-          style={[styles.downloadButton, { backgroundColor: colors.primary + '20' }]} 
-          onPress={onDownload}
-          activeOpacity={0.7}
-        >
-          <MaterialIcons name="download" size={24} color={colors.primary} />
-        </TouchableOpacity>
+            <Animated.View style={downloadAnimatedStyle}>
+              <TouchableOpacity 
+                style={[styles.downloadButton, { backgroundColor: colors.primary }]} 
+                onPress={handleDownload}
+                activeOpacity={0.8}
+              >
+                <MaterialIcons name="download" size={24} color="#FFFFFF" />
+              </TouchableOpacity>
+            </Animated.View>
+          </LinearGradient>
+        </BlurView>
       </View>
     </Animated.View>
   );
@@ -74,20 +113,32 @@ export default function ResourceCard({ resource, onDownload, index }: ResourceCa
 
 const styles = StyleSheet.create({
   container: {
-    borderRadius: BORDER_RADIUS.md,
-    padding: SPACING.md,
     marginHorizontal: SPACING.lg,
     marginBottom: SPACING.md,
+  },
+  blurContainer: {
+    borderRadius: 28,
+    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.2)',
+  },
+  gradient: {
+    padding: SPACING.lg,
     flexDirection: 'row',
     alignItems: 'center',
   },
   fileIcon: {
-    width: 64,
-    height: 64,
-    borderRadius: BORDER_RADIUS.md,
+    width: 72,
+    height: 72,
+    borderRadius: 20,
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: SPACING.md,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 8,
   },
   content: {
     flex: 1,
@@ -103,23 +154,32 @@ const styles = StyleSheet.create({
   },
   metaRow: {
     flexDirection: 'row',
-    alignItems: 'center',
+    flexWrap: 'wrap',
+    gap: SPACING.xs,
   },
-  metaItem: {
+  metaBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginRight: SPACING.md,
+    paddingHorizontal: SPACING.sm,
+    paddingVertical: 4,
+    borderRadius: BORDER_RADIUS.full,
+    gap: 4,
   },
   metaText: {
     ...TYPOGRAPHY.caption,
-    marginLeft: SPACING.xs,
+    fontWeight: '600',
   },
   downloadButton: {
-    width: 48,
-    height: 48,
-    borderRadius: BORDER_RADIUS.md,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
     alignItems: 'center',
     justifyContent: 'center',
     marginLeft: SPACING.sm,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 8,
   },
 });
