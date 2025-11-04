@@ -28,12 +28,18 @@ export default function DashboardScreen({ navigation }: DashboardScreenProps) {
   const { user } = useAuth();
   const { colors, isDarkMode } = useTheme();
   const [currentQuoteIndex, setCurrentQuoteIndex] = useState(0);
+  const [currentDate, setCurrentDate] = useState(new Date());
   const waveAnim = useRef(new RNAnimated.Value(0)).current;
   const quoteOpacity = useRef(new RNAnimated.Value(1)).current;
 
   const upcomingEvent = mockEvents.find(e => e.isRegistered);
 
   useEffect(() => {
+    // Update date every minute
+    const dateInterval = setInterval(() => {
+      setCurrentDate(new Date());
+    }, 60000);
+
     // Wave animation
     RNAnimated.loop(
       RNAnimated.sequence([
@@ -68,7 +74,10 @@ export default function DashboardScreen({ navigation }: DashboardScreenProps) {
       setCurrentQuoteIndex((prev) => (prev + 1) % QUOTES.length);
     }, 5000);
 
-    return () => clearInterval(quoteInterval);
+    return () => {
+      clearInterval(dateInterval);
+      clearInterval(quoteInterval);
+    };
   }, []);
 
   const waveTranslate = waveAnim.interpolate({
@@ -79,6 +88,12 @@ export default function DashboardScreen({ navigation }: DashboardScreenProps) {
   const openSocialMedia = (url: string) => {
     Linking.openURL(url).catch(err => console.error('Error opening URL:', err));
   };
+
+  // Format date
+  const dayName = currentDate.toLocaleDateString('en-US', { weekday: 'short' });
+  const dayNumber = currentDate.getDate();
+  const monthName = currentDate.toLocaleDateString('en-US', { month: 'short' });
+  const year = currentDate.getFullYear();
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
@@ -114,19 +129,38 @@ export default function DashboardScreen({ navigation }: DashboardScreenProps) {
           showsVerticalScrollIndicator={false}
           contentContainerStyle={styles.scrollContent}
         >
-          {/* Personal Greeting */}
+          {/* Personal Greeting with Date */}
           <Animated.View entering={FadeInUp.duration(800)} style={styles.greetingSection}>
-            <Text style={[styles.greeting, { color: colors.text }]}>
-              Welcome back, {user?.name?.split(' ')[0] || 'Member'} 👋
-            </Text>
-            <Text style={[styles.subGreeting, { color: colors.textSecondary }]}>
-              Ready to make an impact today?
-            </Text>
+            <View style={styles.greetingRow}>
+              <View style={styles.greetingTextContainer}>
+                <Text style={[styles.greeting, { color: colors.text }]}>
+                  Welcome back, {user?.name?.split(' ')[0] || 'Member'} 👋
+                </Text>
+                <Text style={[styles.subGreeting, { color: colors.textSecondary }]}>
+                  Ready to make an impact today?
+                </Text>
+              </View>
+              
+              {/* Cool Date Display */}
+              <BlurView intensity={isDarkMode ? 20 : 80} style={styles.dateCard}>
+                <LinearGradient
+                  colors={[colors.primary + '30', colors.accent + '30']}
+                  style={styles.dateGradient}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                >
+                  <Text style={[styles.dateDay, { color: colors.primary }]}>{dayName}</Text>
+                  <Text style={[styles.dateNumber, { color: colors.text }]}>{dayNumber}</Text>
+                  <Text style={[styles.dateMonth, { color: colors.textSecondary }]}>{monthName}</Text>
+                  <Text style={[styles.dateYear, { color: colors.textLight }]}>{year}</Text>
+                </LinearGradient>
+              </BlurView>
+            </View>
           </Animated.View>
 
-          {/* Floating Quote */}
+          {/* Compact Quote */}
           <Animated.View entering={FadeInDown.delay(200).springify()}>
-            <BlurView intensity={isDarkMode ? 20 : 80} style={styles.quoteContainer}>
+            <BlurView intensity={isDarkMode ? 15 : 60} style={styles.quoteContainer}>
               <RNAnimated.View style={{ opacity: quoteOpacity }}>
                 <Text style={[styles.quote, { color: colors.primary }]}>
                   "{QUOTES[currentQuoteIndex]}"
@@ -207,13 +241,12 @@ export default function DashboardScreen({ navigation }: DashboardScreenProps) {
             </BlurView>
           </Animated.View>
 
-          {/* Quick Actions */}
+          {/* Quick Actions - Icon Only */}
           <Animated.View entering={FadeInDown.delay(800).springify()} style={styles.quickActionsSection}>
             <Text style={[styles.sectionTitle, { color: colors.text }]}>Quick Actions</Text>
             <View style={styles.quickActions}>
               <QuickActionButton
                 icon="event"
-                label="Calendar"
                 color={colors.primary}
                 onPress={() => navigation.navigate('Calendar')}
                 colors={colors}
@@ -221,7 +254,6 @@ export default function DashboardScreen({ navigation }: DashboardScreenProps) {
               />
               <QuickActionButton
                 icon="article"
-                label="News"
                 color={colors.secondary}
                 onPress={() => navigation.navigate('NewsFeed')}
                 colors={colors}
@@ -229,7 +261,6 @@ export default function DashboardScreen({ navigation }: DashboardScreenProps) {
               />
               <QuickActionButton
                 icon="folder"
-                label="Resources"
                 color={colors.accent}
                 onPress={() => navigation.navigate('Resources')}
                 colors={colors}
@@ -276,14 +307,13 @@ export default function DashboardScreen({ navigation }: DashboardScreenProps) {
   );
 }
 
-function QuickActionButton({ icon, label, color, onPress, colors, isDarkMode }: any) {
+function QuickActionButton({ icon, color, onPress, colors, isDarkMode }: any) {
   return (
     <TouchableOpacity onPress={onPress} activeOpacity={0.8} style={styles.quickActionButton}>
       <BlurView intensity={isDarkMode ? 20 : 80} style={styles.quickActionBlur}>
         <View style={[styles.quickActionIcon, { backgroundColor: color + '20' }]}>
-          <MaterialIcons name={icon} size={28} color={color} />
+          <MaterialIcons name={icon} size={32} color={color} />
         </View>
-        <Text style={[styles.quickActionLabel, { color: colors.text }]}>{label}</Text>
       </BlurView>
     </TouchableOpacity>
   );
@@ -313,6 +343,15 @@ const styles = StyleSheet.create({
     marginTop: SPACING.xl,
     marginBottom: SPACING.lg,
   },
+  greetingRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+  },
+  greetingTextContainer: {
+    flex: 1,
+    marginRight: SPACING.md,
+  },
   greeting: {
     ...TYPOGRAPHY.h1,
     fontSize: 28,
@@ -322,28 +361,61 @@ const styles = StyleSheet.create({
     ...TYPOGRAPHY.body,
     fontSize: 16,
   },
+  dateCard: {
+    borderRadius: 16,
+    overflow: 'hidden',
+    width: 70,
+  },
+  dateGradient: {
+    padding: SPACING.sm,
+    alignItems: 'center',
+  },
+  dateDay: {
+    ...TYPOGRAPHY.caption,
+    fontSize: 10,
+    fontWeight: '700',
+    textTransform: 'uppercase',
+    letterSpacing: 1,
+  },
+  dateNumber: {
+    ...TYPOGRAPHY.h1,
+    fontSize: 32,
+    fontWeight: '800',
+    lineHeight: 36,
+  },
+  dateMonth: {
+    ...TYPOGRAPHY.caption,
+    fontSize: 11,
+    fontWeight: '600',
+    textTransform: 'uppercase',
+  },
+  dateYear: {
+    ...TYPOGRAPHY.caption,
+    fontSize: 9,
+    fontWeight: '500',
+  },
   quoteContainer: {
-    borderRadius: 24,
-    padding: SPACING.lg,
-    marginBottom: SPACING.lg,
+    borderRadius: 16,
+    padding: SPACING.md,
+    marginBottom: SPACING.md,
     overflow: 'hidden',
     alignItems: 'center',
   },
   quote: {
-    ...TYPOGRAPHY.h3,
-    fontSize: 22,
+    ...TYPOGRAPHY.body,
+    fontSize: 15,
     textAlign: 'center',
     fontStyle: 'italic',
-    marginBottom: SPACING.md,
+    marginBottom: SPACING.sm,
   },
   quoteIndicators: {
     flexDirection: 'row',
     gap: SPACING.xs,
   },
   indicator: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
+    width: 5,
+    height: 5,
+    borderRadius: 2.5,
   },
   eventCard: {
     borderRadius: 24,
@@ -419,27 +491,26 @@ const styles = StyleSheet.create({
   quickActions: {
     flexDirection: 'row',
     gap: SPACING.md,
+    justifyContent: 'center',
   },
   quickActionButton: {
-    flex: 1,
+    width: 80,
+    height: 80,
   },
   quickActionBlur: {
     borderRadius: 20,
-    padding: SPACING.md,
+    width: '100%',
+    height: '100%',
     alignItems: 'center',
+    justifyContent: 'center',
     overflow: 'hidden',
   },
   quickActionIcon: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
+    width: 64,
+    height: 64,
+    borderRadius: 32,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: SPACING.sm,
-  },
-  quickActionLabel: {
-    ...TYPOGRAPHY.bodySmall,
-    fontWeight: '600',
   },
   socialSection: {
     marginBottom: SPACING.lg,

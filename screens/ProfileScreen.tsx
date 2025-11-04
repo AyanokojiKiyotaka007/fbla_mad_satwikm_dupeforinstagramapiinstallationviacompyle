@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TextInput, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TextInput, TouchableOpacity, Alert, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
+import * as ImagePicker from 'expo-image-picker';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { SPACING, TYPOGRAPHY, BORDER_RADIUS, SHADOWS } from '../constants/theme';
@@ -11,6 +12,7 @@ export default function ProfileScreen() {
   const { user, signOut } = useAuth();
   const { colors, isDarkMode, toggleTheme } = useTheme();
   const [isEditing, setIsEditing] = useState(false);
+  const [profileImage, setProfileImage] = useState<string | null>(null);
   const [profile, setProfile] = useState(user || {
     name: '',
     email: '',
@@ -33,6 +35,61 @@ export default function ProfileScreen() {
       [
         { text: 'Cancel', style: 'cancel' },
         { text: 'Sign Out', style: 'destructive', onPress: signOut },
+      ]
+    );
+  };
+
+  const pickImage = async () => {
+    Alert.alert(
+      'Profile Picture',
+      'Choose an option',
+      [
+        {
+          text: 'Take Photo',
+          onPress: async () => {
+            const { status } = await ImagePicker.requestCameraPermissionsAsync();
+            if (status !== 'granted') {
+              Alert.alert('Permission Denied', 'Camera permission is required to take photos.');
+              return;
+            }
+
+            const result = await ImagePicker.launchCameraAsync({
+              mediaTypes: ImagePicker.MediaTypeOptions.Images,
+              allowsEditing: true,
+              aspect: [1, 1],
+              quality: 0.8,
+            });
+
+            if (!result.canceled) {
+              setProfileImage(result.assets[0].uri);
+            }
+          },
+        },
+        {
+          text: 'Choose from Library',
+          onPress: async () => {
+            const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+            if (status !== 'granted') {
+              Alert.alert('Permission Denied', 'Photo library permission is required.');
+              return;
+            }
+
+            const result = await ImagePicker.launchImageLibraryAsync({
+              mediaTypes: ImagePicker.MediaTypeOptions.Images,
+              allowsEditing: true,
+              aspect: [1, 1],
+              quality: 0.8,
+            });
+
+            if (!result.canceled) {
+              setProfileImage(result.assets[0].uri);
+            }
+          },
+        },
+        {
+          text: 'Cancel',
+          style: 'cancel',
+        },
       ]
     );
   };
@@ -98,9 +155,16 @@ export default function ProfileScreen() {
           style={[styles.profileHeader, { backgroundColor: colors.surface }, SHADOWS.medium]}
         >
           <View style={styles.avatarContainer}>
-            <MaterialIcons name="account-circle" size={80} color={colors.primary} />
+            {profileImage ? (
+              <Image source={{ uri: profileImage }} style={styles.profileImage} />
+            ) : (
+              <MaterialIcons name="account-circle" size={80} color={colors.primary} />
+            )}
             {isEditing && (
-              <TouchableOpacity style={[styles.avatarEditButton, { backgroundColor: colors.primary }]}>
+              <TouchableOpacity 
+                style={[styles.avatarEditButton, { backgroundColor: colors.primary }]}
+                onPress={pickImage}
+              >
                 <MaterialIcons name="camera-alt" size={20} color="#FFFFFF" />
               </TouchableOpacity>
             )}
@@ -233,6 +297,11 @@ const styles = StyleSheet.create({
   avatarContainer: {
     position: 'relative',
     marginBottom: SPACING.md,
+  },
+  profileImage: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
   },
   avatarEditButton: {
     position: 'absolute',
