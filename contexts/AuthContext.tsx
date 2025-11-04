@@ -10,6 +10,7 @@ interface User {
   phone: string;
   bio: string;
   memberSince: string;
+  eventsAttended?: number;
 }
 
 interface AuthContextType {
@@ -80,6 +81,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         phone: userData.phone,
         bio: userData.bio,
         memberSince: new Date().toISOString().split('T')[0],
+        eventsAttended: 0,
       };
 
       // Store user in users list

@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Dimensions, Anima
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
-import Animated, { FadeIn, FadeInDown, FadeInUp } from 'react-native-reanimated';
+import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';
 import { BlurView } from 'expo-blur';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
@@ -78,7 +78,7 @@ export default function DashboardScreen({ navigation }: DashboardScreenProps) {
       clearInterval(dateInterval);
       clearInterval(quoteInterval);
     };
-  }, []);
+  }, [waveAnim, quoteOpacity]);
 
   const waveTranslate = waveAnim.interpolate({
     inputRange: [0, 1],
@@ -163,7 +163,7 @@ export default function DashboardScreen({ navigation }: DashboardScreenProps) {
             <BlurView intensity={isDarkMode ? 15 : 60} style={styles.quoteContainer}>
               <RNAnimated.View style={{ opacity: quoteOpacity }}>
                 <Text style={[styles.quote, { color: colors.primary }]}>
-                  "{QUOTES[currentQuoteIndex]}"
+                  &ldquo;{QUOTES[currentQuoteIndex]}&rdquo;
                 </Text>
               </RNAnimated.View>
               <View style={styles.quoteIndicators}>
