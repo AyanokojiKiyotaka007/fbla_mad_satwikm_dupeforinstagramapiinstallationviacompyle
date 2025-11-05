@@ -1,4 +1,4 @@
-// Light and Dark theme colors
+// Light and Dark theme colors with glassmorphism support
 export const LIGHT_COLORS = {
   primary: '#003DA5',
   primaryDark: '#002D7A',
@@ -7,26 +7,31 @@ export const LIGHT_COLORS = {
   secondaryDark: '#E6A519',
   accent: '#00A3E0',
   
-  background: '#F8F9FA',
+  background: '#F5F7FA',
   backgroundGradient1: '#E8F0FE',
   backgroundGradient2: '#F0F7FF',
-  surface: '#FFFFFF',
-  card: '#FFFFFF',
+  surface: 'rgba(255, 255, 255, 0.7)',
+  surfaceSolid: '#FFFFFF',
+  card: 'rgba(255, 255, 255, 0.6)',
   
   text: '#1A1A1A',
   textSecondary: '#6B7280',
   textLight: '#9CA3AF',
   
-  border: '#E5E7EB',
-  divider: '#F3F4F6',
+  border: 'rgba(226, 232, 240, 0.5)',
+  divider: 'rgba(241, 245, 249, 0.5)',
   
   success: '#10B981',
   warning: '#F59E0B',
   error: '#EF4444',
   info: '#3B82F6',
   
-  shadow: 'rgba(0, 0, 0, 0.1)',
-  overlay: 'rgba(0, 0, 0, 0.5)',
+  shadow: 'rgba(0, 0, 0, 0.08)',
+  overlay: 'rgba(0, 0, 0, 0.4)',
+  
+  // Glassmorphism
+  glass: 'rgba(255, 255, 255, 0.65)',
+  glassBorder: 'rgba(255, 255, 255, 0.4)',
 };
 
 export const DARK_COLORS = {
@@ -40,15 +45,16 @@ export const DARK_COLORS = {
   background: '#0F1419',
   backgroundGradient1: '#1A1F2E',
   backgroundGradient2: '#0F1419',
-  surface: '#1A1F2E',
-  card: '#252A35',
+  surface: 'rgba(26, 31, 46, 0.7)',
+  surfaceSolid: '#1A1F2E',
+  card: 'rgba(37, 42, 53, 0.6)',
   
   text: '#FFFFFF',
   textSecondary: '#9CA3AF',
   textLight: '#6B7280',
   
-  border: '#2D3748',
-  divider: '#252A35',
+  border: 'rgba(51, 65, 85, 0.5)',
+  divider: 'rgba(30, 41, 59, 0.5)',
   
   success: '#10B981',
   warning: '#F59E0B',
@@ -57,6 +63,10 @@ export const DARK_COLORS = {
   
   shadow: 'rgba(0, 0, 0, 0.3)',
   overlay: 'rgba(0, 0, 0, 0.7)',
+  
+  // Glassmorphism
+  glass: 'rgba(26, 31, 46, 0.65)',
+  glassBorder: 'rgba(255, 255, 255, 0.1)',
 };
 
 export const SPACING = {
@@ -75,14 +85,19 @@ export const TYPOGRAPHY = {
     lineHeight: 40,
   },
   h2: {
-    fontSize: 24,
+    fontSize: 26,
     fontWeight: '700' as const,
-    lineHeight: 32,
+    lineHeight: 34,
   },
   h3: {
     fontSize: 20,
     fontWeight: '600' as const,
     lineHeight: 28,
+  },
+  h4: {
+    fontSize: 18,
+    fontWeight: '600' as const,
+    lineHeight: 26,
   },
   body: {
     fontSize: 16,
@@ -104,24 +119,24 @@ export const TYPOGRAPHY = {
 export const SHADOWS = {
   small: {
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.06,
+    shadowRadius: 3,
     elevation: 2,
   },
   medium: {
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 4,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
     elevation: 4,
   },
   large: {
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
+    shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 0.12,
-    shadowRadius: 8,
-    elevation: 8,
+    shadowRadius: 12,
+    elevation: 6,
   },
 };
 
@@ -129,7 +144,7 @@ export const BORDER_RADIUS = {
   sm: 8,
   md: 12,
   lg: 16,
-  xl: 24,
-  xxl: 32,
+  xl: 20,
+  xxl: 28,
   full: 9999,
 };

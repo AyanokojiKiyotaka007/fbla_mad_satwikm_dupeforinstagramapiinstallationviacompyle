@@ -3,11 +3,12 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Dimensions, Anima
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
+import { BlurView } from 'expo-blur';
 import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { mockEvents } from '../data/mockData';
-import { SPACING, TYPOGRAPHY } from '../constants/theme';
+import { SPACING, TYPOGRAPHY, SHADOWS, BORDER_RADIUS } from '../constants/theme';
 
 const { width, height } = Dimensions.get('window');
 
@@ -111,12 +112,12 @@ export default function DashboardScreen({ navigation }: DashboardScreenProps) {
           styles.waveOverlay,
           {
             transform: [{ translateY: waveTranslate }],
-            opacity: 0.3,
+            opacity: 0.25,
           },
         ]}
       >
         <LinearGradient
-          colors={[colors.primary + '40', colors.accent + '40', colors.primary + '40']}
+          colors={[colors.primary + '30', colors.accent + '30', colors.primary + '30']}
           style={StyleSheet.absoluteFillObject}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
@@ -141,38 +142,42 @@ export default function DashboardScreen({ navigation }: DashboardScreenProps) {
               </View>
               
               {/* Cool Date Display */}
-              <View style={[styles.dateCard, { backgroundColor: colors.primary + '20' }]}>
-                <Text style={[styles.dateDay, { color: colors.primary }]}>{dayName}</Text>
-                <Text style={[styles.dateNumber, { color: colors.text }]}>{dayNumber}</Text>
-                <Text style={[styles.dateMonth, { color: colors.textSecondary }]}>{monthName}</Text>
-                <Text style={[styles.dateYear, { color: colors.textLight }]}>{year}</Text>
-              </View>
+              <BlurView intensity={isDarkMode ? 20 : 60} style={styles.dateCard}>
+                <View style={[styles.dateCardInner, { backgroundColor: colors.primary + '15', borderColor: colors.glassBorder, borderWidth: 1 }]}>
+                  <Text style={[styles.dateDay, { color: colors.primary }]}>{dayName}</Text>
+                  <Text style={[styles.dateNumber, { color: colors.text }]}>{dayNumber}</Text>
+                  <Text style={[styles.dateMonth, { color: colors.textSecondary }]}>{monthName}</Text>
+                  <Text style={[styles.dateYear, { color: colors.textLight }]}>{year}</Text>
+                </View>
+              </BlurView>
             </View>
           </Animated.View>
 
           {/* Compact Quote */}
           <Animated.View entering={FadeInDown.delay(200).springify()}>
-            <View style={[styles.quoteContainer, { backgroundColor: colors.surface }]}>
-              <RNAnimated.View style={{ opacity: quoteOpacity }}>
-                <Text style={[styles.quote, { color: colors.primary }]}>
-                  &ldquo;{QUOTES[currentQuoteIndex]}&rdquo;
-                </Text>
-              </RNAnimated.View>
-              <View style={styles.quoteIndicators}>
-                {QUOTES.map((_, index) => (
-                  <View
-                    key={index}
-                    style={[
-                      styles.indicator,
-                      {
-                        backgroundColor: index === currentQuoteIndex ? colors.primary : colors.textLight,
-                        opacity: index === currentQuoteIndex ? 1 : 0.3,
-                      },
-                    ]}
-                  />
-                ))}
+            <BlurView intensity={isDarkMode ? 20 : 60} style={[styles.quoteContainer, SHADOWS.small]}>
+              <View style={[styles.quoteInner, { borderColor: colors.glassBorder, borderWidth: 1 }]}>
+                <RNAnimated.View style={{ opacity: quoteOpacity }}>
+                  <Text style={[styles.quote, { color: colors.primary }]}>
+                    &ldquo;{QUOTES[currentQuoteIndex]}&rdquo;
+                  </Text>
+                </RNAnimated.View>
+                <View style={styles.quoteIndicators}>
+                  {QUOTES.map((_, index) => (
+                    <View
+                      key={index}
+                      style={[
+                        styles.indicator,
+                        {
+                          backgroundColor: index === currentQuoteIndex ? colors.primary : colors.textLight,
+                          opacity: index === currentQuoteIndex ? 1 : 0.3,
+                        },
+                      ]}
+                    />
+                  ))}
+                </View>
               </View>
-            </View>
+            </BlurView>
           </Animated.View>
 
           {/* Upcoming Event */}
@@ -182,51 +187,60 @@ export default function DashboardScreen({ navigation }: DashboardScreenProps) {
                 activeOpacity={0.9}
                 onPress={() => navigation.navigate('EventDetail', { event: upcomingEvent })}
               >
-                <View style={[styles.eventCard, { backgroundColor: colors.surface }]}>
-                  <View style={styles.eventHeader}>
-                    <View style={[styles.eventIconContainer, { backgroundColor: colors.primary }]}>
-                      <MaterialIcons name="event" size={24} color="#FFFFFF" />
+                <BlurView intensity={isDarkMode ? 25 : 70} style={[styles.eventCard, SHADOWS.medium]}>
+                  <View style={[styles.eventCardInner, { borderColor: colors.glassBorder, borderWidth: 1 }]}>
+                    <View style={styles.eventHeader}>
+                      <View style={[styles.eventIconContainer, { backgroundColor: colors.primary }]}>
+                        <MaterialIcons name="event" size={24} color="#FFFFFF" />
+                      </View>
+                      <View style={styles.eventHeaderText}>
+                        <Text style={[styles.eventLabel, { color: colors.textLight }]}>
+                          NEXT EVENT
+                        </Text>
+                        <Text style={[styles.eventTitle, { color: colors.text }]} numberOfLines={2}>
+                          {upcomingEvent.title}
+                        </Text>
+                      </View>
                     </View>
-                    <View style={styles.eventHeaderText}>
-                      <Text style={[styles.eventLabel, { color: colors.textLight }]}>
-                        Next Event
-                      </Text>
-                      <Text style={[styles.eventTitle, { color: colors.text }]} numberOfLines={2}>
-                        {upcomingEvent.title}
-                      </Text>
+                    <View style={styles.eventDetails}>
+                      <View style={styles.eventDetailRow}>
+                        <MaterialIcons name="calendar-today" size={16} color={colors.textSecondary} />
+                        <Text style={[styles.eventDetailText, { color: colors.textSecondary }]}>
+                          {upcomingEvent.date}
+                        </Text>
+                      </View>
+                      <View style={styles.eventDetailRow}>
+                        <MaterialIcons name="access-time" size={16} color={colors.textSecondary} />
+                        <Text style={[styles.eventDetailText, { color: colors.textSecondary }]}>
+                          {upcomingEvent.time}
+                        </Text>
+                      </View>
                     </View>
                   </View>
-                  <View style={styles.eventDetails}>
-                    <View style={styles.eventDetailRow}>
-                      <MaterialIcons name="calendar-today" size={16} color={colors.textSecondary} />
-                      <Text style={[styles.eventDetailText, { color: colors.textSecondary }]}>
-                        {upcomingEvent.date}
-                      </Text>
-                    </View>
-                    <View style={styles.eventDetailRow}>
-                      <MaterialIcons name="access-time" size={16} color={colors.textSecondary} />
-                      <Text style={[styles.eventDetailText, { color: colors.textSecondary }]}>
-                        {upcomingEvent.time}
-                      </Text>
-                    </View>
-                  </View>
-                </View>
+                </BlurView>
               </TouchableOpacity>
             </Animated.View>
           )}
 
-          {/* Notifications Strip */}
+          {/* Notifications Strip - Now Functional */}
           <Animated.View entering={FadeInDown.delay(600).springify()}>
-            <View style={[styles.notificationStrip, { backgroundColor: colors.surface }]}>
-              <View style={[styles.notificationDot, { backgroundColor: colors.secondary }]} />
-              <Text style={[styles.notificationText, { color: colors.text }]}>
-                1 new announcement
-              </Text>
-              <MaterialIcons name="chevron-right" size={20} color={colors.textLight} />
-            </View>
+            <TouchableOpacity
+              activeOpacity={0.8}
+              onPress={() => navigation.navigate('NewsFeed')}
+            >
+              <BlurView intensity={isDarkMode ? 20 : 60} style={[styles.notificationStrip, SHADOWS.small]}>
+                <View style={[styles.notificationInner, { borderColor: colors.glassBorder, borderWidth: 1 }]}>
+                  <View style={[styles.notificationDot, { backgroundColor: colors.secondary }]} />
+                  <Text style={[styles.notificationText, { color: colors.text }]}>
+                    1 new announcement
+                  </Text>
+                  <MaterialIcons name="chevron-right" size={20} color={colors.textLight} />
+                </View>
+              </BlurView>
+            </TouchableOpacity>
           </Animated.View>
 
-          {/* Quick Actions - Icon Only */}
+          {/* Quick Actions - Centered Header */}
           <Animated.View entering={FadeInDown.delay(800).springify()} style={styles.quickActionsSection}>
             <Text style={[styles.sectionTitle, { color: colors.text }]}>Quick Actions</Text>
             <View style={styles.quickActions}>
@@ -235,51 +249,60 @@ export default function DashboardScreen({ navigation }: DashboardScreenProps) {
                 color={colors.primary}
                 onPress={() => navigation.navigate('Calendar')}
                 colors={colors}
+                isDarkMode={isDarkMode}
               />
               <QuickActionButton
                 icon="article"
                 color={colors.secondary}
                 onPress={() => navigation.navigate('NewsFeed')}
                 colors={colors}
+                isDarkMode={isDarkMode}
               />
               <QuickActionButton
                 icon="folder"
                 color={colors.accent}
                 onPress={() => navigation.navigate('Resources')}
                 colors={colors}
+                isDarkMode={isDarkMode}
               />
             </View>
           </Animated.View>
 
-          {/* Social Media Section */}
+          {/* Social Media Section - Centered Header */}
           <Animated.View entering={FadeInDown.delay(1000).springify()} style={styles.socialSection}>
             <Text style={[styles.sectionTitle, { color: colors.text }]}>Connect With Us</Text>
             <View style={styles.socialButtons}>
               <TouchableOpacity
-                style={[styles.socialButton, { backgroundColor: colors.surface }]}
                 onPress={() => openSocialMedia('https://www.instagram.com/fbla_pbl/')}
-                activeOpacity={0.7}
+                activeOpacity={0.8}
               >
-                <LinearGradient
-                  colors={['#833AB4', '#FD1D1D', '#F77737']}
-                  style={styles.socialIconGradient}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 1 }}
-                >
-                  <MaterialIcons name="camera-alt" size={24} color="#FFFFFF" />
-                </LinearGradient>
-                <Text style={[styles.socialLabel, { color: colors.text }]}>Instagram</Text>
+                <BlurView intensity={isDarkMode ? 20 : 60} style={[styles.socialButton, SHADOWS.small]}>
+                  <View style={[styles.socialButtonInner, { borderColor: colors.glassBorder, borderWidth: 1 }]}>
+                    <LinearGradient
+                      colors={['#833AB4', '#FD1D1D', '#F77737']}
+                      style={styles.socialIconGradient}
+                      start={{ x: 0, y: 0 }}
+                      end={{ x: 1, y: 1 }}
+                    >
+                      <MaterialIcons name="camera-alt" size={24} color="#FFFFFF" />
+                    </LinearGradient>
+                    <Text style={[styles.socialLabel, { color: colors.text }]}>Instagram</Text>
+                  </View>
+                </BlurView>
               </TouchableOpacity>
 
               <TouchableOpacity
-                style={[styles.socialButton, { backgroundColor: colors.surface }]}
                 onPress={() => openSocialMedia('https://twitter.com/FBLA_PBL')}
-                activeOpacity={0.7}
+                activeOpacity={0.8}
               >
-                <View style={[styles.socialIconGradient, { backgroundColor: '#1DA1F2' }]}>
-                  <MaterialIcons name="tag" size={24} color="#FFFFFF" />
-                </View>
-                <Text style={[styles.socialLabel, { color: colors.text }]}>Twitter/X</Text>
+                <BlurView intensity={isDarkMode ? 20 : 60} style={[styles.socialButton, SHADOWS.small]}>
+                  <View style={[styles.socialButtonInner, { borderColor: colors.glassBorder, borderWidth: 1 }]}>
+                    <View style={[styles.socialIconGradient, { backgroundColor: '#1DA1F2' }]}>
+                      <MaterialIcons name="tag" size={24} color="#FFFFFF" />
+                    </View>
+                    <Text style={[styles.socialLabel, { color: colors.text }]}>Twitter/X</Text>
+                  </View>
+                </BlurView>
               </TouchableOpacity>
             </View>
           </Animated.View>
@@ -289,14 +312,16 @@ export default function DashboardScreen({ navigation }: DashboardScreenProps) {
   );
 }
 
-function QuickActionButton({ icon, color, onPress, colors }: any) {
+function QuickActionButton({ icon, color, onPress, colors, isDarkMode }: any) {
   return (
     <TouchableOpacity onPress={onPress} activeOpacity={0.8} style={styles.quickActionButton}>
-      <View style={[styles.quickActionBlur, { backgroundColor: colors.surface }]}>
-        <View style={[styles.quickActionIcon, { backgroundColor: color + '20' }]}>
-          <MaterialIcons name={icon} size={32} color={color} />
+      <BlurView intensity={isDarkMode ? 20 : 60} style={[styles.quickActionBlur, SHADOWS.small]}>
+        <View style={[styles.quickActionInner, { borderColor: colors.glassBorder, borderWidth: 1 }]}>
+          <View style={[styles.quickActionIcon, { backgroundColor: color + '20' }]}>
+            <MaterialIcons name={icon} size={32} color={color} />
+          </View>
         </View>
-      </View>
+      </BlurView>
     </TouchableOpacity>
   );
 }
@@ -345,6 +370,9 @@ const styles = StyleSheet.create({
   },
   dateCard: {
     borderRadius: 16,
+    overflow: 'hidden',
+  },
+  dateCardInner: {
     padding: SPACING.sm,
     width: 70,
     alignItems: 'center',
@@ -374,9 +402,12 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
   quoteContainer: {
-    borderRadius: 16,
-    padding: SPACING.md,
+    borderRadius: 18,
     marginBottom: SPACING.md,
+    overflow: 'hidden',
+  },
+  quoteInner: {
+    padding: SPACING.md,
     alignItems: 'center',
   },
   quote: {
@@ -385,6 +416,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontStyle: 'italic',
     marginBottom: SPACING.sm,
+    fontWeight: '500',
   },
   quoteIndicators: {
     flexDirection: 'row',
@@ -397,8 +429,11 @@ const styles = StyleSheet.create({
   },
   eventCard: {
     borderRadius: 24,
-    padding: SPACING.lg,
+    overflow: 'hidden',
     marginBottom: SPACING.lg,
+  },
+  eventCardInner: {
+    padding: SPACING.lg,
   },
   eventHeader: {
     flexDirection: 'row',
@@ -421,6 +456,7 @@ const styles = StyleSheet.create({
     textTransform: 'uppercase',
     letterSpacing: 1,
     marginBottom: SPACING.xs,
+    fontWeight: '700',
   },
   eventTitle: {
     ...TYPOGRAPHY.h3,
@@ -438,11 +474,14 @@ const styles = StyleSheet.create({
     ...TYPOGRAPHY.bodySmall,
   },
   notificationStrip: {
+    borderRadius: 16,
+    marginBottom: SPACING.lg,
+    overflow: 'hidden',
+  },
+  notificationInner: {
     flexDirection: 'row',
     alignItems: 'center',
-    borderRadius: 16,
     padding: SPACING.md,
-    marginBottom: SPACING.lg,
   },
   notificationDot: {
     width: 8,
@@ -453,6 +492,7 @@ const styles = StyleSheet.create({
   notificationText: {
     ...TYPOGRAPHY.bodySmall,
     flex: 1,
+    fontWeight: '500',
   },
   quickActionsSection: {
     marginBottom: SPACING.lg,
@@ -460,7 +500,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     ...TYPOGRAPHY.h3,
     marginBottom: SPACING.md,
-    paddingLeft: SPACING.xs,
+    textAlign: 'center',
   },
   quickActions: {
     flexDirection: 'row',
@@ -473,6 +513,11 @@ const styles = StyleSheet.create({
   },
   quickActionBlur: {
     borderRadius: 20,
+    width: '100%',
+    height: '100%',
+    overflow: 'hidden',
+  },
+  quickActionInner: {
     width: '100%',
     height: '100%',
     alignItems: 'center',
@@ -495,6 +540,9 @@ const styles = StyleSheet.create({
   socialButton: {
     flex: 1,
     borderRadius: 20,
+    overflow: 'hidden',
+  },
+  socialButtonInner: {
     padding: SPACING.md,
     alignItems: 'center',
   },

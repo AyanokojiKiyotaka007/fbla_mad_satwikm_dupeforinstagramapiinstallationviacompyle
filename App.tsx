@@ -6,6 +6,7 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { Platform } from 'react-native';
+import { BlurView } from 'expo-blur';
 
 import { ThemeProvider, useTheme } from './contexts/ThemeContext';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
@@ -33,13 +34,27 @@ function TabNavigator() {
         tabBarActiveTintColor: colors.primary,
         tabBarInactiveTintColor: colors.textLight,
         tabBarStyle: {
-          backgroundColor: colors.surface,
+          position: 'absolute',
+          backgroundColor: isDarkMode ? 'rgba(26, 31, 46, 0.8)' : 'rgba(255, 255, 255, 0.8)',
           borderTopWidth: 1,
-          borderTopColor: colors.divider,
+          borderTopColor: colors.glassBorder,
           paddingBottom: Platform.OS === 'ios' ? 20 : 8,
           paddingTop: 8,
           height: Platform.OS === 'ios' ? 88 : 68,
+          elevation: 0,
         },
+        tabBarBackground: () => (
+          <BlurView
+            intensity={isDarkMode ? 80 : 90}
+            style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              bottom: 0,
+              right: 0,
+            }}
+          />
+        ),
         tabBarLabelStyle: {
           fontSize: 12,
           fontWeight: '600',

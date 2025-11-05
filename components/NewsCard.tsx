@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
+import { BlurView } from 'expo-blur';
 import Animated, { FadeInUp } from 'react-native-reanimated';
 import { NewsItem } from '../types';
 import { useTheme } from '../contexts/ThemeContext';
@@ -20,7 +21,7 @@ const categoryIcons = {
 };
 
 export default function NewsCard({ news, onLike, index }: NewsCardProps) {
-  const { colors } = useTheme();
+  const { colors, isDarkMode } = useTheme();
   
   const categoryColors = {
     announcement: colors.primary,
@@ -34,52 +35,57 @@ export default function NewsCard({ news, onLike, index }: NewsCardProps) {
 
   return (
     <Animated.View entering={FadeInUp.delay(index * 100).springify()}>
-      <View style={[styles.container, { backgroundColor: colors.surface }, SHADOWS.medium]}>
-        <View style={styles.header}>
-          <View style={[styles.categoryIcon, { backgroundColor: categoryColor + '20' }]}>
-            <MaterialIcons name={categoryIcon} size={20} color={categoryColor} />
+      <BlurView intensity={isDarkMode ? 25 : 70} style={[styles.container, SHADOWS.medium]}>
+        <View style={[styles.cardInner, { borderColor: colors.glassBorder, borderWidth: 1 }]}>
+          <View style={styles.header}>
+            <View style={[styles.categoryIcon, { backgroundColor: categoryColor + '20' }]}>
+              <MaterialIcons name={categoryIcon} size={20} color={categoryColor} />
+            </View>
+            <View style={styles.headerText}>
+              <Text style={[styles.title, { color: colors.text }]} numberOfLines={2}>{news.title}</Text>
+              <Text style={[styles.meta, { color: colors.textLight }]}>
+                {news.author} • {news.date}
+              </Text>
+            </View>
           </View>
-          <View style={styles.headerText}>
-            <Text style={[styles.title, { color: colors.text }]} numberOfLines={2}>{news.title}</Text>
-            <Text style={[styles.meta, { color: colors.textLight }]}>
-              {news.author} • {news.date}
-            </Text>
-          </View>
-        </View>
-        
-        <Text style={[styles.content, { color: colors.textSecondary }]} numberOfLines={3}>{news.content}</Text>
-        
-        <View style={[styles.footer, { borderTopColor: colors.divider }]}>
-          <TouchableOpacity 
-            style={styles.likeButton} 
-            onPress={onLike}
-            activeOpacity={0.7}
-          >
-            <MaterialIcons 
-              name={news.isLiked ? 'favorite' : 'favorite-border'} 
-              size={20} 
-              color={news.isLiked ? colors.error : colors.textLight} 
-            />
-            <Text style={[styles.likeText, { color: news.isLiked ? colors.error : colors.textLight }]}>
-              {news.likes}
-            </Text>
-          </TouchableOpacity>
           
-          <TouchableOpacity style={styles.shareButton}>
-            <MaterialIcons name="share" size={20} color={colors.textLight} />
-          </TouchableOpacity>
+          <Text style={[styles.content, { color: colors.textSecondary }]} numberOfLines={3}>{news.content}</Text>
+          
+          <View style={[styles.footer, { borderTopColor: colors.divider }]}>
+            <TouchableOpacity 
+              style={styles.likeButton} 
+              onPress={onLike}
+              activeOpacity={0.7}
+            >
+              <MaterialIcons 
+                name={news.isLiked ? 'favorite' : 'favorite-border'} 
+                size={20} 
+                color={news.isLiked ? colors.error : colors.textLight} 
+              />
+              <Text style={[styles.likeText, { color: news.isLiked ? colors.error : colors.textLight }]}>
+                {news.likes}
+              </Text>
+            </TouchableOpacity>
+            
+            <TouchableOpacity style={styles.shareButton}>
+              <MaterialIcons name="share" size={20} color={colors.textLight} />
+            </TouchableOpacity>
+          </View>
         </View>
-      </View>
+      </BlurView>
     </Animated.View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    borderRadius: BORDER_RADIUS.md,
-    padding: SPACING.md,
+    borderRadius: BORDER_RADIUS.lg,
     marginHorizontal: SPACING.lg,
     marginBottom: SPACING.md,
+    overflow: 'hidden',
+  },
+  cardInner: {
+    padding: SPACING.md,
   },
   header: {
     flexDirection: 'row',

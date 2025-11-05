@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
+import { BlurView } from 'expo-blur';
 import Animated, { FadeInLeft } from 'react-native-reanimated';
 import { Resource } from '../types';
 import { useTheme } from '../contexts/ThemeContext';
@@ -27,57 +28,62 @@ const fileTypeColors = {
 };
 
 export default function ResourceCard({ resource, onDownload, index }: ResourceCardProps) {
-  const { colors } = useTheme();
+  const { colors, isDarkMode } = useTheme();
   const fileIcon = fileTypeIcons[resource.fileType];
   const fileColor = fileTypeColors[resource.fileType];
 
   return (
     <Animated.View entering={FadeInLeft.delay(index * 100).springify()}>
-      <View style={[styles.container, { backgroundColor: colors.surface }, SHADOWS.medium]}>
-        <View style={[styles.fileIcon, { backgroundColor: fileColor + '20' }]}>
-          <MaterialIcons name={fileIcon} size={32} color={fileColor} />
-        </View>
-        
-        <View style={styles.content}>
-          <Text style={[styles.title, { color: colors.text }]} numberOfLines={2}>{resource.title}</Text>
-          <Text style={[styles.description, { color: colors.textSecondary }]} numberOfLines={2}>{resource.description}</Text>
+      <BlurView intensity={isDarkMode ? 25 : 70} style={[styles.container, SHADOWS.medium]}>
+        <View style={[styles.cardInner, { borderColor: colors.glassBorder, borderWidth: 1 }]}>
+          <View style={[styles.fileIcon, { backgroundColor: fileColor + '20' }]}>
+            <MaterialIcons name={fileIcon} size={32} color={fileColor} />
+          </View>
           
-          <View style={styles.metaRow}>
-            <View style={styles.metaItem}>
-              <MaterialIcons name="insert-drive-file" size={14} color={colors.textLight} />
-              <Text style={[styles.metaText, { color: colors.textLight }]}>{resource.fileType.toUpperCase()}</Text>
-            </View>
+          <View style={styles.content}>
+            <Text style={[styles.title, { color: colors.text }]} numberOfLines={2}>{resource.title}</Text>
+            <Text style={[styles.description, { color: colors.textSecondary }]} numberOfLines={2}>{resource.description}</Text>
             
-            <View style={styles.metaItem}>
-              <MaterialIcons name="storage" size={14} color={colors.textLight} />
-              <Text style={[styles.metaText, { color: colors.textLight }]}>{resource.size}</Text>
-            </View>
-            
-            <View style={styles.metaItem}>
-              <MaterialIcons name="download" size={14} color={colors.textLight} />
-              <Text style={[styles.metaText, { color: colors.textLight }]}>{resource.downloads}</Text>
+            <View style={styles.metaRow}>
+              <View style={styles.metaItem}>
+                <MaterialIcons name="insert-drive-file" size={14} color={colors.textLight} />
+                <Text style={[styles.metaText, { color: colors.textLight }]}>{resource.fileType.toUpperCase()}</Text>
+              </View>
+              
+              <View style={styles.metaItem}>
+                <MaterialIcons name="storage" size={14} color={colors.textLight} />
+                <Text style={[styles.metaText, { color: colors.textLight }]}>{resource.size}</Text>
+              </View>
+              
+              <View style={styles.metaItem}>
+                <MaterialIcons name="download" size={14} color={colors.textLight} />
+                <Text style={[styles.metaText, { color: colors.textLight }]}>{resource.downloads}</Text>
+              </View>
             </View>
           </View>
+          
+          <TouchableOpacity 
+            style={[styles.downloadButton, { backgroundColor: colors.primary + '20' }]} 
+            onPress={onDownload}
+            activeOpacity={0.7}
+          >
+            <MaterialIcons name="download" size={24} color={colors.primary} />
+          </TouchableOpacity>
         </View>
-        
-        <TouchableOpacity 
-          style={[styles.downloadButton, { backgroundColor: colors.primary + '20' }]} 
-          onPress={onDownload}
-          activeOpacity={0.7}
-        >
-          <MaterialIcons name="download" size={24} color={colors.primary} />
-        </TouchableOpacity>
-      </View>
+      </BlurView>
     </Animated.View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    borderRadius: BORDER_RADIUS.md,
-    padding: SPACING.md,
+    borderRadius: BORDER_RADIUS.lg,
     marginHorizontal: SPACING.lg,
     marginBottom: SPACING.md,
+    overflow: 'hidden',
+  },
+  cardInner: {
+    padding: SPACING.md,
     flexDirection: 'row',
     alignItems: 'center',
   },

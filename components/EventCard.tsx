@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
+import { BlurView } from 'expo-blur';
 import Animated, { FadeInRight } from 'react-native-reanimated';
 import { Event } from '../types';
 import { useTheme } from '../contexts/ThemeContext';
@@ -20,7 +21,7 @@ const categoryIcons = {
 };
 
 export default function EventCard({ event, onPress, index }: EventCardProps) {
-  const { colors } = useTheme();
+  const { colors, isDarkMode } = useTheme();
   
   const categoryColors = {
     meeting: colors.info,
@@ -35,46 +36,49 @@ export default function EventCard({ event, onPress, index }: EventCardProps) {
   return (
     <Animated.View entering={FadeInRight.delay(index * 100).springify()}>
       <TouchableOpacity 
-        style={[styles.container, { backgroundColor: colors.surface }, SHADOWS.medium]} 
         onPress={onPress}
-        activeOpacity={0.7}
+        activeOpacity={0.8}
       >
-        <View style={[styles.categoryBadge, { backgroundColor: categoryColor }]}>
-          <MaterialIcons name={categoryIcon} size={20} color="#FFFFFF" />
-        </View>
-        
-        <View style={styles.content}>
-          <Text style={[styles.title, { color: colors.text }]} numberOfLines={2}>{event.title}</Text>
-          
-          <View style={styles.infoRow}>
-            <MaterialIcons name="calendar-today" size={14} color={colors.textSecondary} />
-            <Text style={[styles.infoText, { color: colors.textSecondary }]}>{event.date}</Text>
-          </View>
-          
-          <View style={styles.infoRow}>
-            <MaterialIcons name="access-time" size={14} color={colors.textSecondary} />
-            <Text style={[styles.infoText, { color: colors.textSecondary }]}>{event.time}</Text>
-          </View>
-          
-          <View style={styles.infoRow}>
-            <MaterialIcons name="location-on" size={14} color={colors.textSecondary} />
-            <Text style={[styles.infoText, { color: colors.textSecondary }]} numberOfLines={1}>{event.location}</Text>
-          </View>
-          
-          <View style={[styles.footer, { borderTopColor: colors.divider }]}>
-            <View style={styles.attendeesContainer}>
-              <MaterialIcons name="people" size={16} color={colors.textLight} />
-              <Text style={[styles.attendeesText, { color: colors.textLight }]}>{event.attendees} attending</Text>
+        <BlurView intensity={isDarkMode ? 25 : 70} style={[styles.container, SHADOWS.medium]}>
+          <View style={[styles.cardInner, { borderColor: colors.glassBorder, borderWidth: 1 }]}>
+            <View style={[styles.categoryBadge, { backgroundColor: categoryColor }]}>
+              <MaterialIcons name={categoryIcon} size={20} color="#FFFFFF" />
             </View>
             
-            {event.isRegistered && (
-              <View style={[styles.registeredBadge, { backgroundColor: colors.success + '20' }]}>
-                <MaterialIcons name="check-circle" size={14} color={colors.success} />
-                <Text style={[styles.registeredText, { color: colors.success }]}>Registered</Text>
+            <View style={styles.content}>
+              <Text style={[styles.title, { color: colors.text }]} numberOfLines={2}>{event.title}</Text>
+              
+              <View style={styles.infoRow}>
+                <MaterialIcons name="calendar-today" size={14} color={colors.textSecondary} />
+                <Text style={[styles.infoText, { color: colors.textSecondary }]}>{event.date}</Text>
               </View>
-            )}
+              
+              <View style={styles.infoRow}>
+                <MaterialIcons name="access-time" size={14} color={colors.textSecondary} />
+                <Text style={[styles.infoText, { color: colors.textSecondary }]}>{event.time}</Text>
+              </View>
+              
+              <View style={styles.infoRow}>
+                <MaterialIcons name="location-on" size={14} color={colors.textSecondary} />
+                <Text style={[styles.infoText, { color: colors.textSecondary }]} numberOfLines={1}>{event.location}</Text>
+              </View>
+              
+              <View style={[styles.footer, { borderTopColor: colors.divider }]}>
+                <View style={styles.attendeesContainer}>
+                  <MaterialIcons name="people" size={16} color={colors.textLight} />
+                  <Text style={[styles.attendeesText, { color: colors.textLight }]}>{event.attendees} attending</Text>
+                </View>
+                
+                {event.isRegistered && (
+                  <View style={[styles.registeredBadge, { backgroundColor: colors.success + '20' }]}>
+                    <MaterialIcons name="check-circle" size={14} color={colors.success} />
+                    <Text style={[styles.registeredText, { color: colors.success }]}>Registered</Text>
+                  </View>
+                )}
+              </View>
+            </View>
           </View>
-        </View>
+        </BlurView>
       </TouchableOpacity>
     </Animated.View>
   );
@@ -82,10 +86,13 @@ export default function EventCard({ event, onPress, index }: EventCardProps) {
 
 const styles = StyleSheet.create({
   container: {
-    borderRadius: BORDER_RADIUS.md,
+    borderRadius: BORDER_RADIUS.lg,
     marginHorizontal: SPACING.lg,
     marginBottom: SPACING.md,
     overflow: 'hidden',
+  },
+  cardInner: {
+    padding: SPACING.md,
   },
   categoryBadge: {
     position: 'absolute',
@@ -99,12 +106,11 @@ const styles = StyleSheet.create({
     zIndex: 1,
   },
   content: {
-    padding: SPACING.md,
+    paddingRight: 48,
   },
   title: {
     ...TYPOGRAPHY.h3,
     marginBottom: SPACING.sm,
-    paddingRight: 48,
   },
   infoRow: {
     flexDirection: 'row',
