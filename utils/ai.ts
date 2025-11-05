@@ -38,18 +38,7 @@ Focus areas: Leadership, business strategy, competition preparation, networking,
 
 // Helper function to get environment variables with fallbacks
 const getEnvVar = (key: string): string | undefined => {
-  // Direct access to the extra config
-  const extra = Constants.expoConfig?.extra;
-  
-  if (extra && typeof extra === 'object' && key in extra) {
-    const value = extra[key];
-    if (typeof value === 'string' && value.trim() !== '') {
-      console.log(`✅ Found ${key} in expoConfig.extra:`, value.substring(0, 20) + '...');
-      return value;
-    }
-  }
-  
-  // Fallback to specific process.env keys
+  // Try process.env first (loaded from .env.local)
   if (key === 'EXPO_PUBLIC_KIKI_BASE_URL') {
     const value = process.env.EXPO_PUBLIC_KIKI_BASE_URL;
     if (value && value.trim() !== '') {
@@ -62,6 +51,16 @@ const getEnvVar = (key: string): string | undefined => {
     const value = process.env.EXPO_PUBLIC_KIKI_API_KEY;
     if (value && value.trim() !== '') {
       console.log(`✅ Found ${key} in process.env:`, value.substring(0, 20) + '...');
+      return value;
+    }
+  }
+  
+  // Fallback to expoConfig.extra
+  const extra = Constants.expoConfig?.extra;
+  if (extra && typeof extra === 'object' && key in extra) {
+    const value = extra[key];
+    if (typeof value === 'string' && value.trim() !== '') {
+      console.log(`✅ Found ${key} in expoConfig.extra:`, value.substring(0, 20) + '...');
       return value;
     }
   }
