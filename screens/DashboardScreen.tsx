@@ -146,14 +146,14 @@ export default function DashboardScreen({ navigation }: DashboardScreenProps) {
               {/* Enhanced Calendar Card with edge glow */}
               <Animated.View entering={FadeIn.delay(300).springify()}>
                 <BlurView 
-                  intensity={isDarkMode ? 25 : 80} 
+                  intensity={isDarkMode ? 40 : 95} 
                   tint={isDarkMode ? 'dark' : 'light'}
                   style={[styles.dateCard, SHADOWS.medium]}
                 >
                   <View style={[styles.dateCardInner, { 
-                    borderColor: isDarkMode ? 'rgba(90, 159, 238, 0.3)' : 'rgba(255, 255, 255, 0.6)', 
+                    borderColor: isDarkMode ? 'rgba(90, 159, 238, 0.4)' : 'rgba(255, 255, 255, 0.7)', 
                     borderWidth: 1.5,
-                    backgroundColor: isDarkMode ? 'rgba(26, 31, 46, 0.3)' : 'rgba(255, 255, 255, 0.2)'
+                    backgroundColor: 'transparent'
                   }]}>
                     <Text style={[styles.dateDay, { color: colors.primary }]}>{dayName}</Text>
                     <Text style={[styles.dateNumber, { color: colors.text }]}>{dayNumber}</Text>
@@ -168,14 +168,14 @@ export default function DashboardScreen({ navigation }: DashboardScreenProps) {
           {/* Enhanced Quote Card with luminous edges */}
           <Animated.View entering={FadeInDown.delay(200).springify()}>
             <BlurView 
-              intensity={isDarkMode ? 25 : 85} 
+              intensity={isDarkMode ? 40 : 95} 
               tint={isDarkMode ? 'dark' : 'light'}
               style={[styles.quoteContainer, SHADOWS.medium]}
             >
               <View style={[styles.quoteInner, { 
-                borderColor: isDarkMode ? 'rgba(90, 159, 238, 0.3)' : 'rgba(255, 255, 255, 0.6)', 
+                borderColor: isDarkMode ? 'rgba(90, 159, 238, 0.4)' : 'rgba(255, 255, 255, 0.7)', 
                 borderWidth: 1.5,
-                backgroundColor: isDarkMode ? 'rgba(26, 31, 46, 0.3)' : 'rgba(255, 255, 255, 0.2)'
+                backgroundColor: 'transparent'
               }]}>
                 <RNAnimated.View style={{ opacity: quoteOpacity }}>
                   <Text style={[styles.quote, { color: colors.primary }]}>
@@ -208,14 +208,14 @@ export default function DashboardScreen({ navigation }: DashboardScreenProps) {
                 onPress={() => navigation.navigate('EventDetail', { event: upcomingEvent })}
               >
                 <BlurView 
-                  intensity={isDarkMode ? 30 : 85} 
+                  intensity={isDarkMode ? 45 : 95} 
                   tint={isDarkMode ? 'dark' : 'light'}
                   style={[styles.eventCard, SHADOWS.large]}
                 >
                   <View style={[styles.eventCardInner, { 
-                    borderColor: isDarkMode ? 'rgba(90, 159, 238, 0.3)' : 'rgba(255, 255, 255, 0.6)', 
+                    borderColor: isDarkMode ? 'rgba(90, 159, 238, 0.4)' : 'rgba(255, 255, 255, 0.7)', 
                     borderWidth: 1.5,
-                    backgroundColor: isDarkMode ? 'rgba(26, 31, 46, 0.3)' : 'rgba(255, 255, 255, 0.2)'
+                    backgroundColor: 'transparent'
                   }]}>
                     <View style={styles.eventHeader}>
                       <View style={[styles.eventIconContainer, { backgroundColor: colors.primary }]}>
@@ -257,14 +257,14 @@ export default function DashboardScreen({ navigation }: DashboardScreenProps) {
               onPress={() => navigation.navigate('NewsFeed')}
             >
               <BlurView 
-                intensity={isDarkMode ? 25 : 85} 
+                intensity={isDarkMode ? 40 : 95} 
                 tint={isDarkMode ? 'dark' : 'light'}
                 style={[styles.notificationStrip, SHADOWS.small]}
               >
                 <View style={[styles.notificationInner, { 
-                  borderColor: isDarkMode ? 'rgba(90, 159, 238, 0.3)' : 'rgba(255, 255, 255, 0.6)', 
+                  borderColor: isDarkMode ? 'rgba(90, 159, 238, 0.4)' : 'rgba(255, 255, 255, 0.7)', 
                   borderWidth: 1.5,
-                  backgroundColor: isDarkMode ? 'rgba(26, 31, 46, 0.3)' : 'rgba(255, 255, 255, 0.2)'
+                  backgroundColor: 'transparent'
                 }]}>
                   <View style={[styles.notificationDot, { backgroundColor: colors.secondary }]} />
                   <Text style={[styles.notificationText, { color: colors.text }]}>
@@ -319,9 +319,9 @@ export default function DashboardScreen({ navigation }: DashboardScreenProps) {
                   style={[styles.socialButton, SHADOWS.medium]}
                 >
                   <View style={[styles.socialButtonInner, { 
-                    borderColor: isDarkMode ? 'rgba(90, 159, 238, 0.3)' : 'rgba(255, 255, 255, 0.6)', 
+                    borderColor: isDarkMode ? 'rgba(90, 159, 238, 0.4)' : 'rgba(255, 255, 255, 0.7)', 
                     borderWidth: 1.5,
-                    backgroundColor: isDarkMode ? 'rgba(26, 31, 46, 0.3)' : 'rgba(255, 255, 255, 0.2)'
+                    backgroundColor: 'transparent'
                   }]}>
                     <LinearGradient
                       colors={['#833AB4', '#FD1D1D', '#F77737']}
@@ -347,9 +347,9 @@ export default function DashboardScreen({ navigation }: DashboardScreenProps) {
                   style={[styles.socialButton, SHADOWS.medium]}
                 >
                   <View style={[styles.socialButtonInner, { 
-                    borderColor: isDarkMode ? 'rgba(90, 159, 238, 0.3)' : 'rgba(255, 255, 255, 0.6)', 
+                    borderColor: isDarkMode ? 'rgba(90, 159, 238, 0.4)' : 'rgba(255, 255, 255, 0.7)', 
                     borderWidth: 1.5,
-                    backgroundColor: isDarkMode ? 'rgba(26, 31, 46, 0.3)' : 'rgba(255, 255, 255, 0.2)'
+                    backgroundColor: 'transparent'
                   }]}>
                     <View style={[styles.socialIconGradient, { backgroundColor: '#1DA1F2' }]}>
                       <MaterialIcons name="tag" size={24} color="#FFFFFF" />
@@ -370,14 +370,14 @@ function QuickActionButton({ icon, color, onPress, colors, isDarkMode }: any) {
   return (
     <TouchableOpacity onPress={onPress} activeOpacity={0.85} style={styles.quickActionButton}>
       <BlurView 
-        intensity={isDarkMode ? 25 : 85} 
+        intensity={isDarkMode ? 40 : 95} 
         tint={isDarkMode ? 'dark' : 'light'}
         style={[styles.quickActionBlur, SHADOWS.medium]}
       >
         <View style={[styles.quickActionInner, { 
-          borderColor: isDarkMode ? 'rgba(90, 159, 238, 0.3)' : 'rgba(255, 255, 255, 0.6)', 
+          borderColor: isDarkMode ? 'rgba(90, 159, 238, 0.4)' : 'rgba(255, 255, 255, 0.7)', 
           borderWidth: 1.5,
-          backgroundColor: isDarkMode ? 'rgba(26, 31, 46, 0.3)' : 'rgba(255, 255, 255, 0.2)'
+          backgroundColor: 'transparent'
         }]}>
           <View style={[styles.quickActionIcon, { backgroundColor: color + '20' }]}>
             <MaterialIcons name={icon} size={32} color={color} />

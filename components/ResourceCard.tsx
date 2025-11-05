@@ -35,14 +35,14 @@ export default function ResourceCard({ resource, onDownload, index }: ResourceCa
   return (
     <Animated.View entering={FadeInLeft.delay(index * 100).springify()}>
       <BlurView 
-        intensity={isDarkMode ? 30 : 85} 
+        intensity={isDarkMode ? 45 : 95} 
         tint={isDarkMode ? 'dark' : 'light'}
         style={[styles.container, SHADOWS.medium]}
       >
         <View style={[styles.cardInner, { 
-          borderColor: isDarkMode ? 'rgba(90, 159, 238, 0.3)' : 'rgba(255, 255, 255, 0.6)', 
+          borderColor: isDarkMode ? 'rgba(90, 159, 238, 0.4)' : 'rgba(255, 255, 255, 0.7)', 
           borderWidth: 1.5,
-          backgroundColor: isDarkMode ? 'rgba(26, 31, 46, 0.3)' : 'rgba(255, 255, 255, 0.2)'
+          backgroundColor: 'transparent'
         }]}>
           <View style={[styles.fileIcon, { backgroundColor: fileColor + '20' }]}>
             <MaterialIcons name={fileIcon} size={32} color={fileColor} />

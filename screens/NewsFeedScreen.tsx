@@ -46,10 +46,12 @@ export default function NewsFeedScreen() {
       <LinearGradient
         colors={isDarkMode 
           ? ['#0A0E1A', '#1A1F2E', '#0F1419', '#0A0E1A']
-          : ['#E8F0FE', '#F0F5FF', '#FDFEFF', '#FFFFFF']
+          : ['#E6EFFD', '#EEF4FF', '#F8FBFF', '#FFFFFF']
         }
-        style={StyleSheet.absoluteFillObject}
-        locations={[0, 0.3, 0.7, 1]}
+        style={[StyleSheet.absoluteFillObject, { width: '100%', height: '100%' }]}
+        locations={[0, 0.35, 0.65, 1]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 0, y: 1 }}
       />
       
       <View style={styles.header}>

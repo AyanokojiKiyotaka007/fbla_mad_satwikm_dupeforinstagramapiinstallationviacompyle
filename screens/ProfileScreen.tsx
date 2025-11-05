@@ -137,10 +137,12 @@ export default function ProfileScreen() {
       <LinearGradient
         colors={isDarkMode 
           ? ['#0A0E1A', '#1A1F2E', '#0F1419', '#0A0E1A']
-          : ['#E8F0FE', '#F0F5FF', '#FDFEFF', '#FFFFFF']
+          : ['#E6EFFD', '#EEF4FF', '#F8FBFF', '#FFFFFF']
         }
-        style={StyleSheet.absoluteFillObject}
-        locations={[0, 0.3, 0.7, 1]}
+        style={[StyleSheet.absoluteFillObject, { width: '100%', height: '100%' }]}
+        locations={[0, 0.35, 0.65, 1]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 0, y: 1 }}
       />
       
       <View style={styles.header}>
@@ -163,147 +165,147 @@ export default function ProfileScreen() {
       >
         {/* Profile Header */}
         <Animated.View entering={FadeIn.duration(600)}>
-          <BlurView intensity={isDarkMode ? 30 : 75} style={[styles.profileHeader, SHADOWS.medium]}>
-            <LinearGradient
-              colors={isDarkMode 
-                ? ['rgba(26, 31, 46, 0.5)', 'rgba(37, 42, 53, 0.4)']
-                : ['rgba(255, 255, 255, 0.6)', 'rgba(255, 255, 255, 0.4)']
-              }
-              style={styles.profileGradient}
-            >
-              <View style={[styles.profileInner, { borderColor: colors.glassBorder, borderWidth: 1.5 }]}>
-                <View style={styles.avatarContainer}>
-                  {profileImage ? (
-                    <Image source={{ uri: profileImage }} style={styles.profileImage} />
-                  ) : (
-                    <MaterialIcons name="account-circle" size={80} color={colors.primary} />
-                  )}
-                  {isEditing && (
-                    <TouchableOpacity 
-                      style={[styles.avatarEditButton, { backgroundColor: colors.primary }]}
-                      onPress={pickImage}
-                    >
-                      <MaterialIcons name="camera-alt" size={20} color="#FFFFFF" />
-                    </TouchableOpacity>
-                  )}
-                </View>
-                <Text style={[styles.profileName, { color: colors.text }]}>{profile.name}</Text>
-                <Text style={[styles.profilePosition, { color: colors.textSecondary }]}>{profile.position}</Text>
-                <View style={[styles.chapterBadge, { backgroundColor: colors.primary + '20' }]}>
-                  <MaterialIcons name="school" size={16} color={colors.primary} />
-                  <Text style={[styles.chapterText, { color: colors.primary }]}>{profile.chapter}</Text>
-                </View>
+          <BlurView 
+            intensity={isDarkMode ? 45 : 95} 
+            tint={isDarkMode ? 'dark' : 'light'}
+            style={[styles.profileHeader, SHADOWS.medium]}
+          >
+            <View style={[styles.profileInner, { 
+              borderColor: isDarkMode ? 'rgba(90, 159, 238, 0.4)' : 'rgba(255, 255, 255, 0.7)', 
+              borderWidth: 1.5,
+              backgroundColor: 'transparent'
+            }]}>
+              <View style={styles.avatarContainer}>
+                {profileImage ? (
+                  <Image source={{ uri: profileImage }} style={styles.profileImage} />
+                ) : (
+                  <MaterialIcons name="account-circle" size={80} color={colors.primary} />
+                )}
+                {isEditing && (
+                  <TouchableOpacity 
+                    style={[styles.avatarEditButton, { backgroundColor: colors.primary }]}
+                    onPress={pickImage}
+                  >
+                    <MaterialIcons name="camera-alt" size={20} color="#FFFFFF" />
+                  </TouchableOpacity>
+                )}
               </View>
-            </LinearGradient>
+              <Text style={[styles.profileName, { color: colors.text }]}>{profile.name}</Text>
+              <Text style={[styles.profilePosition, { color: colors.textSecondary }]}>{profile.position}</Text>
+              <View style={[styles.chapterBadge, { backgroundColor: colors.primary + '20' }]}>
+                <MaterialIcons name="school" size={16} color={colors.primary} />
+                <Text style={[styles.chapterText, { color: colors.primary }]}>{profile.chapter}</Text>
+              </View>
+            </View>
           </BlurView>
         </Animated.View>
 
         {/* Stats */}
         <Animated.View entering={FadeInDown.delay(200).springify()}>
-          <BlurView intensity={isDarkMode ? 30 : 75} style={[styles.statsCard, SHADOWS.medium]}>
-            <LinearGradient
-              colors={isDarkMode 
-                ? ['rgba(26, 31, 46, 0.5)', 'rgba(37, 42, 53, 0.4)']
-                : ['rgba(255, 255, 255, 0.6)', 'rgba(255, 255, 255, 0.4)']
-              }
-              style={styles.statsGradient}
-            >
-              <View style={[styles.statsInner, { borderColor: colors.glassBorder, borderWidth: 1.5 }]}>
-                <View style={styles.statItem}>
-                  <Text style={[styles.statValue, { color: colors.primary }]}>
-                    {user?.eventsAttended || 0}
-                  </Text>
-                  <Text style={[styles.statLabel, { color: colors.textSecondary }]}>Events Attended</Text>
-                </View>
-                <View style={[styles.statDivider, { backgroundColor: colors.divider }]} />
-                <View style={styles.statItem}>
-                  <Text style={[styles.statValue, { color: colors.primary }]}>
-                    {profile.memberSince ? Math.floor((Date.now() - new Date(profile.memberSince).getTime()) / (1000 * 60 * 60 * 24)) : 0}
-                  </Text>
-                  <Text style={[styles.statLabel, { color: colors.textSecondary }]}>Days as Member</Text>
-                </View>
+          <BlurView 
+            intensity={isDarkMode ? 45 : 95} 
+            tint={isDarkMode ? 'dark' : 'light'}
+            style={[styles.statsCard, SHADOWS.medium]}
+          >
+            <View style={[styles.statsInner, { 
+              borderColor: isDarkMode ? 'rgba(90, 159, 238, 0.4)' : 'rgba(255, 255, 255, 0.7)', 
+              borderWidth: 1.5,
+              backgroundColor: 'transparent'
+            }]}>
+              <View style={styles.statItem}>
+                <Text style={[styles.statValue, { color: colors.primary }]}>
+                  {user?.eventsAttended || 0}
+                </Text>
+                <Text style={[styles.statLabel, { color: colors.textSecondary }]}>Events Attended</Text>
               </View>
-            </LinearGradient>
+              <View style={[styles.statDivider, { backgroundColor: colors.divider }]} />
+              <View style={styles.statItem}>
+                <Text style={[styles.statValue, { color: colors.primary }]}>
+                  {profile.memberSince ? Math.floor((Date.now() - new Date(profile.memberSince).getTime()) / (1000 * 60 * 60 * 24)) : 0}
+                </Text>
+                <Text style={[styles.statLabel, { color: colors.textSecondary }]}>Days as Member</Text>
+              </View>
+            </View>
           </BlurView>
         </Animated.View>
 
         {/* Profile Information */}
         <Animated.View entering={FadeInDown.delay(300).springify()}>
-          <BlurView intensity={isDarkMode ? 30 : 75} style={[styles.infoCard, SHADOWS.medium]}>
-            <LinearGradient
-              colors={isDarkMode 
-                ? ['rgba(26, 31, 46, 0.5)', 'rgba(37, 42, 53, 0.4)']
-                : ['rgba(255, 255, 255, 0.6)', 'rgba(255, 255, 255, 0.4)']
-              }
-              style={styles.infoGradient}
-            >
-              <View style={[styles.infoInner, { borderColor: colors.glassBorder, borderWidth: 1.5 }]}>
-                <Text style={[styles.sectionTitle, { color: colors.text }]}>Personal Information</Text>
-                
-                <InfoField icon="email" label="Email" value={profile.email} editable colors={colors} isEditing={isEditing} profile={profile} setProfile={setProfile} />
-                <InfoField icon="phone" label="Phone" value={profile.phone} editable colors={colors} isEditing={isEditing} profile={profile} setProfile={setProfile} />
-                <InfoField icon="calendar-today" label="Member Since" value={profile.memberSince} colors={colors} isEditing={false} profile={profile} setProfile={setProfile} />
-                <InfoField icon="info" label="Bio" value={profile.bio} editable multiline colors={colors} isEditing={isEditing} profile={profile} setProfile={setProfile} />
-              </View>
-            </LinearGradient>
+          <BlurView 
+            intensity={isDarkMode ? 45 : 95} 
+            tint={isDarkMode ? 'dark' : 'light'}
+            style={[styles.infoCard, SHADOWS.medium]}
+          >
+            <View style={[styles.infoInner, { 
+              borderColor: isDarkMode ? 'rgba(90, 159, 238, 0.4)' : 'rgba(255, 255, 255, 0.7)', 
+              borderWidth: 1.5,
+              backgroundColor: 'transparent'
+            }]}>
+              <Text style={[styles.sectionTitle, { color: colors.text }]}>Personal Information</Text>
+              
+              <InfoField icon="email" label="Email" value={profile.email} editable colors={colors} isEditing={isEditing} profile={profile} setProfile={setProfile} />
+              <InfoField icon="phone" label="Phone" value={profile.phone} editable colors={colors} isEditing={isEditing} profile={profile} setProfile={setProfile} />
+              <InfoField icon="calendar-today" label="Member Since" value={profile.memberSince} colors={colors} isEditing={false} profile={profile} setProfile={setProfile} />
+              <InfoField icon="info" label="Bio" value={profile.bio} editable multiline colors={colors} isEditing={isEditing} profile={profile} setProfile={setProfile} />
+            </View>
           </BlurView>
         </Animated.View>
 
         {/* Settings */}
         <Animated.View entering={FadeInDown.delay(400).springify()}>
-          <BlurView intensity={isDarkMode ? 30 : 75} style={[styles.settingsCard, SHADOWS.medium]}>
-            <LinearGradient
-              colors={isDarkMode 
-                ? ['rgba(26, 31, 46, 0.5)', 'rgba(37, 42, 53, 0.4)']
-                : ['rgba(255, 255, 255, 0.6)', 'rgba(255, 255, 255, 0.4)']
-              }
-              style={styles.settingsGradient}
-            >
-              <View style={[styles.settingsInner, { borderColor: colors.glassBorder, borderWidth: 1.5 }]}>
-                <Text style={[styles.sectionTitle, { color: colors.text }]}>Settings</Text>
-                
-                <TouchableOpacity style={[styles.settingItem, { borderBottomColor: colors.divider }]} onPress={toggleTheme}>
-                  <View style={styles.settingLeft}>
-                    <MaterialIcons name={isDarkMode ? 'dark-mode' : 'light-mode'} size={24} color={colors.textSecondary} />
-                    <Text style={[styles.settingText, { color: colors.text }]}>Dark Mode</Text>
-                  </View>
-                  <View style={[styles.toggle, { backgroundColor: isDarkMode ? colors.primary : colors.border }]}>
-                    <View style={[styles.toggleThumb, { transform: [{ translateX: isDarkMode ? 20 : 0 }] }]} />
-                  </View>
-                </TouchableOpacity>
+          <BlurView 
+            intensity={isDarkMode ? 45 : 95} 
+            tint={isDarkMode ? 'dark' : 'light'}
+            style={[styles.settingsCard, SHADOWS.medium]}
+          >
+            <View style={[styles.settingsInner, { 
+              borderColor: isDarkMode ? 'rgba(90, 159, 238, 0.4)' : 'rgba(255, 255, 255, 0.7)', 
+              borderWidth: 1.5,
+              backgroundColor: 'transparent'
+            }]}>
+              <Text style={[styles.sectionTitle, { color: colors.text }]}>Settings</Text>
+              
+              <TouchableOpacity style={[styles.settingItem, { borderBottomColor: colors.divider }]} onPress={toggleTheme}>
+                <View style={styles.settingLeft}>
+                  <MaterialIcons name={isDarkMode ? 'dark-mode' : 'light-mode'} size={24} color={colors.textSecondary} />
+                  <Text style={[styles.settingText, { color: colors.text }]}>Dark Mode</Text>
+                </View>
+                <View style={[styles.toggle, { backgroundColor: isDarkMode ? colors.primary : colors.border }]}>
+                  <View style={[styles.toggleThumb, { transform: [{ translateX: isDarkMode ? 20 : 0 }] }]} />
+                </View>
+              </TouchableOpacity>
 
-                <TouchableOpacity style={[styles.settingItem, { borderBottomColor: colors.divider }]}>
-                  <View style={styles.settingLeft}>
-                    <MaterialIcons name="notifications" size={24} color={colors.textSecondary} />
-                    <Text style={[styles.settingText, { color: colors.text }]}>Notifications</Text>
-                  </View>
-                  <MaterialIcons name="chevron-right" size={24} color={colors.textLight} />
-                </TouchableOpacity>
+              <TouchableOpacity style={[styles.settingItem, { borderBottomColor: colors.divider }]}>
+                <View style={styles.settingLeft}>
+                  <MaterialIcons name="notifications" size={24} color={colors.textSecondary} />
+                  <Text style={[styles.settingText, { color: colors.text }]}>Notifications</Text>
+                </View>
+                <MaterialIcons name="chevron-right" size={24} color={colors.textLight} />
+              </TouchableOpacity>
 
-                <TouchableOpacity style={[styles.settingItem, { borderBottomColor: colors.divider }]}>
-                  <View style={styles.settingLeft}>
-                    <MaterialIcons name="lock" size={24} color={colors.textSecondary} />
-                    <Text style={[styles.settingText, { color: colors.text }]}>Privacy</Text>
-                  </View>
-                  <MaterialIcons name="chevron-right" size={24} color={colors.textLight} />
-                </TouchableOpacity>
+              <TouchableOpacity style={[styles.settingItem, { borderBottomColor: colors.divider }]}>
+                <View style={styles.settingLeft}>
+                  <MaterialIcons name="lock" size={24} color={colors.textSecondary} />
+                  <Text style={[styles.settingText, { color: colors.text }]}>Privacy</Text>
+                </View>
+                <MaterialIcons name="chevron-right" size={24} color={colors.textLight} />
+              </TouchableOpacity>
 
-                <TouchableOpacity style={[styles.settingItem, { borderBottomColor: colors.divider }]}>
-                  <View style={styles.settingLeft}>
-                    <MaterialIcons name="help" size={24} color={colors.textSecondary} />
-                    <Text style={[styles.settingText, { color: colors.text }]}>Help & Support</Text>
-                  </View>
-                  <MaterialIcons name="chevron-right" size={24} color={colors.textLight} />
-                </TouchableOpacity>
+              <TouchableOpacity style={[styles.settingItem, { borderBottomColor: colors.divider }]}>
+                <View style={styles.settingLeft}>
+                  <MaterialIcons name="help" size={24} color={colors.textSecondary} />
+                  <Text style={[styles.settingText, { color: colors.text }]}>Help & Support</Text>
+                </View>
+                <MaterialIcons name="chevron-right" size={24} color={colors.textLight} />
+              </TouchableOpacity>
 
-                <TouchableOpacity style={[styles.settingItem, styles.logoutItem]} onPress={handleSignOut}>
-                  <View style={styles.settingLeft}>
-                    <MaterialIcons name="logout" size={24} color={colors.error} />
-                    <Text style={[styles.settingText, styles.logoutText, { color: colors.error }]}>Log Out</Text>
-                  </View>
-                </TouchableOpacity>
-              </View>
-            </LinearGradient>
+              <TouchableOpacity style={[styles.settingItem, styles.logoutItem]} onPress={handleSignOut}>
+                <View style={styles.settingLeft}>
+                  <MaterialIcons name="logout" size={24} color={colors.error} />
+                  <Text style={[styles.settingText, styles.logoutText, { color: colors.error }]}>Log Out</Text>
+                </View>
+              </TouchableOpacity>
+            </View>
           </BlurView>
         </Animated.View>
       </ScrollView>
@@ -341,12 +343,10 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.md,
     overflow: 'hidden',
   },
-  profileGradient: {
-    borderRadius: BORDER_RADIUS.lg,
-  },
   profileInner: {
     padding: SPACING.lg,
     alignItems: 'center',
+    borderRadius: BORDER_RADIUS.lg,
   },
   avatarContainer: {
     position: 'relative',
@@ -392,12 +392,10 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.md,
     overflow: 'hidden',
   },
-  statsGradient: {
-    borderRadius: BORDER_RADIUS.lg,
-  },
   statsInner: {
     padding: SPACING.lg,
     flexDirection: 'row',
+    borderRadius: BORDER_RADIUS.lg,
   },
   statItem: {
     flex: 1,
@@ -421,11 +419,9 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.md,
     overflow: 'hidden',
   },
-  infoGradient: {
-    borderRadius: BORDER_RADIUS.lg,
-  },
   infoInner: {
     padding: SPACING.lg,
+    borderRadius: BORDER_RADIUS.lg,
   },
   sectionTitle: {
     ...TYPOGRAPHY.h3,
@@ -463,11 +459,9 @@ const styles = StyleSheet.create({
     borderRadius: BORDER_RADIUS.lg,
     overflow: 'hidden',
   },
-  settingsGradient: {
-    borderRadius: BORDER_RADIUS.lg,
-  },
   settingsInner: {
     padding: SPACING.lg,
+    borderRadius: BORDER_RADIUS.lg,
   },
   settingItem: {
     flexDirection: 'row',
