@@ -35,15 +35,28 @@ export default function ResourceCard({ resource, onDownload, index }: ResourceCa
 
   return (
     <Animated.View entering={FadeInLeft.delay(index * 100).springify()}>
-      <BlurView intensity={isDarkMode ? 30 : 75} style={[styles.container, SHADOWS.medium]}>
+      <BlurView intensity={isDarkMode ? 30 : 85} style={[styles.container, SHADOWS.medium]}>
         <LinearGradient
           colors={isDarkMode 
             ? ['rgba(26, 31, 46, 0.5)', 'rgba(37, 42, 53, 0.4)']
-            : ['rgba(255, 255, 255, 0.6)', 'rgba(255, 255, 255, 0.4)']
+            : ['rgba(255, 255, 255, 0.90)', 'rgba(255, 255, 255, 0.75)']
           }
           style={styles.gradient}
         >
-          <View style={[styles.cardInner, { borderColor: colors.glassBorder, borderWidth: 1.5 }]}>
+          {/* Edge reflection */}
+          <LinearGradient
+            colors={isDarkMode 
+              ? ['rgba(90, 159, 238, 0.1)', 'transparent']
+              : ['rgba(255, 255, 255, 0.98)', 'transparent']
+            }
+            style={styles.edgeReflection}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 0.5, y: 0.5 }}
+          />
+          <View style={[styles.cardInner, { 
+            borderColor: isDarkMode ? colors.glassBorder : 'rgba(255, 255, 255, 0.9)', 
+            borderWidth: 2 
+          }]}>
             <View style={[styles.fileIcon, { backgroundColor: fileColor + '20' }]}>
               <MaterialIcons name={fileIcon} size={32} color={fileColor} />
             </View>
@@ -86,13 +99,21 @@ export default function ResourceCard({ resource, onDownload, index }: ResourceCa
 
 const styles = StyleSheet.create({
   container: {
-    borderRadius: BORDER_RADIUS.lg,
+    borderRadius: 18,
     marginHorizontal: SPACING.lg,
     marginBottom: SPACING.md,
     overflow: 'hidden',
   },
   gradient: {
-    borderRadius: BORDER_RADIUS.lg,
+    borderRadius: 18,
+  },
+  edgeReflection: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    width: '50%',
+    height: '50%',
+    borderTopLeftRadius: 18,
   },
   cardInner: {
     padding: SPACING.md,
@@ -100,8 +121,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   fileIcon: {
-    width: 66,
-    height: 66,
+    width: 68,
+    height: 68,
     borderRadius: BORDER_RADIUS.md,
     alignItems: 'center',
     justifyContent: 'center',
@@ -134,8 +155,8 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
   downloadButton: {
-    width: 50,
-    height: 50,
+    width: 52,
+    height: 52,
     borderRadius: BORDER_RADIUS.md,
     alignItems: 'center',
     justifyContent: 'center',

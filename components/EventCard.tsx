@@ -40,15 +40,28 @@ export default function EventCard({ event, onPress, index }: EventCardProps) {
         onPress={onPress}
         activeOpacity={0.85}
       >
-        <BlurView intensity={isDarkMode ? 30 : 75} style={[styles.container, SHADOWS.medium]}>
+        <BlurView intensity={isDarkMode ? 30 : 85} style={[styles.container, SHADOWS.medium]}>
           <LinearGradient
             colors={isDarkMode 
               ? ['rgba(26, 31, 46, 0.5)', 'rgba(37, 42, 53, 0.4)']
-              : ['rgba(255, 255, 255, 0.6)', 'rgba(255, 255, 255, 0.4)']
+              : ['rgba(255, 255, 255, 0.90)', 'rgba(255, 255, 255, 0.75)']
             }
             style={styles.gradient}
           >
-            <View style={[styles.cardInner, { borderColor: colors.glassBorder, borderWidth: 1.5 }]}>
+            {/* Edge reflection for curved corners */}
+            <LinearGradient
+              colors={isDarkMode 
+                ? ['rgba(90, 159, 238, 0.1)', 'transparent']
+                : ['rgba(255, 255, 255, 0.98)', 'transparent']
+              }
+              style={styles.edgeReflection}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 0.5, y: 0.5 }}
+            />
+            <View style={[styles.cardInner, { 
+              borderColor: isDarkMode ? colors.glassBorder : 'rgba(255, 255, 255, 0.9)', 
+              borderWidth: 2 
+            }]}>
               <View style={[styles.categoryBadge, { backgroundColor: categoryColor }]}>
                 <MaterialIcons name={categoryIcon} size={20} color="#FFFFFF" />
               </View>
@@ -95,13 +108,21 @@ export default function EventCard({ event, onPress, index }: EventCardProps) {
 
 const styles = StyleSheet.create({
   container: {
-    borderRadius: BORDER_RADIUS.lg,
+    borderRadius: 18,
     marginHorizontal: SPACING.lg,
     marginBottom: SPACING.md,
     overflow: 'hidden',
   },
   gradient: {
-    borderRadius: BORDER_RADIUS.lg,
+    borderRadius: 18,
+  },
+  edgeReflection: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    width: '50%',
+    height: '50%',
+    borderTopLeftRadius: 18,
   },
   cardInner: {
     padding: SPACING.md,
@@ -110,15 +131,15 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: SPACING.md,
     right: SPACING.md,
-    width: 42,
-    height: 42,
+    width: 44,
+    height: 44,
     borderRadius: BORDER_RADIUS.md,
     alignItems: 'center',
     justifyContent: 'center',
     zIndex: 1,
   },
   content: {
-    paddingRight: 50,
+    paddingRight: 52,
   },
   title: {
     ...TYPOGRAPHY.h3,

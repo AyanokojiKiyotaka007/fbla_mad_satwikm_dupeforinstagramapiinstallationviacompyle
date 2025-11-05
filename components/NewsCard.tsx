@@ -36,15 +36,28 @@ export default function NewsCard({ news, onLike, index }: NewsCardProps) {
 
   return (
     <Animated.View entering={FadeInUp.delay(index * 100).springify()}>
-      <BlurView intensity={isDarkMode ? 30 : 75} style={[styles.container, SHADOWS.medium]}>
+      <BlurView intensity={isDarkMode ? 30 : 85} style={[styles.container, SHADOWS.medium]}>
         <LinearGradient
           colors={isDarkMode 
             ? ['rgba(26, 31, 46, 0.5)', 'rgba(37, 42, 53, 0.4)']
-            : ['rgba(255, 255, 255, 0.6)', 'rgba(255, 255, 255, 0.4)']
+            : ['rgba(255, 255, 255, 0.90)', 'rgba(255, 255, 255, 0.75)']
           }
           style={styles.gradient}
         >
-          <View style={[styles.cardInner, { borderColor: colors.glassBorder, borderWidth: 1.5 }]}>
+          {/* Edge glow */}
+          <LinearGradient
+            colors={isDarkMode 
+              ? ['rgba(90, 159, 238, 0.08)', 'transparent', 'rgba(90, 159, 238, 0.08)']
+              : ['rgba(255, 255, 255, 0.95)', 'transparent', 'rgba(255, 255, 255, 0.95)']
+            }
+            style={styles.edgeGlow}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 0 }}
+          />
+          <View style={[styles.cardInner, { 
+            borderColor: isDarkMode ? colors.glassBorder : 'rgba(255, 255, 255, 0.9)', 
+            borderWidth: 2 
+          }]}>
             <View style={styles.header}>
               <View style={[styles.categoryIcon, { backgroundColor: categoryColor + '20' }]}>
                 <MaterialIcons name={categoryIcon} size={20} color={categoryColor} />
@@ -88,13 +101,21 @@ export default function NewsCard({ news, onLike, index }: NewsCardProps) {
 
 const styles = StyleSheet.create({
   container: {
-    borderRadius: BORDER_RADIUS.lg,
+    borderRadius: 18,
     marginHorizontal: SPACING.lg,
     marginBottom: SPACING.md,
     overflow: 'hidden',
   },
   gradient: {
-    borderRadius: BORDER_RADIUS.lg,
+    borderRadius: 18,
+  },
+  edgeGlow: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    borderRadius: 18,
   },
   cardInner: {
     padding: SPACING.md,
@@ -104,8 +125,8 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.sm,
   },
   categoryIcon: {
-    width: 42,
-    height: 42,
+    width: 44,
+    height: 44,
     borderRadius: BORDER_RADIUS.md,
     alignItems: 'center',
     justifyContent: 'center',

@@ -93,28 +93,33 @@ export default function DashboardScreen({ navigation }: DashboardScreenProps) {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
-      {/* Full-screen refined gradient */}
+      {/* Full-screen refined gradient - fills entire viewport */}
       <LinearGradient
         colors={isDarkMode 
           ? ['#0A0E1A', '#1A1F2E', '#0F1419', '#0A0E1A']
-          : ['#E8F0FE', '#F0F5FF', '#FDFEFF', '#FFFFFF']
+          : ['#E6EFFD', '#EEF4FF', '#F8FBFF', '#FFFFFF']
         }
-        style={StyleSheet.absoluteFillObject}
-        locations={[0, 0.3, 0.7, 1]}
+        style={[StyleSheet.absoluteFillObject, { width: '100%', height: '100%' }]}
+        locations={[0, 0.35, 0.65, 1]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 0, y: 1 }}
       />
 
-      {/* Animated Wave Overlay */}
+      {/* Animated Wave Overlay with shimmer */}
       <RNAnimated.View
         style={[
           styles.waveOverlay,
           {
             transform: [{ translateY: waveTranslate }],
-            opacity: isDarkMode ? 0.15 : 0.2,
+            opacity: isDarkMode ? 0.15 : 0.12,
           },
         ]}
       >
         <LinearGradient
-          colors={[colors.primary + '20', colors.accent + '25', colors.primary + '20']}
+          colors={isDarkMode 
+            ? [colors.primary + '20', colors.accent + '25', colors.primary + '20']
+            : [colors.primary + '15', colors.accent + '18', colors.primary + '15']
+          }
           style={StyleSheet.absoluteFillObject}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
@@ -126,7 +131,7 @@ export default function DashboardScreen({ navigation }: DashboardScreenProps) {
           showsVerticalScrollIndicator={false}
           contentContainerStyle={styles.scrollContent}
         >
-          {/* Personal Greeting with Date - No emoji */}
+          {/* Personal Greeting with Date */}
           <Animated.View entering={FadeInUp.duration(800)} style={styles.greetingSection}>
             <View style={styles.greetingRow}>
               <View style={styles.greetingTextContainer}>
@@ -138,17 +143,31 @@ export default function DashboardScreen({ navigation }: DashboardScreenProps) {
                 </Text>
               </View>
               
-              {/* Enhanced Calendar Card */}
+              {/* Enhanced Calendar Card with edge glow */}
               <Animated.View entering={FadeIn.delay(300).springify()}>
-                <BlurView intensity={isDarkMode ? 25 : 70} style={styles.dateCard}>
+                <BlurView intensity={isDarkMode ? 25 : 80} style={[styles.dateCard, SHADOWS.medium]}>
                   <LinearGradient
                     colors={isDarkMode 
                       ? [colors.primary + '25', colors.primary + '15']
-                      : [colors.primary + '18', colors.primary + '10']
+                      : ['rgba(255, 255, 255, 0.9)', 'rgba(255, 255, 255, 0.7)']
                     }
                     style={styles.dateCardGradient}
                   >
-                    <View style={[styles.dateCardInner, { borderColor: colors.glassBorder, borderWidth: 1.5 }]}>
+                    {/* Edge reflection */}
+                    <LinearGradient
+                      colors={isDarkMode 
+                        ? ['rgba(90, 159, 238, 0.1)', 'transparent']
+                        : ['rgba(255, 255, 255, 0.98)', 'transparent']
+                      }
+                      style={styles.edgeReflection}
+                      start={{ x: 0, y: 0 }}
+                      end={{ x: 1, y: 1 }}
+                    />
+                    <View style={[styles.dateCardInner, { 
+                      borderColor: isDarkMode ? colors.glassBorder : 'rgba(255, 255, 255, 0.9)', 
+                      borderWidth: 2,
+                      backgroundColor: isDarkMode ? 'transparent' : 'rgba(0, 61, 165, 0.03)'
+                    }]}>
                       <Text style={[styles.dateDay, { color: colors.primary }]}>{dayName}</Text>
                       <Text style={[styles.dateNumber, { color: colors.text }]}>{dayNumber}</Text>
                       <Text style={[styles.dateMonth, { color: colors.textSecondary }]}>{monthName}</Text>
@@ -160,17 +179,30 @@ export default function DashboardScreen({ navigation }: DashboardScreenProps) {
             </View>
           </Animated.View>
 
-          {/* Enhanced Quote Card */}
+          {/* Enhanced Quote Card with luminous edges */}
           <Animated.View entering={FadeInDown.delay(200).springify()}>
-            <BlurView intensity={isDarkMode ? 25 : 75} style={[styles.quoteContainer, SHADOWS.medium]}>
+            <BlurView intensity={isDarkMode ? 25 : 85} style={[styles.quoteContainer, SHADOWS.medium]}>
               <LinearGradient
                 colors={isDarkMode 
                   ? ['rgba(26, 31, 46, 0.4)', 'rgba(37, 42, 53, 0.3)']
-                  : ['rgba(255, 255, 255, 0.5)', 'rgba(255, 255, 255, 0.3)']
+                  : ['rgba(255, 255, 255, 0.88)', 'rgba(255, 255, 255, 0.72)']
                 }
                 style={styles.quoteGradient}
               >
-                <View style={[styles.quoteInner, { borderColor: colors.glassBorder, borderWidth: 1.5 }]}>
+                {/* Edge glow */}
+                <LinearGradient
+                  colors={isDarkMode 
+                    ? ['rgba(90, 159, 238, 0.08)', 'transparent', 'rgba(90, 159, 238, 0.08)']
+                    : ['rgba(255, 255, 255, 0.95)', 'transparent', 'rgba(255, 255, 255, 0.95)']
+                  }
+                  style={styles.cardEdgeGlow}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 0 }}
+                />
+                <View style={[styles.quoteInner, { 
+                  borderColor: isDarkMode ? colors.glassBorder : 'rgba(255, 255, 255, 0.85)', 
+                  borderWidth: 2 
+                }]}>
                   <RNAnimated.View style={{ opacity: quoteOpacity }}>
                     <Text style={[styles.quote, { color: colors.primary }]}>
                       &ldquo;{QUOTES[currentQuoteIndex]}&rdquo;
@@ -195,22 +227,35 @@ export default function DashboardScreen({ navigation }: DashboardScreenProps) {
             </BlurView>
           </Animated.View>
 
-          {/* Enhanced Upcoming Event */}
+          {/* Enhanced Upcoming Event with defined glass */}
           {upcomingEvent && (
             <Animated.View entering={FadeInDown.delay(400).springify()}>
               <TouchableOpacity
                 activeOpacity={0.85}
                 onPress={() => navigation.navigate('EventDetail', { event: upcomingEvent })}
               >
-                <BlurView intensity={isDarkMode ? 30 : 75} style={[styles.eventCard, SHADOWS.large]}>
+                <BlurView intensity={isDarkMode ? 30 : 85} style={[styles.eventCard, SHADOWS.large]}>
                   <LinearGradient
                     colors={isDarkMode 
                       ? ['rgba(26, 31, 46, 0.5)', 'rgba(37, 42, 53, 0.4)']
-                      : ['rgba(255, 255, 255, 0.6)', 'rgba(255, 255, 255, 0.4)']
+                      : ['rgba(255, 255, 255, 0.90)', 'rgba(255, 255, 255, 0.75)']
                     }
                     style={styles.eventGradient}
                   >
-                    <View style={[styles.eventCardInner, { borderColor: colors.glassBorder, borderWidth: 1.5 }]}>
+                    {/* Curved edge reflection */}
+                    <LinearGradient
+                      colors={isDarkMode 
+                        ? ['rgba(90, 159, 238, 0.1)', 'transparent']
+                        : ['rgba(255, 255, 255, 0.98)', 'transparent']
+                      }
+                      style={styles.curvedReflection}
+                      start={{ x: 0, y: 0 }}
+                      end={{ x: 0.5, y: 0.5 }}
+                    />
+                    <View style={[styles.eventCardInner, { 
+                      borderColor: isDarkMode ? colors.glassBorder : 'rgba(255, 255, 255, 0.9)', 
+                      borderWidth: 2 
+                    }]}>
                       <View style={styles.eventHeader}>
                         <View style={[styles.eventIconContainer, { backgroundColor: colors.primary }]}>
                           <MaterialIcons name="event" size={24} color="#FFFFFF" />
@@ -251,15 +296,18 @@ export default function DashboardScreen({ navigation }: DashboardScreenProps) {
               activeOpacity={0.85}
               onPress={() => navigation.navigate('NewsFeed')}
             >
-              <BlurView intensity={isDarkMode ? 25 : 75} style={[styles.notificationStrip, SHADOWS.small]}>
+              <BlurView intensity={isDarkMode ? 25 : 85} style={[styles.notificationStrip, SHADOWS.small]}>
                 <LinearGradient
                   colors={isDarkMode 
                     ? ['rgba(26, 31, 46, 0.4)', 'rgba(37, 42, 53, 0.3)']
-                    : ['rgba(255, 255, 255, 0.5)', 'rgba(255, 255, 255, 0.3)']
+                    : ['rgba(255, 255, 255, 0.88)', 'rgba(255, 255, 255, 0.72)']
                   }
                   style={styles.notificationGradient}
                 >
-                  <View style={[styles.notificationInner, { borderColor: colors.glassBorder, borderWidth: 1.5 }]}>
+                  <View style={[styles.notificationInner, { 
+                    borderColor: isDarkMode ? colors.glassBorder : 'rgba(255, 255, 255, 0.85)', 
+                    borderWidth: 2 
+                  }]}>
                     <View style={[styles.notificationDot, { backgroundColor: colors.secondary }]} />
                     <Text style={[styles.notificationText, { color: colors.text }]}>
                       1 new announcement
@@ -308,15 +356,18 @@ export default function DashboardScreen({ navigation }: DashboardScreenProps) {
                 activeOpacity={0.85}
                 style={styles.socialButtonWrapper}
               >
-                <BlurView intensity={isDarkMode ? 25 : 75} style={[styles.socialButton, SHADOWS.medium]}>
+                <BlurView intensity={isDarkMode ? 25 : 85} style={[styles.socialButton, SHADOWS.medium]}>
                   <LinearGradient
                     colors={isDarkMode 
                       ? ['rgba(26, 31, 46, 0.4)', 'rgba(37, 42, 53, 0.3)']
-                      : ['rgba(255, 255, 255, 0.5)', 'rgba(255, 255, 255, 0.3)']
+                      : ['rgba(255, 255, 255, 0.88)', 'rgba(255, 255, 255, 0.72)']
                     }
                     style={styles.socialGradient}
                   >
-                    <View style={[styles.socialButtonInner, { borderColor: colors.glassBorder, borderWidth: 1.5 }]}>
+                    <View style={[styles.socialButtonInner, { 
+                      borderColor: isDarkMode ? colors.glassBorder : 'rgba(255, 255, 255, 0.85)', 
+                      borderWidth: 2 
+                    }]}>
                       <LinearGradient
                         colors={['#833AB4', '#FD1D1D', '#F77737']}
                         style={styles.socialIconGradient}
@@ -336,15 +387,18 @@ export default function DashboardScreen({ navigation }: DashboardScreenProps) {
                 activeOpacity={0.85}
                 style={styles.socialButtonWrapper}
               >
-                <BlurView intensity={isDarkMode ? 25 : 75} style={[styles.socialButton, SHADOWS.medium]}>
+                <BlurView intensity={isDarkMode ? 25 : 85} style={[styles.socialButton, SHADOWS.medium]}>
                   <LinearGradient
                     colors={isDarkMode 
                       ? ['rgba(26, 31, 46, 0.4)', 'rgba(37, 42, 53, 0.3)']
-                      : ['rgba(255, 255, 255, 0.5)', 'rgba(255, 255, 255, 0.3)']
+                      : ['rgba(255, 255, 255, 0.88)', 'rgba(255, 255, 255, 0.72)']
                     }
                     style={styles.socialGradient}
                   >
-                    <View style={[styles.socialButtonInner, { borderColor: colors.glassBorder, borderWidth: 1.5 }]}>
+                    <View style={[styles.socialButtonInner, { 
+                      borderColor: isDarkMode ? colors.glassBorder : 'rgba(255, 255, 255, 0.85)', 
+                      borderWidth: 2 
+                    }]}>
                       <View style={[styles.socialIconGradient, { backgroundColor: '#1DA1F2' }]}>
                         <MaterialIcons name="tag" size={24} color="#FFFFFF" />
                       </View>
@@ -364,15 +418,28 @@ export default function DashboardScreen({ navigation }: DashboardScreenProps) {
 function QuickActionButton({ icon, color, onPress, colors, isDarkMode }: any) {
   return (
     <TouchableOpacity onPress={onPress} activeOpacity={0.85} style={styles.quickActionButton}>
-      <BlurView intensity={isDarkMode ? 25 : 75} style={[styles.quickActionBlur, SHADOWS.medium]}>
+      <BlurView intensity={isDarkMode ? 25 : 85} style={[styles.quickActionBlur, SHADOWS.medium]}>
         <LinearGradient
           colors={isDarkMode 
             ? ['rgba(26, 31, 46, 0.4)', 'rgba(37, 42, 53, 0.3)']
-            : ['rgba(255, 255, 255, 0.5)', 'rgba(255, 255, 255, 0.3)']
+            : ['rgba(255, 255, 255, 0.88)', 'rgba(255, 255, 255, 0.72)']
           }
           style={styles.quickActionGradient}
         >
-          <View style={[styles.quickActionInner, { borderColor: colors.glassBorder, borderWidth: 1.5 }]}>
+          {/* Edge glow for curved corners */}
+          <LinearGradient
+            colors={isDarkMode 
+              ? ['rgba(90, 159, 238, 0.08)', 'transparent']
+              : ['rgba(255, 255, 255, 0.95)', 'transparent']
+            }
+            style={styles.buttonEdgeGlow}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+          />
+          <View style={[styles.quickActionInner, { 
+            borderColor: isDarkMode ? colors.glassBorder : 'rgba(255, 255, 255, 0.85)', 
+            borderWidth: 2 
+          }]}>
             <View style={[styles.quickActionIcon, { backgroundColor: color + '20' }]}>
               <MaterialIcons name={icon} size={32} color={color} />
             </View>
@@ -426,15 +493,24 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   dateCard: {
-    borderRadius: 18,
+    borderRadius: 20,
     overflow: 'hidden',
   },
   dateCardGradient: {
-    borderRadius: 18,
+    borderRadius: 20,
+  },
+  edgeReflection: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    height: '50%',
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
   },
   dateCardInner: {
     padding: SPACING.md,
-    width: 75,
+    width: 78,
     alignItems: 'center',
   },
   dateDay: {
@@ -444,9 +520,9 @@ const styles = StyleSheet.create({
   },
   dateNumber: {
     ...TYPOGRAPHY.h1,
-    fontSize: 34,
+    fontSize: 36,
     fontWeight: '800',
-    lineHeight: 38,
+    lineHeight: 40,
   },
   dateMonth: {
     ...TYPOGRAPHY.captionBold,
@@ -459,12 +535,20 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
   quoteContainer: {
-    borderRadius: 20,
+    borderRadius: 22,
     marginBottom: SPACING.md,
     overflow: 'hidden',
   },
   quoteGradient: {
-    borderRadius: 20,
+    borderRadius: 22,
+  },
+  cardEdgeGlow: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    borderRadius: 22,
   },
   quoteInner: {
     padding: SPACING.lg,
@@ -487,12 +571,20 @@ const styles = StyleSheet.create({
     borderRadius: 3,
   },
   eventCard: {
-    borderRadius: 24,
+    borderRadius: 26,
     overflow: 'hidden',
     marginBottom: SPACING.lg,
   },
   eventGradient: {
-    borderRadius: 24,
+    borderRadius: 26,
+  },
+  curvedReflection: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    width: '60%',
+    height: '60%',
+    borderTopLeftRadius: 26,
   },
   eventCardInner: {
     padding: SPACING.lg,
@@ -534,12 +626,12 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
   notificationStrip: {
-    borderRadius: 18,
+    borderRadius: 20,
     marginBottom: SPACING.lg,
     overflow: 'hidden',
   },
   notificationGradient: {
-    borderRadius: 18,
+    borderRadius: 20,
   },
   notificationInner: {
     flexDirection: 'row',
@@ -571,11 +663,11 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   quickActionButton: {
-    width: 85,
-    height: 85,
+    width: 88,
+    height: 88,
   },
   quickActionBlur: {
-    borderRadius: 22,
+    borderRadius: 24,
     width: '100%',
     height: '100%',
     overflow: 'hidden',
@@ -583,7 +675,15 @@ const styles = StyleSheet.create({
   quickActionGradient: {
     width: '100%',
     height: '100%',
-    borderRadius: 22,
+    borderRadius: 24,
+  },
+  buttonEdgeGlow: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    width: '50%',
+    height: '50%',
+    borderTopLeftRadius: 24,
   },
   quickActionInner: {
     width: '100%',
@@ -592,9 +692,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   quickActionIcon: {
-    width: 68,
-    height: 68,
-    borderRadius: 34,
+    width: 70,
+    height: 70,
+    borderRadius: 35,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -610,20 +710,20 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   socialButton: {
-    borderRadius: 22,
+    borderRadius: 24,
     overflow: 'hidden',
   },
   socialGradient: {
-    borderRadius: 22,
+    borderRadius: 24,
   },
   socialButtonInner: {
     padding: SPACING.lg,
     alignItems: 'center',
   },
   socialIconGradient: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
+    width: 62,
+    height: 62,
+    borderRadius: 31,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: SPACING.sm,
