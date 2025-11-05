@@ -58,8 +58,10 @@ export const generateAIResponse = async (
       { role: 'user', content: userMessage }
     ];
 
-    // Make direct API call
-    const response = await fetch(`${baseURL}/chat/completions`, {
+    // Make direct API call - remove trailing slash and add correct endpoint
+    const apiUrl = baseURL.endsWith('/') ? `${baseURL}v1/chat/completions` : `${baseURL}/v1/chat/completions`;
+    
+    const response = await fetch(apiUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -74,6 +76,8 @@ export const generateAIResponse = async (
     });
 
     if (!response.ok) {
+      const errorText = await response.text();
+      console.error('API Error:', response.status, errorText);
       throw new Error(`API request failed: ${response.status}`);
     }
 
@@ -103,7 +107,10 @@ export const getMotivationalQuote = async (): Promise<string> => {
       return 'Leadership is not about being in charge. It\'s about taking care of those in your charge.';
     }
 
-    const response = await fetch(`${baseURL}/chat/completions`, {
+    // Make direct API call - remove trailing slash and add correct endpoint
+    const apiUrl = baseURL.endsWith('/') ? `${baseURL}v1/chat/completions` : `${baseURL}/v1/chat/completions`;
+
+    const response = await fetch(apiUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

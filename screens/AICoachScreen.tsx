@@ -152,36 +152,38 @@ export default function AICoachScreen({ navigation }: AICoachScreenProps) {
         ]}
       >
         <BlurView
-          intensity={isDarkMode ? 40 : 95}
+          intensity={isDarkMode ? 50 : 95}
           tint={isDarkMode ? 'dark' : 'light'}
-          style={[
-            styles.messageBlur,
-            isUser ? styles.userMessageBlur : styles.aiMessageBlur
-          ]}
+          style={styles.messageBlur}
         >
           <View
             style={[
               styles.messageInner,
               {
                 borderColor: isUser 
-                  ? (isDarkMode ? 'rgba(90, 159, 238, 0.5)' : 'rgba(0, 61, 165, 0.3)')
-                  : (isDarkMode ? 'rgba(90, 159, 238, 0.4)' : 'rgba(255, 255, 255, 0.7)'),
+                  ? (isDarkMode ? 'rgba(90, 159, 238, 0.6)' : 'rgba(0, 61, 165, 0.4)')
+                  : (isDarkMode ? 'rgba(90, 159, 238, 0.5)' : 'rgba(255, 255, 255, 0.8)'),
                 borderWidth: 1.5,
                 backgroundColor: isUser
-                  ? (isDarkMode ? 'rgba(90, 159, 238, 0.15)' : 'rgba(0, 61, 165, 0.08)')
-                  : (isDarkMode ? 'transparent' : 'rgba(255, 255, 255, 0.9)')
+                  ? (isDarkMode ? 'rgba(90, 159, 238, 0.2)' : 'rgba(0, 61, 165, 0.1)')
+                  : (isDarkMode ? 'rgba(26, 31, 46, 0.6)' : 'rgba(255, 255, 255, 0.95)')
               }
             ]}
           >
             {!isUser && (
-              <View style={[styles.aiIcon, { backgroundColor: colors.primary }]}>
-                <MaterialIcons name="psychology" size={16} color="#FFFFFF" />
+              <View style={[styles.aiIconContainer]}>
+                <View style={[styles.aiIcon, { backgroundColor: colors.primary }]}>
+                  <MaterialIcons name="psychology" size={18} color="#FFFFFF" />
+                </View>
               </View>
             )}
             <Text
               style={[
                 styles.messageText,
-                { color: isUser ? (isDarkMode ? '#FFFFFF' : colors.primary) : colors.text }
+                { 
+                  color: isUser ? (isDarkMode ? '#FFFFFF' : colors.primary) : colors.text,
+                  textAlign: isUser ? 'right' : 'left'
+                }
               ]}
             >
               {displayContent}
@@ -206,7 +208,7 @@ export default function AICoachScreen({ navigation }: AICoachScreenProps) {
         onPress={() => handleEventPress(event)}
       >
         <BlurView
-          intensity={isDarkMode ? 40 : 95}
+          intensity={isDarkMode ? 50 : 95}
           tint={isDarkMode ? 'dark' : 'light'}
           style={[styles.eventCard, SHADOWS.medium]}
         >
@@ -214,29 +216,29 @@ export default function AICoachScreen({ navigation }: AICoachScreenProps) {
             style={[
               styles.eventCardInner,
               {
-                borderColor: isDarkMode ? 'rgba(90, 159, 238, 0.4)' : 'rgba(255, 255, 255, 0.7)',
+                borderColor: isDarkMode ? 'rgba(90, 159, 238, 0.5)' : 'rgba(255, 255, 255, 0.8)',
                 borderWidth: 1.5,
-                backgroundColor: isDarkMode ? 'transparent' : 'rgba(255, 255, 255, 0.9)'
+                backgroundColor: isDarkMode ? 'rgba(26, 31, 46, 0.6)' : 'rgba(255, 255, 255, 0.95)'
               }
             ]}
           >
             <View style={styles.eventCardHeader}>
               <View style={[styles.eventIconSmall, { backgroundColor: colors.primary }]}>
-                <MaterialIcons name="event" size={16} color="#FFFFFF" />
+                <MaterialIcons name="event" size={18} color="#FFFFFF" />
               </View>
               <Text style={[styles.eventCardTitle, { color: colors.text }]} numberOfLines={2}>
                 {event.title}
               </Text>
             </View>
             <View style={styles.eventCardDetails}>
-              <MaterialIcons name="calendar-today" size={12} color={colors.textSecondary} />
+              <MaterialIcons name="calendar-today" size={14} color={colors.textSecondary} />
               <Text style={[styles.eventCardDate, { color: colors.textSecondary }]}>
                 {event.date}
               </Text>
             </View>
             <View style={styles.viewMoreButton}>
-              <Text style={[styles.viewMoreText, { color: colors.primary }]}>View More</Text>
-              <MaterialIcons name="arrow-forward" size={14} color={colors.primary} />
+              <Text style={[styles.viewMoreText, { color: colors.primary }]}>View Details</Text>
+              <MaterialIcons name="arrow-forward" size={16} color={colors.primary} />
             </View>
           </View>
         </BlurView>
@@ -254,10 +256,10 @@ export default function AICoachScreen({ navigation }: AICoachScreenProps) {
             style={styles.backButton}
             activeOpacity={0.7}
           >
-            <MaterialIcons name="arrow-back" size={24} color={colors.text} />
+            <MaterialIcons name="arrow-back" size={26} color={colors.text} />
           </TouchableOpacity>
           <View style={styles.headerTitleContainer}>
-            <MaterialIcons name="psychology" size={28} color={colors.primary} />
+            <MaterialIcons name="psychology" size={32} color={colors.primary} />
             <Text style={[styles.headerTitle, { color: colors.text }]}>AI Coach</Text>
           </View>
           <View style={styles.headerSpacer} />
@@ -280,33 +282,34 @@ export default function AICoachScreen({ navigation }: AICoachScreenProps) {
             {messages.length === 0 && showQuote && (
               <Animated.View entering={FadeIn.delay(400).springify()} style={styles.welcomeContainer}>
                 <BlurView
-                  intensity={isDarkMode ? 40 : 95}
+                  intensity={isDarkMode ? 50 : 95}
                   tint={isDarkMode ? 'dark' : 'light'}
-                  style={[styles.welcomeBlur, SHADOWS.medium]}
+                  style={[styles.welcomeBlur, SHADOWS.large]}
                 >
                   <View
                     style={[
                       styles.welcomeInner,
                       {
-                        borderColor: isDarkMode ? 'rgba(90, 159, 238, 0.4)' : 'rgba(255, 255, 255, 0.7)',
-                        borderWidth: 1.5,
-                        backgroundColor: isDarkMode ? 'transparent' : 'rgba(255, 255, 255, 0.9)'
+                        borderColor: isDarkMode ? 'rgba(90, 159, 238, 0.5)' : 'rgba(255, 255, 255, 0.8)',
+                        borderWidth: 2,
+                        backgroundColor: isDarkMode ? 'rgba(26, 31, 46, 0.6)' : 'rgba(255, 255, 255, 0.95)'
                       }
                     ]}
                   >
                     <View style={[styles.welcomeIcon, { backgroundColor: colors.primary }]}>
-                      <MaterialIcons name="psychology" size={32} color="#FFFFFF" />
+                      <MaterialIcons name="psychology" size={36} color="#FFFFFF" />
                     </View>
                     <Text style={[styles.welcomeTitle, { color: colors.text }]}>
                       Welcome, {user?.name?.split(' ')[0] || 'Member'}!
                     </Text>
                     <Text style={[styles.welcomeSubtitle, { color: colors.textSecondary }]}>
-                      I'm your AI Coach, here to help with leadership growth, event prep, and competition guidance.
+                      Your AI Coach for leadership growth, event prep, and competition guidance.
                     </Text>
                     {motivationalQuote && (
                       <View style={styles.quoteContainer}>
+                        <MaterialIcons name="format-quote" size={24} color={colors.primary} style={styles.quoteIcon} />
                         <Text style={[styles.quoteText, { color: colors.primary }]}>
-                          "{motivationalQuote}"
+                          {motivationalQuote}
                         </Text>
                       </View>
                     )}
@@ -325,7 +328,7 @@ export default function AICoachScreen({ navigation }: AICoachScreenProps) {
             {recommendedEvents.length > 0 && (
               <Animated.View entering={FadeInDown.delay(300).springify()} style={styles.recommendationsContainer}>
                 <Text style={[styles.recommendationsTitle, { color: colors.text }]}>
-                  Recommended Events for You
+                  Recommended Events
                 </Text>
                 {recommendedEvents.map((event, index) => renderEventCard(event, index))}
               </Animated.View>
@@ -335,7 +338,7 @@ export default function AICoachScreen({ navigation }: AICoachScreenProps) {
           {/* Input Area */}
           <Animated.View entering={FadeInUp.delay(600).springify()} style={styles.inputContainer}>
             <BlurView
-              intensity={isDarkMode ? 50 : 95}
+              intensity={isDarkMode ? 60 : 95}
               tint={isDarkMode ? 'dark' : 'light'}
               style={[styles.inputBlur, SHADOWS.large]}
             >
@@ -343,9 +346,9 @@ export default function AICoachScreen({ navigation }: AICoachScreenProps) {
                 style={[
                   styles.inputInner,
                   {
-                    borderColor: isDarkMode ? 'rgba(90, 159, 238, 0.5)' : 'rgba(255, 255, 255, 0.8)',
-                    borderWidth: 1.5,
-                    backgroundColor: isDarkMode ? 'rgba(26, 31, 46, 0.5)' : 'rgba(255, 255, 255, 0.95)'
+                    borderColor: isDarkMode ? 'rgba(90, 159, 238, 0.6)' : 'rgba(255, 255, 255, 0.9)',
+                    borderWidth: 2,
+                    backgroundColor: isDarkMode ? 'rgba(26, 31, 46, 0.7)' : 'rgba(255, 255, 255, 0.98)'
                   }
                 ]}
               >
@@ -377,7 +380,7 @@ export default function AICoachScreen({ navigation }: AICoachScreenProps) {
                   {isLoading ? (
                     <ActivityIndicator size="small" color="#FFFFFF" />
                   ) : (
-                    <MaterialIcons name="send" size={20} color="#FFFFFF" />
+                    <MaterialIcons name="send" size={22} color="#FFFFFF" />
                   )}
                 </TouchableOpacity>
               </View>
@@ -401,25 +404,26 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: SPACING.lg,
-    paddingVertical: SPACING.md,
+    paddingVertical: SPACING.lg,
   },
   backButton: {
-    width: 40,
-    height: 40,
+    width: 44,
+    height: 44,
     alignItems: 'center',
     justifyContent: 'center',
   },
   headerTitleContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: SPACING.sm,
+    gap: SPACING.md,
   },
   headerTitle: {
-    ...TYPOGRAPHY.h2,
-    fontSize: 24,
+    fontSize: 28,
+    fontWeight: '700',
+    letterSpacing: 0.5,
   },
   headerSpacer: {
-    width: 40,
+    width: 44,
   },
   chatContainer: {
     flex: 1,
@@ -429,55 +433,70 @@ const styles = StyleSheet.create({
   },
   messagesContent: {
     paddingHorizontal: SPACING.lg,
-    paddingTop: SPACING.md,
+    paddingTop: SPACING.sm,
     paddingBottom: SPACING.xl,
   },
   welcomeContainer: {
     marginBottom: SPACING.xl,
+    alignItems: 'center',
   },
   welcomeBlur: {
-    borderRadius: 24,
+    borderRadius: 28,
     overflow: 'hidden',
+    width: '100%',
   },
   welcomeInner: {
-    padding: SPACING.xl,
+    padding: SPACING.xl * 1.5,
     alignItems: 'center',
-    borderRadius: 24,
+    borderRadius: 28,
   },
   welcomeIcon: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
+    width: 72,
+    height: 72,
+    borderRadius: 36,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: SPACING.md,
-  },
-  welcomeTitle: {
-    ...TYPOGRAPHY.h2,
-    marginBottom: SPACING.sm,
-    textAlign: 'center',
-  },
-  welcomeSubtitle: {
-    ...TYPOGRAPHY.body,
-    textAlign: 'center',
     marginBottom: SPACING.lg,
   },
+  welcomeTitle: {
+    fontSize: 26,
+    fontWeight: '700',
+    marginBottom: SPACING.sm,
+    textAlign: 'center',
+    letterSpacing: 0.3,
+  },
+  welcomeSubtitle: {
+    fontSize: 16,
+    lineHeight: 24,
+    textAlign: 'center',
+    marginBottom: SPACING.xl,
+    paddingHorizontal: SPACING.md,
+  },
   quoteContainer: {
-    paddingVertical: SPACING.md,
-    paddingHorizontal: SPACING.lg,
-    marginBottom: SPACING.md,
+    paddingVertical: SPACING.lg,
+    paddingHorizontal: SPACING.xl,
+    marginBottom: SPACING.lg,
+    alignItems: 'center',
+  },
+  quoteIcon: {
+    marginBottom: SPACING.xs,
+    opacity: 0.7,
   },
   quoteText: {
-    ...TYPOGRAPHY.bodyMedium,
+    fontSize: 15,
     fontStyle: 'italic',
     textAlign: 'center',
+    lineHeight: 22,
+    fontWeight: '500',
   },
   welcomePrompt: {
-    ...TYPOGRAPHY.bodySmall,
+    fontSize: 14,
     textAlign: 'center',
+    paddingHorizontal: SPACING.md,
   },
   messageContainer: {
-    marginBottom: SPACING.md,
+    marginBottom: SPACING.lg,
+    width: '100%',
   },
   userMessageContainer: {
     alignItems: 'flex-end',
@@ -486,116 +505,117 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
   },
   messageBlur: {
-    borderRadius: 20,
+    borderRadius: 22,
     overflow: 'hidden',
-    maxWidth: '85%',
-  },
-  userMessageBlur: {
-    borderRadius: 20,
-  },
-  aiMessageBlur: {
-    borderRadius: 20,
+    maxWidth: '82%',
   },
   messageInner: {
-    padding: SPACING.md,
-    borderRadius: 20,
+    padding: SPACING.lg,
+    borderRadius: 22,
+  },
+  aiIconContainer: {
+    marginBottom: SPACING.sm,
   },
   aiIcon: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: SPACING.xs,
-  },
-  messageText: {
-    ...TYPOGRAPHY.body,
-    lineHeight: 22,
-  },
-  recommendationsContainer: {
-    marginTop: SPACING.xl,
-    marginBottom: SPACING.lg,
-  },
-  recommendationsTitle: {
-    ...TYPOGRAPHY.h3,
-    marginBottom: SPACING.md,
-    textAlign: 'center',
-  },
-  eventCardWrapper: {
-    marginBottom: SPACING.md,
-  },
-  eventCard: {
-    borderRadius: 20,
-    overflow: 'hidden',
-  },
-  eventCardInner: {
-    padding: SPACING.md,
-    borderRadius: 20,
-  },
-  eventCardHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: SPACING.sm,
-    gap: SPACING.sm,
-  },
-  eventIconSmall: {
     width: 32,
     height: 32,
     borderRadius: 16,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  eventCardTitle: {
-    ...TYPOGRAPHY.h4,
+  messageText: {
     fontSize: 16,
+    lineHeight: 24,
+    letterSpacing: 0.2,
+  },
+  recommendationsContainer: {
+    marginTop: SPACING.xl * 1.5,
+    marginBottom: SPACING.lg,
+  },
+  recommendationsTitle: {
+    fontSize: 22,
+    fontWeight: '700',
+    marginBottom: SPACING.lg,
+    textAlign: 'center',
+    letterSpacing: 0.3,
+  },
+  eventCardWrapper: {
+    marginBottom: SPACING.lg,
+  },
+  eventCard: {
+    borderRadius: 22,
+    overflow: 'hidden',
+  },
+  eventCardInner: {
+    padding: SPACING.lg,
+    borderRadius: 22,
+  },
+  eventCardHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: SPACING.md,
+    gap: SPACING.md,
+  },
+  eventIconSmall: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  eventCardTitle: {
+    fontSize: 17,
+    fontWeight: '600',
     flex: 1,
+    lineHeight: 22,
   },
   eventCardDetails: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: SPACING.xs,
-    marginBottom: SPACING.sm,
+    gap: SPACING.sm,
+    marginBottom: SPACING.md,
   },
   eventCardDate: {
-    ...TYPOGRAPHY.bodySmall,
+    fontSize: 14,
   },
   viewMoreButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: SPACING.xs,
+    gap: SPACING.sm,
     alignSelf: 'flex-start',
   },
   viewMoreText: {
-    ...TYPOGRAPHY.bodySmall,
+    fontSize: 15,
     fontWeight: '600',
   },
   inputContainer: {
     paddingHorizontal: SPACING.lg,
-    paddingBottom: SPACING.md,
-    paddingTop: SPACING.sm,
+    paddingBottom: SPACING.lg,
+    paddingTop: SPACING.md,
   },
   inputBlur: {
-    borderRadius: 24,
+    borderRadius: 28,
     overflow: 'hidden',
   },
   inputInner: {
     flexDirection: 'row',
     alignItems: 'flex-end',
-    padding: SPACING.sm,
-    borderRadius: 24,
-    gap: SPACING.sm,
+    padding: SPACING.md,
+    borderRadius: 28,
+    gap: SPACING.md,
   },
   input: {
     flex: 1,
-    ...TYPOGRAPHY.body,
+    fontSize: 16,
     maxHeight: 100,
-    paddingHorizontal: SPACING.sm,
-    paddingVertical: SPACING.xs,
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.sm,
+    lineHeight: 22,
   },
   sendButton: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
+    width: 48,
+    height: 48,
+    borderRadius: 24,
     alignItems: 'center',
     justifyContent: 'center',
   },
