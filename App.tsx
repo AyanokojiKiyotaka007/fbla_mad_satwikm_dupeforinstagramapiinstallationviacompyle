@@ -20,6 +20,7 @@ import NewsFeedScreen from './screens/NewsFeedScreen';
 import ResourcesScreen from './screens/ResourcesScreen';
 import ProfileScreen from './screens/ProfileScreen';
 import EventDetailScreen from './screens/EventDetailScreen';
+import AICoachScreen from './screens/AICoachScreen';
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -133,6 +134,14 @@ function MainStack() {
       <Stack.Screen 
         name="EventDetail" 
         component={EventDetailScreen}
+        options={{
+          presentation: 'card',
+          animation: 'slide_from_right',
+        }}
+      />
+      <Stack.Screen 
+        name="AICoach" 
+        component={AICoachScreen}
         options={{
           presentation: 'card',
           animation: 'slide_from_right',

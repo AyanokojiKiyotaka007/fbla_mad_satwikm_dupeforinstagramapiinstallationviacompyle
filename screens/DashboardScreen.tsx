@@ -144,6 +144,44 @@ export default function DashboardScreen({ navigation }: DashboardScreenProps) {
             </BlurView>
           </Animated.View>
 
+          {/* AI Coach Button - NEW */}
+          <Animated.View entering={FadeInDown.delay(300).springify()}>
+            <TouchableOpacity
+              activeOpacity={0.85}
+              onPress={() => navigation.navigate('AICoach')}
+            >
+              <BlurView 
+                intensity={isDarkMode ? 45 : 95} 
+                tint={isDarkMode ? 'dark' : 'light'}
+                style={[styles.aiCoachCard, SHADOWS.large]}
+              >
+                <View style={[styles.aiCoachCardInner, { 
+                  borderColor: isDarkMode ? 'rgba(90, 159, 238, 0.5)' : 'rgba(255, 255, 255, 0.7)', 
+                  borderWidth: 1.5,
+                  backgroundColor: isDarkMode ? 'transparent' : 'rgba(255, 255, 255, 0.9)'
+                }]}>
+                  <View style={styles.aiCoachHeader}>
+                    <View style={[styles.aiCoachIconContainer, { backgroundColor: colors.accent }]}>
+                      <MaterialIcons name="psychology" size={28} color="#FFFFFF" />
+                    </View>
+                    <View style={styles.aiCoachHeaderText}>
+                      <Text style={[styles.aiCoachLabel, { color: colors.textLight }]}>
+                        NEED GUIDANCE?
+                      </Text>
+                      <Text style={[styles.aiCoachTitle, { color: colors.text }]}>
+                        Ask AI Coach
+                      </Text>
+                    </View>
+                    <MaterialIcons name="chevron-right" size={24} color={colors.primary} />
+                  </View>
+                  <Text style={[styles.aiCoachDescription, { color: colors.textSecondary }]}>
+                    Get personalized advice on leadership, events, and competition prep
+                  </Text>
+                </View>
+              </BlurView>
+            </TouchableOpacity>
+          </Animated.View>
+
           {/* Enhanced Upcoming Event with defined glass */}
           {upcomingEvent && (
             <Animated.View entering={FadeInDown.delay(400).springify()}>
@@ -557,5 +595,42 @@ const styles = StyleSheet.create({
   socialLabel: {
     ...TYPOGRAPHY.bodySmall,
     fontWeight: '600',
+  },
+  aiCoachCard: {
+    borderRadius: 26,
+    overflow: 'hidden',
+    marginBottom: SPACING.lg,
+  },
+  aiCoachCardInner: {
+    padding: SPACING.lg,
+    borderRadius: 26,
+  },
+  aiCoachHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: SPACING.sm,
+  },
+  aiCoachIconContainer: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: SPACING.md,
+  },
+  aiCoachHeaderText: {
+    flex: 1,
+  },
+  aiCoachLabel: {
+    ...TYPOGRAPHY.captionBold,
+    marginBottom: SPACING.xs,
+  },
+  aiCoachTitle: {
+    ...TYPOGRAPHY.h3,
+    fontSize: 20,
+  },
+  aiCoachDescription: {
+    ...TYPOGRAPHY.bodySmall,
+    lineHeight: 20,
   },
 });

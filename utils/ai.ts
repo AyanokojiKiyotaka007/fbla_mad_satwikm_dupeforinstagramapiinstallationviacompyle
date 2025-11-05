@@ -1,0 +1,103 @@
+import { generateText } from 'ai';
+import { createOpenAI } from '@ai-sdk/openai';
+
+const customProvider = createOpenAI({
+  compatibility: 'strict',
+  baseURL: process.env.EXPO_PUBLIC_KIKI_BASE_URL,
+  apiKey: process.env.EXPO_PUBLIC_KIKI_API_KEY
+});
+
+// Helper function to chunk text into words
+const chunkTextIntoWords = (text: string): string[] => {
+  return text.split(/\s+/).filter(word => word.length > 0);
+};
+
+// Helper function to simulate streaming with delays
+const simulateStreaming = async (words: string[], onChunk: (chunk: string) => void) => {
+  for (const word of words) {
+    await new Promise(resolve => setTimeout(resolve, 50)); // 50ms delay between words
+    onChunk(word + ' '); // Add space after each word
+  }
+};
+
+// System prompt for FBLA AI Coach
+const FBLA_SYSTEM_PROMPT = `You are an AI Coach for FBLA (Future Business Leaders of America), a professional and motivational mentor focused on leadership development, business skills, event preparation, and career readiness.
+
+Your role is to:
+- Provide guidance on FBLA competitive events and preparation strategies
+- Offer leadership and business skill development advice
+- Help with event planning and deadline management
+- Share motivational insights about entrepreneurship and career growth
+- Answer questions about FBLA programs, competitions, and opportunities
+- Suggest relevant events based on member interests
+
+Tone: Professional yet friendly, motivational, and supportive. Keep responses concise (2-4 sentences) unless more detail is specifically requested. Use business terminology appropriately and inspire confidence in members' abilities.
+
+Focus areas: Leadership, business strategy, competition preparation, networking, career development, time management, and FBLA-specific guidance.`;
+
+export interface Message {
+  role: 'user' | 'assistant';
+  content: string;
+}
+
+// Generate AI response with chat history
+export const generateAIResponse = async (
+  userMessage: string, 
+  chatHistory: Message[],
+  onChunk?: (chunk: string) => void
+): Promise<string> => {
+  try {
+    // Create messages array with system message and chat history
+    const messages = [
+      {
+        role: 'system' as const,
+        content: FBLA_SYSTEM_PROMPT
+      },
+      ...chatHistory.map(msg => ({
+        role: msg.role as 'user' | 'assistant',
+        content: msg.content
+      })),
+      { role: 'user' as const, content: userMessage }
+    ];
+    
+    // Generate complete response using messages
+    const response = await generateText({
+      model: customProvider('gpt-4o'),
+      messages: messages
+    });
+
+    if (onChunk) {
+      const words = chunkTextIntoWords(response.text);
+      await simulateStreaming(words, onChunk);
+    }
+
+    return response.text;
+  } catch (error) {
+    console.error('Error generating AI response:', error);
+    return "I'm having trouble connecting right now. Please try again in a moment.";
+  }
+};
+
+// Get motivational quote for idle state
+export const getMotivationalQuote = async (): Promise<string> => {
+  try {
+    const response = await generateText({
+      model: customProvider('gpt-4o'),
+      messages: [
+        {
+          role: 'system',
+          content: 'You are a motivational business coach. Generate a single inspiring quote about leadership, business, or success. Keep it under 20 words. Do not include quotation marks or attribution.'
+        },
+        {
+          role: 'user',
+          content: 'Give me an inspiring business leadership quote.'
+        }
+      ]
+    });
+
+    return response.text;
+  } catch (error) {
+    console.error('Error generating quote:', error);
+    return 'Leadership is not about being in charge. It\'s about taking care of those in your charge.';
+  }
+};
