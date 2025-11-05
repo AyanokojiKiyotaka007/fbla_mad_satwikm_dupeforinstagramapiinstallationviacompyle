@@ -145,35 +145,21 @@ export default function DashboardScreen({ navigation }: DashboardScreenProps) {
               
               {/* Enhanced Calendar Card with edge glow */}
               <Animated.View entering={FadeIn.delay(300).springify()}>
-                <BlurView intensity={isDarkMode ? 25 : 80} style={[styles.dateCard, SHADOWS.medium]}>
-                  <LinearGradient
-                    colors={isDarkMode 
-                      ? [colors.primary + '25', colors.primary + '15']
-                      : ['rgba(255, 255, 255, 0.9)', 'rgba(255, 255, 255, 0.7)']
-                    }
-                    style={styles.dateCardGradient}
-                  >
-                    {/* Edge reflection */}
-                    <LinearGradient
-                      colors={isDarkMode 
-                        ? ['rgba(90, 159, 238, 0.1)', 'transparent']
-                        : ['rgba(255, 255, 255, 0.98)', 'transparent']
-                      }
-                      style={styles.edgeReflection}
-                      start={{ x: 0, y: 0 }}
-                      end={{ x: 1, y: 1 }}
-                    />
-                    <View style={[styles.dateCardInner, { 
-                      borderColor: isDarkMode ? colors.glassBorder : 'rgba(255, 255, 255, 0.9)', 
-                      borderWidth: 2,
-                      backgroundColor: isDarkMode ? 'transparent' : 'rgba(0, 61, 165, 0.03)'
-                    }]}>
-                      <Text style={[styles.dateDay, { color: colors.primary }]}>{dayName}</Text>
-                      <Text style={[styles.dateNumber, { color: colors.text }]}>{dayNumber}</Text>
-                      <Text style={[styles.dateMonth, { color: colors.textSecondary }]}>{monthName}</Text>
-                      <Text style={[styles.dateYear, { color: colors.textLight }]}>{year}</Text>
-                    </View>
-                  </LinearGradient>
+                <BlurView 
+                  intensity={isDarkMode ? 25 : 80} 
+                  tint={isDarkMode ? 'dark' : 'light'}
+                  style={[styles.dateCard, SHADOWS.medium]}
+                >
+                  <View style={[styles.dateCardInner, { 
+                    borderColor: isDarkMode ? 'rgba(90, 159, 238, 0.3)' : 'rgba(255, 255, 255, 0.6)', 
+                    borderWidth: 1.5,
+                    backgroundColor: isDarkMode ? 'rgba(26, 31, 46, 0.3)' : 'rgba(255, 255, 255, 0.2)'
+                  }]}>
+                    <Text style={[styles.dateDay, { color: colors.primary }]}>{dayName}</Text>
+                    <Text style={[styles.dateNumber, { color: colors.text }]}>{dayNumber}</Text>
+                    <Text style={[styles.dateMonth, { color: colors.textSecondary }]}>{monthName}</Text>
+                    <Text style={[styles.dateYear, { color: colors.textLight }]}>{year}</Text>
+                  </View>
                 </BlurView>
               </Animated.View>
             </View>
@@ -181,49 +167,36 @@ export default function DashboardScreen({ navigation }: DashboardScreenProps) {
 
           {/* Enhanced Quote Card with luminous edges */}
           <Animated.View entering={FadeInDown.delay(200).springify()}>
-            <BlurView intensity={isDarkMode ? 25 : 85} style={[styles.quoteContainer, SHADOWS.medium]}>
-              <LinearGradient
-                colors={isDarkMode 
-                  ? ['rgba(26, 31, 46, 0.4)', 'rgba(37, 42, 53, 0.3)']
-                  : ['rgba(255, 255, 255, 0.88)', 'rgba(255, 255, 255, 0.72)']
-                }
-                style={styles.quoteGradient}
-              >
-                {/* Edge glow */}
-                <LinearGradient
-                  colors={isDarkMode 
-                    ? ['rgba(90, 159, 238, 0.08)', 'transparent', 'rgba(90, 159, 238, 0.08)']
-                    : ['rgba(255, 255, 255, 0.95)', 'transparent', 'rgba(255, 255, 255, 0.95)']
-                  }
-                  style={styles.cardEdgeGlow}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 0 }}
-                />
-                <View style={[styles.quoteInner, { 
-                  borderColor: isDarkMode ? colors.glassBorder : 'rgba(255, 255, 255, 0.85)', 
-                  borderWidth: 2 
-                }]}>
-                  <RNAnimated.View style={{ opacity: quoteOpacity }}>
-                    <Text style={[styles.quote, { color: colors.primary }]}>
-                      &ldquo;{QUOTES[currentQuoteIndex]}&rdquo;
-                    </Text>
-                  </RNAnimated.View>
-                  <View style={styles.quoteIndicators}>
-                    {QUOTES.map((_, index) => (
-                      <View
-                        key={index}
-                        style={[
-                          styles.indicator,
-                          {
-                            backgroundColor: index === currentQuoteIndex ? colors.primary : colors.textLight,
-                            opacity: index === currentQuoteIndex ? 1 : 0.3,
-                          },
-                        ]}
-                      />
-                    ))}
-                  </View>
+            <BlurView 
+              intensity={isDarkMode ? 25 : 85} 
+              tint={isDarkMode ? 'dark' : 'light'}
+              style={[styles.quoteContainer, SHADOWS.medium]}
+            >
+              <View style={[styles.quoteInner, { 
+                borderColor: isDarkMode ? 'rgba(90, 159, 238, 0.3)' : 'rgba(255, 255, 255, 0.6)', 
+                borderWidth: 1.5,
+                backgroundColor: isDarkMode ? 'rgba(26, 31, 46, 0.3)' : 'rgba(255, 255, 255, 0.2)'
+              }]}>
+                <RNAnimated.View style={{ opacity: quoteOpacity }}>
+                  <Text style={[styles.quote, { color: colors.primary }]}>
+                    &ldquo;{QUOTES[currentQuoteIndex]}&rdquo;
+                  </Text>
+                </RNAnimated.View>
+                <View style={styles.quoteIndicators}>
+                  {QUOTES.map((_, index) => (
+                    <View
+                      key={index}
+                      style={[
+                        styles.indicator,
+                        {
+                          backgroundColor: index === currentQuoteIndex ? colors.primary : colors.textLight,
+                          opacity: index === currentQuoteIndex ? 1 : 0.3,
+                        },
+                      ]}
+                    />
+                  ))}
                 </View>
-              </LinearGradient>
+              </View>
             </BlurView>
           </Animated.View>
 
@@ -234,57 +207,44 @@ export default function DashboardScreen({ navigation }: DashboardScreenProps) {
                 activeOpacity={0.85}
                 onPress={() => navigation.navigate('EventDetail', { event: upcomingEvent })}
               >
-                <BlurView intensity={isDarkMode ? 30 : 85} style={[styles.eventCard, SHADOWS.large]}>
-                  <LinearGradient
-                    colors={isDarkMode 
-                      ? ['rgba(26, 31, 46, 0.5)', 'rgba(37, 42, 53, 0.4)']
-                      : ['rgba(255, 255, 255, 0.90)', 'rgba(255, 255, 255, 0.75)']
-                    }
-                    style={styles.eventGradient}
-                  >
-                    {/* Curved edge reflection */}
-                    <LinearGradient
-                      colors={isDarkMode 
-                        ? ['rgba(90, 159, 238, 0.1)', 'transparent']
-                        : ['rgba(255, 255, 255, 0.98)', 'transparent']
-                      }
-                      style={styles.curvedReflection}
-                      start={{ x: 0, y: 0 }}
-                      end={{ x: 0.5, y: 0.5 }}
-                    />
-                    <View style={[styles.eventCardInner, { 
-                      borderColor: isDarkMode ? colors.glassBorder : 'rgba(255, 255, 255, 0.9)', 
-                      borderWidth: 2 
-                    }]}>
-                      <View style={styles.eventHeader}>
-                        <View style={[styles.eventIconContainer, { backgroundColor: colors.primary }]}>
-                          <MaterialIcons name="event" size={24} color="#FFFFFF" />
-                        </View>
-                        <View style={styles.eventHeaderText}>
-                          <Text style={[styles.eventLabel, { color: colors.textLight }]}>
-                            NEXT EVENT
-                          </Text>
-                          <Text style={[styles.eventTitle, { color: colors.text }]} numberOfLines={2}>
-                            {upcomingEvent.title}
-                          </Text>
-                        </View>
+                <BlurView 
+                  intensity={isDarkMode ? 30 : 85} 
+                  tint={isDarkMode ? 'dark' : 'light'}
+                  style={[styles.eventCard, SHADOWS.large]}
+                >
+                  <View style={[styles.eventCardInner, { 
+                    borderColor: isDarkMode ? 'rgba(90, 159, 238, 0.3)' : 'rgba(255, 255, 255, 0.6)', 
+                    borderWidth: 1.5,
+                    backgroundColor: isDarkMode ? 'rgba(26, 31, 46, 0.3)' : 'rgba(255, 255, 255, 0.2)'
+                  }]}>
+                    <View style={styles.eventHeader}>
+                      <View style={[styles.eventIconContainer, { backgroundColor: colors.primary }]}>
+                        <MaterialIcons name="event" size={24} color="#FFFFFF" />
                       </View>
-                      <View style={styles.eventDetails}>
-                        <View style={styles.eventDetailRow}>
-                          <MaterialIcons name="calendar-today" size={16} color={colors.textSecondary} />
-                          <Text style={[styles.eventDetailText, { color: colors.textSecondary }]}>
-                            {upcomingEvent.date}
-                          </Text>
-                        </View>
-                        <View style={styles.eventDetailRow}>
-                          <MaterialIcons name="access-time" size={16} color={colors.textSecondary} />
-                          <Text style={[styles.eventDetailText, { color: colors.textSecondary }]}>
-                            {upcomingEvent.time}
-                          </Text>
-                        </View>
+                      <View style={styles.eventHeaderText}>
+                        <Text style={[styles.eventLabel, { color: colors.textLight }]}>
+                          NEXT EVENT
+                        </Text>
+                        <Text style={[styles.eventTitle, { color: colors.text }]} numberOfLines={2}>
+                          {upcomingEvent.title}
+                        </Text>
                       </View>
                     </View>
-                  </LinearGradient>
+                    <View style={styles.eventDetails}>
+                      <View style={styles.eventDetailRow}>
+                        <MaterialIcons name="calendar-today" size={16} color={colors.textSecondary} />
+                        <Text style={[styles.eventDetailText, { color: colors.textSecondary }]}>
+                          {upcomingEvent.date}
+                        </Text>
+                      </View>
+                      <View style={styles.eventDetailRow}>
+                        <MaterialIcons name="access-time" size={16} color={colors.textSecondary} />
+                        <Text style={[styles.eventDetailText, { color: colors.textSecondary }]}>
+                          {upcomingEvent.time}
+                        </Text>
+                      </View>
+                    </View>
+                  </View>
                 </BlurView>
               </TouchableOpacity>
             </Animated.View>
@@ -296,25 +256,22 @@ export default function DashboardScreen({ navigation }: DashboardScreenProps) {
               activeOpacity={0.85}
               onPress={() => navigation.navigate('NewsFeed')}
             >
-              <BlurView intensity={isDarkMode ? 25 : 85} style={[styles.notificationStrip, SHADOWS.small]}>
-                <LinearGradient
-                  colors={isDarkMode 
-                    ? ['rgba(26, 31, 46, 0.4)', 'rgba(37, 42, 53, 0.3)']
-                    : ['rgba(255, 255, 255, 0.88)', 'rgba(255, 255, 255, 0.72)']
-                  }
-                  style={styles.notificationGradient}
-                >
-                  <View style={[styles.notificationInner, { 
-                    borderColor: isDarkMode ? colors.glassBorder : 'rgba(255, 255, 255, 0.85)', 
-                    borderWidth: 2 
-                  }]}>
-                    <View style={[styles.notificationDot, { backgroundColor: colors.secondary }]} />
-                    <Text style={[styles.notificationText, { color: colors.text }]}>
-                      1 new announcement
-                    </Text>
-                    <MaterialIcons name="chevron-right" size={20} color={colors.textLight} />
-                  </View>
-                </LinearGradient>
+              <BlurView 
+                intensity={isDarkMode ? 25 : 85} 
+                tint={isDarkMode ? 'dark' : 'light'}
+                style={[styles.notificationStrip, SHADOWS.small]}
+              >
+                <View style={[styles.notificationInner, { 
+                  borderColor: isDarkMode ? 'rgba(90, 159, 238, 0.3)' : 'rgba(255, 255, 255, 0.6)', 
+                  borderWidth: 1.5,
+                  backgroundColor: isDarkMode ? 'rgba(26, 31, 46, 0.3)' : 'rgba(255, 255, 255, 0.2)'
+                }]}>
+                  <View style={[styles.notificationDot, { backgroundColor: colors.secondary }]} />
+                  <Text style={[styles.notificationText, { color: colors.text }]}>
+                    1 new announcement
+                  </Text>
+                  <MaterialIcons name="chevron-right" size={20} color={colors.textLight} />
+                </View>
               </BlurView>
             </TouchableOpacity>
           </Animated.View>
@@ -356,29 +313,26 @@ export default function DashboardScreen({ navigation }: DashboardScreenProps) {
                 activeOpacity={0.85}
                 style={styles.socialButtonWrapper}
               >
-                <BlurView intensity={isDarkMode ? 25 : 85} style={[styles.socialButton, SHADOWS.medium]}>
-                  <LinearGradient
-                    colors={isDarkMode 
-                      ? ['rgba(26, 31, 46, 0.4)', 'rgba(37, 42, 53, 0.3)']
-                      : ['rgba(255, 255, 255, 0.88)', 'rgba(255, 255, 255, 0.72)']
-                    }
-                    style={styles.socialGradient}
-                  >
-                    <View style={[styles.socialButtonInner, { 
-                      borderColor: isDarkMode ? colors.glassBorder : 'rgba(255, 255, 255, 0.85)', 
-                      borderWidth: 2 
-                    }]}>
-                      <LinearGradient
-                        colors={['#833AB4', '#FD1D1D', '#F77737']}
-                        style={styles.socialIconGradient}
-                        start={{ x: 0, y: 0 }}
-                        end={{ x: 1, y: 1 }}
-                      >
-                        <MaterialIcons name="camera-alt" size={24} color="#FFFFFF" />
-                      </LinearGradient>
-                      <Text style={[styles.socialLabel, { color: colors.text }]}>Instagram</Text>
-                    </View>
-                  </LinearGradient>
+                <BlurView 
+                  intensity={isDarkMode ? 25 : 85} 
+                  tint={isDarkMode ? 'dark' : 'light'}
+                  style={[styles.socialButton, SHADOWS.medium]}
+                >
+                  <View style={[styles.socialButtonInner, { 
+                    borderColor: isDarkMode ? 'rgba(90, 159, 238, 0.3)' : 'rgba(255, 255, 255, 0.6)', 
+                    borderWidth: 1.5,
+                    backgroundColor: isDarkMode ? 'rgba(26, 31, 46, 0.3)' : 'rgba(255, 255, 255, 0.2)'
+                  }]}>
+                    <LinearGradient
+                      colors={['#833AB4', '#FD1D1D', '#F77737']}
+                      style={styles.socialIconGradient}
+                      start={{ x: 0, y: 0 }}
+                      end={{ x: 1, y: 1 }}
+                    >
+                      <MaterialIcons name="camera-alt" size={24} color="#FFFFFF" />
+                    </LinearGradient>
+                    <Text style={[styles.socialLabel, { color: colors.text }]}>Instagram</Text>
+                  </View>
                 </BlurView>
               </TouchableOpacity>
 
@@ -387,24 +341,21 @@ export default function DashboardScreen({ navigation }: DashboardScreenProps) {
                 activeOpacity={0.85}
                 style={styles.socialButtonWrapper}
               >
-                <BlurView intensity={isDarkMode ? 25 : 85} style={[styles.socialButton, SHADOWS.medium]}>
-                  <LinearGradient
-                    colors={isDarkMode 
-                      ? ['rgba(26, 31, 46, 0.4)', 'rgba(37, 42, 53, 0.3)']
-                      : ['rgba(255, 255, 255, 0.88)', 'rgba(255, 255, 255, 0.72)']
-                    }
-                    style={styles.socialGradient}
-                  >
-                    <View style={[styles.socialButtonInner, { 
-                      borderColor: isDarkMode ? colors.glassBorder : 'rgba(255, 255, 255, 0.85)', 
-                      borderWidth: 2 
-                    }]}>
-                      <View style={[styles.socialIconGradient, { backgroundColor: '#1DA1F2' }]}>
-                        <MaterialIcons name="tag" size={24} color="#FFFFFF" />
-                      </View>
-                      <Text style={[styles.socialLabel, { color: colors.text }]}>Twitter/X</Text>
+                <BlurView 
+                  intensity={isDarkMode ? 25 : 85} 
+                  tint={isDarkMode ? 'dark' : 'light'}
+                  style={[styles.socialButton, SHADOWS.medium]}
+                >
+                  <View style={[styles.socialButtonInner, { 
+                    borderColor: isDarkMode ? 'rgba(90, 159, 238, 0.3)' : 'rgba(255, 255, 255, 0.6)', 
+                    borderWidth: 1.5,
+                    backgroundColor: isDarkMode ? 'rgba(26, 31, 46, 0.3)' : 'rgba(255, 255, 255, 0.2)'
+                  }]}>
+                    <View style={[styles.socialIconGradient, { backgroundColor: '#1DA1F2' }]}>
+                      <MaterialIcons name="tag" size={24} color="#FFFFFF" />
                     </View>
-                  </LinearGradient>
+                    <Text style={[styles.socialLabel, { color: colors.text }]}>Twitter/X</Text>
+                  </View>
                 </BlurView>
               </TouchableOpacity>
             </View>
@@ -418,33 +369,20 @@ export default function DashboardScreen({ navigation }: DashboardScreenProps) {
 function QuickActionButton({ icon, color, onPress, colors, isDarkMode }: any) {
   return (
     <TouchableOpacity onPress={onPress} activeOpacity={0.85} style={styles.quickActionButton}>
-      <BlurView intensity={isDarkMode ? 25 : 85} style={[styles.quickActionBlur, SHADOWS.medium]}>
-        <LinearGradient
-          colors={isDarkMode 
-            ? ['rgba(26, 31, 46, 0.4)', 'rgba(37, 42, 53, 0.3)']
-            : ['rgba(255, 255, 255, 0.88)', 'rgba(255, 255, 255, 0.72)']
-          }
-          style={styles.quickActionGradient}
-        >
-          {/* Edge glow for curved corners */}
-          <LinearGradient
-            colors={isDarkMode 
-              ? ['rgba(90, 159, 238, 0.08)', 'transparent']
-              : ['rgba(255, 255, 255, 0.95)', 'transparent']
-            }
-            style={styles.buttonEdgeGlow}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-          />
-          <View style={[styles.quickActionInner, { 
-            borderColor: isDarkMode ? colors.glassBorder : 'rgba(255, 255, 255, 0.85)', 
-            borderWidth: 2 
-          }]}>
-            <View style={[styles.quickActionIcon, { backgroundColor: color + '20' }]}>
-              <MaterialIcons name={icon} size={32} color={color} />
-            </View>
+      <BlurView 
+        intensity={isDarkMode ? 25 : 85} 
+        tint={isDarkMode ? 'dark' : 'light'}
+        style={[styles.quickActionBlur, SHADOWS.medium]}
+      >
+        <View style={[styles.quickActionInner, { 
+          borderColor: isDarkMode ? 'rgba(90, 159, 238, 0.3)' : 'rgba(255, 255, 255, 0.6)', 
+          borderWidth: 1.5,
+          backgroundColor: isDarkMode ? 'rgba(26, 31, 46, 0.3)' : 'rgba(255, 255, 255, 0.2)'
+        }]}>
+          <View style={[styles.quickActionIcon, { backgroundColor: color + '20' }]}>
+            <MaterialIcons name={icon} size={32} color={color} />
           </View>
-        </LinearGradient>
+        </View>
       </BlurView>
     </TouchableOpacity>
   );
@@ -496,22 +434,11 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     overflow: 'hidden',
   },
-  dateCardGradient: {
-    borderRadius: 20,
-  },
-  edgeReflection: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    height: '50%',
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-  },
   dateCardInner: {
     padding: SPACING.md,
     width: 78,
     alignItems: 'center',
+    borderRadius: 20,
   },
   dateDay: {
     ...TYPOGRAPHY.captionBold,
@@ -539,20 +466,10 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.md,
     overflow: 'hidden',
   },
-  quoteGradient: {
-    borderRadius: 22,
-  },
-  cardEdgeGlow: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    borderRadius: 22,
-  },
   quoteInner: {
     padding: SPACING.lg,
     alignItems: 'center',
+    borderRadius: 22,
   },
   quote: {
     ...TYPOGRAPHY.bodyMedium,
@@ -575,19 +492,9 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     marginBottom: SPACING.lg,
   },
-  eventGradient: {
-    borderRadius: 26,
-  },
-  curvedReflection: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    width: '60%',
-    height: '60%',
-    borderTopLeftRadius: 26,
-  },
   eventCardInner: {
     padding: SPACING.lg,
+    borderRadius: 26,
   },
   eventHeader: {
     flexDirection: 'row',
@@ -630,13 +537,11 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.lg,
     overflow: 'hidden',
   },
-  notificationGradient: {
-    borderRadius: 20,
-  },
   notificationInner: {
     flexDirection: 'row',
     alignItems: 'center',
     padding: SPACING.md,
+    borderRadius: 20,
   },
   notificationDot: {
     width: 8,
@@ -672,24 +577,12 @@ const styles = StyleSheet.create({
     height: '100%',
     overflow: 'hidden',
   },
-  quickActionGradient: {
-    width: '100%',
-    height: '100%',
-    borderRadius: 24,
-  },
-  buttonEdgeGlow: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    width: '50%',
-    height: '50%',
-    borderTopLeftRadius: 24,
-  },
   quickActionInner: {
     width: '100%',
     height: '100%',
     alignItems: 'center',
     justifyContent: 'center',
+    borderRadius: 24,
   },
   quickActionIcon: {
     width: 70,
@@ -713,12 +606,10 @@ const styles = StyleSheet.create({
     borderRadius: 24,
     overflow: 'hidden',
   },
-  socialGradient: {
-    borderRadius: 24,
-  },
   socialButtonInner: {
     padding: SPACING.lg,
     alignItems: 'center',
+    borderRadius: 24,
   },
   socialIconGradient: {
     width: 62,

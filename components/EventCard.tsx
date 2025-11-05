@@ -2,7 +2,6 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { BlurView } from 'expo-blur';
-import { LinearGradient } from 'expo-linear-gradient';
 import Animated, { FadeInRight } from 'react-native-reanimated';
 import { Event } from '../types';
 import { useTheme } from '../contexts/ThemeContext';
@@ -40,66 +39,53 @@ export default function EventCard({ event, onPress, index }: EventCardProps) {
         onPress={onPress}
         activeOpacity={0.85}
       >
-        <BlurView intensity={isDarkMode ? 30 : 85} style={[styles.container, SHADOWS.medium]}>
-          <LinearGradient
-            colors={isDarkMode 
-              ? ['rgba(26, 31, 46, 0.5)', 'rgba(37, 42, 53, 0.4)']
-              : ['rgba(255, 255, 255, 0.90)', 'rgba(255, 255, 255, 0.75)']
-            }
-            style={styles.gradient}
-          >
-            {/* Edge reflection for curved corners */}
-            <LinearGradient
-              colors={isDarkMode 
-                ? ['rgba(90, 159, 238, 0.1)', 'transparent']
-                : ['rgba(255, 255, 255, 0.98)', 'transparent']
-              }
-              style={styles.edgeReflection}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 0.5, y: 0.5 }}
-            />
-            <View style={[styles.cardInner, { 
-              borderColor: isDarkMode ? colors.glassBorder : 'rgba(255, 255, 255, 0.9)', 
-              borderWidth: 2 
-            }]}>
-              <View style={[styles.categoryBadge, { backgroundColor: categoryColor }]}>
-                <MaterialIcons name={categoryIcon} size={20} color="#FFFFFF" />
+        <BlurView 
+          intensity={isDarkMode ? 30 : 85} 
+          tint={isDarkMode ? 'dark' : 'light'}
+          style={[styles.container, SHADOWS.medium]}
+        >
+          <View style={[styles.cardInner, { 
+            borderColor: isDarkMode ? 'rgba(90, 159, 238, 0.3)' : 'rgba(255, 255, 255, 0.6)', 
+            borderWidth: 1.5,
+            backgroundColor: isDarkMode ? 'rgba(26, 31, 46, 0.3)' : 'rgba(255, 255, 255, 0.2)'
+          }]}>
+            <View style={[styles.categoryBadge, { backgroundColor: categoryColor }]}>
+              <MaterialIcons name={categoryIcon} size={20} color="#FFFFFF" />
+            </View>
+            
+            <View style={styles.content}>
+              <Text style={[styles.title, { color: colors.text }]} numberOfLines={2}>{event.title}</Text>
+              
+              <View style={styles.infoRow}>
+                <MaterialIcons name="calendar-today" size={14} color={colors.textSecondary} />
+                <Text style={[styles.infoText, { color: colors.textSecondary }]}>{event.date}</Text>
               </View>
               
-              <View style={styles.content}>
-                <Text style={[styles.title, { color: colors.text }]} numberOfLines={2}>{event.title}</Text>
-                
-                <View style={styles.infoRow}>
-                  <MaterialIcons name="calendar-today" size={14} color={colors.textSecondary} />
-                  <Text style={[styles.infoText, { color: colors.textSecondary }]}>{event.date}</Text>
+              <View style={styles.infoRow}>
+                <MaterialIcons name="access-time" size={14} color={colors.textSecondary} />
+                <Text style={[styles.infoText, { color: colors.textSecondary }]}>{event.time}</Text>
+              </View>
+              
+              <View style={styles.infoRow}>
+                <MaterialIcons name="location-on" size={14} color={colors.textSecondary} />
+                <Text style={[styles.infoText, { color: colors.textSecondary }]} numberOfLines={1}>{event.location}</Text>
+              </View>
+              
+              <View style={[styles.footer, { borderTopColor: colors.divider }]}>
+                <View style={styles.attendeesContainer}>
+                  <MaterialIcons name="people" size={16} color={colors.textLight} />
+                  <Text style={[styles.attendeesText, { color: colors.textLight }]}>{event.attendees} attending</Text>
                 </View>
                 
-                <View style={styles.infoRow}>
-                  <MaterialIcons name="access-time" size={14} color={colors.textSecondary} />
-                  <Text style={[styles.infoText, { color: colors.textSecondary }]}>{event.time}</Text>
-                </View>
-                
-                <View style={styles.infoRow}>
-                  <MaterialIcons name="location-on" size={14} color={colors.textSecondary} />
-                  <Text style={[styles.infoText, { color: colors.textSecondary }]} numberOfLines={1}>{event.location}</Text>
-                </View>
-                
-                <View style={[styles.footer, { borderTopColor: colors.divider }]}>
-                  <View style={styles.attendeesContainer}>
-                    <MaterialIcons name="people" size={16} color={colors.textLight} />
-                    <Text style={[styles.attendeesText, { color: colors.textLight }]}>{event.attendees} attending</Text>
+                {event.isRegistered && (
+                  <View style={[styles.registeredBadge, { backgroundColor: colors.success + '20' }]}>
+                    <MaterialIcons name="check-circle" size={14} color={colors.success} />
+                    <Text style={[styles.registeredText, { color: colors.success }]}>Registered</Text>
                   </View>
-                  
-                  {event.isRegistered && (
-                    <View style={[styles.registeredBadge, { backgroundColor: colors.success + '20' }]}>
-                      <MaterialIcons name="check-circle" size={14} color={colors.success} />
-                      <Text style={[styles.registeredText, { color: colors.success }]}>Registered</Text>
-                    </View>
-                  )}
-                </View>
+                )}
               </View>
             </View>
-          </LinearGradient>
+          </View>
         </BlurView>
       </TouchableOpacity>
     </Animated.View>
@@ -113,19 +99,9 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.md,
     overflow: 'hidden',
   },
-  gradient: {
-    borderRadius: 18,
-  },
-  edgeReflection: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    width: '50%',
-    height: '50%',
-    borderTopLeftRadius: 18,
-  },
   cardInner: {
     padding: SPACING.md,
+    borderRadius: 18,
   },
   categoryBadge: {
     position: 'absolute',

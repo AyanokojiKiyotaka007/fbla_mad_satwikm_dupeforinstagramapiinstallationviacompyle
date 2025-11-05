@@ -2,7 +2,6 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { BlurView } from 'expo-blur';
-import { LinearGradient } from 'expo-linear-gradient';
 import Animated, { FadeInUp } from 'react-native-reanimated';
 import { NewsItem } from '../types';
 import { useTheme } from '../contexts/ThemeContext';
@@ -36,64 +35,51 @@ export default function NewsCard({ news, onLike, index }: NewsCardProps) {
 
   return (
     <Animated.View entering={FadeInUp.delay(index * 100).springify()}>
-      <BlurView intensity={isDarkMode ? 30 : 85} style={[styles.container, SHADOWS.medium]}>
-        <LinearGradient
-          colors={isDarkMode 
-            ? ['rgba(26, 31, 46, 0.5)', 'rgba(37, 42, 53, 0.4)']
-            : ['rgba(255, 255, 255, 0.90)', 'rgba(255, 255, 255, 0.75)']
-          }
-          style={styles.gradient}
-        >
-          {/* Edge glow */}
-          <LinearGradient
-            colors={isDarkMode 
-              ? ['rgba(90, 159, 238, 0.08)', 'transparent', 'rgba(90, 159, 238, 0.08)']
-              : ['rgba(255, 255, 255, 0.95)', 'transparent', 'rgba(255, 255, 255, 0.95)']
-            }
-            style={styles.edgeGlow}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 0 }}
-          />
-          <View style={[styles.cardInner, { 
-            borderColor: isDarkMode ? colors.glassBorder : 'rgba(255, 255, 255, 0.9)', 
-            borderWidth: 2 
-          }]}>
-            <View style={styles.header}>
-              <View style={[styles.categoryIcon, { backgroundColor: categoryColor + '20' }]}>
-                <MaterialIcons name={categoryIcon} size={20} color={categoryColor} />
-              </View>
-              <View style={styles.headerText}>
-                <Text style={[styles.title, { color: colors.text }]} numberOfLines={2}>{news.title}</Text>
-                <Text style={[styles.meta, { color: colors.textLight }]}>
-                  {news.author} • {news.date}
-                </Text>
-              </View>
+      <BlurView 
+        intensity={isDarkMode ? 30 : 85} 
+        tint={isDarkMode ? 'dark' : 'light'}
+        style={[styles.container, SHADOWS.medium]}
+      >
+        <View style={[styles.cardInner, { 
+          borderColor: isDarkMode ? 'rgba(90, 159, 238, 0.3)' : 'rgba(255, 255, 255, 0.6)', 
+          borderWidth: 1.5,
+          backgroundColor: isDarkMode ? 'rgba(26, 31, 46, 0.3)' : 'rgba(255, 255, 255, 0.2)'
+        }]}>
+          <View style={styles.header}>
+            <View style={[styles.categoryIcon, { backgroundColor: categoryColor + '20' }]}>
+              <MaterialIcons name={categoryIcon} size={20} color={categoryColor} />
             </View>
-            
-            <Text style={[styles.content, { color: colors.textSecondary }]} numberOfLines={3}>{news.content}</Text>
-            
-            <View style={[styles.footer, { borderTopColor: colors.divider }]}>
-              <TouchableOpacity 
-                style={styles.likeButton} 
-                onPress={onLike}
-                activeOpacity={0.7}
-              >
-                <MaterialIcons 
-                  name={news.isLiked ? 'favorite' : 'favorite-border'} 
-                  size={20} 
-                  color={news.isLiked ? colors.error : colors.textLight} 
-                />
-                <Text style={[styles.likeText, { color: news.isLiked ? colors.error : colors.textLight }]}>
-                  {news.likes}
-                </Text>
-              </TouchableOpacity>
-              
-              <TouchableOpacity style={styles.shareButton}>
-                <MaterialIcons name="share" size={20} color={colors.textLight} />
-              </TouchableOpacity>
+            <View style={styles.headerText}>
+              <Text style={[styles.title, { color: colors.text }]} numberOfLines={2}>{news.title}</Text>
+              <Text style={[styles.meta, { color: colors.textLight }]}>
+                {news.author} • {news.date}
+              </Text>
             </View>
           </View>
-        </LinearGradient>
+          
+          <Text style={[styles.content, { color: colors.textSecondary }]} numberOfLines={3}>{news.content}</Text>
+          
+          <View style={[styles.footer, { borderTopColor: colors.divider }]}>
+            <TouchableOpacity 
+              style={styles.likeButton} 
+              onPress={onLike}
+              activeOpacity={0.7}
+            >
+              <MaterialIcons 
+                name={news.isLiked ? 'favorite' : 'favorite-border'} 
+                size={20} 
+                color={news.isLiked ? colors.error : colors.textLight} 
+              />
+              <Text style={[styles.likeText, { color: news.isLiked ? colors.error : colors.textLight }]}>
+                {news.likes}
+              </Text>
+            </TouchableOpacity>
+            
+            <TouchableOpacity style={styles.shareButton}>
+              <MaterialIcons name="share" size={20} color={colors.textLight} />
+            </TouchableOpacity>
+          </View>
+        </View>
       </BlurView>
     </Animated.View>
   );
@@ -106,19 +92,9 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.md,
     overflow: 'hidden',
   },
-  gradient: {
-    borderRadius: 18,
-  },
-  edgeGlow: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    borderRadius: 18,
-  },
   cardInner: {
     padding: SPACING.md,
+    borderRadius: 18,
   },
   header: {
     flexDirection: 'row',
