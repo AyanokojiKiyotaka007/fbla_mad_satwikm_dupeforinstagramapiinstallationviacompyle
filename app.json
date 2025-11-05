@@ -50,6 +50,10 @@
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "EXPO_PUBLIC_KIKI_API_KEY": "proj_f2af9daa_3ZR2SDrop5YD4nSLzVq5ANbj",
+      "EXPO_PUBLIC_KIKI_BASE_URL": "https://kiki-unkey-proxy.chris-d9a.workers.dev/"
     }
   }
 }

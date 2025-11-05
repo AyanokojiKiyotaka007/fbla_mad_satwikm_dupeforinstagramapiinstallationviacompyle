@@ -47,11 +47,6 @@ const getEnvVar = (key: string): string | undefined => {
   ];
   
   const value = sources.find(v => v !== undefined && v !== null && v !== '');
-  
-  if (!value) {
-    console.warn(`Environment variable ${key} not found in any source`);
-  }
-  
   return value;
 };
 
@@ -67,7 +62,7 @@ const constructApiUrl = (baseURL: string): string => {
   // Validate URL format
   try {
     new URL(cleanBase);
-  } catch (e) {
+  } catch {
     throw new Error(`Invalid base URL format: ${cleanBase}`);
   }
   
@@ -86,24 +81,12 @@ export const generateAIResponse = async (
     const baseURL = getEnvVar('EXPO_PUBLIC_KIKI_BASE_URL');
     const apiKey = getEnvVar('EXPO_PUBLIC_KIKI_API_KEY');
 
-    console.log('Environment check:', {
-      hasBaseURL: !!baseURL,
-      baseURLLength: baseURL?.length || 0,
-      hasApiKey: !!apiKey,
-      apiKeyLength: apiKey?.length || 0,
-      baseURLValue: baseURL ? `${baseURL.substring(0, 20)}...` : 'MISSING'
-    });
-
     // Validate environment variables with detailed error messages
     if (!baseURL || baseURL.trim() === '') {
-      const errorMsg = 'API Base URL is missing or empty. Please check your .env.local file and ensure EXPO_PUBLIC_KIKI_BASE_URL is set correctly.';
-      console.error(errorMsg);
       return "I'm unable to connect to the AI service right now. The API configuration is missing. Please contact support.";
     }
 
     if (!apiKey || apiKey.trim() === '') {
-      const errorMsg = 'API Key is missing or empty. Please check your .env.local file and ensure EXPO_PUBLIC_KIKI_API_KEY is set correctly.';
-      console.error(errorMsg);
       return "I'm unable to connect to the AI service right now. The API key is missing. Please contact support.";
     }
 
@@ -111,9 +94,7 @@ export const generateAIResponse = async (
     let apiUrl: string;
     try {
       apiUrl = constructApiUrl(baseURL);
-      console.log('Constructed API URL:', apiUrl);
     } catch (urlError) {
-      console.error('URL construction failed:', urlError);
       return "I'm having trouble with the API configuration. Please contact support.";
     }
 
@@ -126,14 +107,6 @@ export const generateAIResponse = async (
       ...chatHistory,
       { role: 'user', content: userMessage }
     ];
-
-    console.log('Making API request to:', apiUrl);
-    console.log('Request payload:', {
-      model: 'gpt-4o',
-      messageCount: messages.length,
-      temperature: 0.7,
-      max_tokens: 500
-    });
 
     // Make direct API call
     const response = await fetch(apiUrl, {
@@ -150,22 +123,10 @@ export const generateAIResponse = async (
       })
     });
 
-    // Log response details for debugging
-    console.log('API Response Status:', response.status);
-    console.log('API Response OK:', response.ok);
-
     if (!response.ok) {
-      const errorText = await response.text();
-      console.error('API Error Details:', {
-        status: response.status,
-        statusText: response.statusText,
-        url: apiUrl,
-        errorBody: errorText
-      });
-      
       // Provide user-friendly error messages based on status code
       if (response.status === 404) {
-        return "I'm having trouble connecting to the AI service. The endpoint may be incorrect. Please try again later.";
+        return "I'm having trouble connecting to the AI service. Please try again later.";
       } else if (response.status === 401 || response.status === 403) {
         return "I'm having trouble authenticating with the AI service. Please contact support.";
       } else if (response.status >= 500) {
@@ -176,8 +137,6 @@ export const generateAIResponse = async (
     }
 
     const data = await response.json();
-    console.log('API Response received successfully');
-    
     const aiResponse = data.choices?.[0]?.message?.content || "I'm having trouble responding right now.";
 
     // Simulate streaming if callback provided
@@ -188,10 +147,9 @@ export const generateAIResponse = async (
 
     return aiResponse;
   } catch (error) {
-    console.error('Error generating AI response:', error);
-    if (error instanceof Error) {
-      console.error('Error message:', error.message);
-      console.error('Error stack:', error.stack);
+    // Log error for debugging but return user-friendly message
+    if (__DEV__) {
+      console.error('AI Error:', error instanceof Error ? error.message : 'Unknown error');
     }
     return "I'm having trouble connecting right now. Please try again in a moment.";
   }
