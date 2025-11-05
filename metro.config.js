@@ -21,23 +21,32 @@ config.resolver.sourceExts = [
   'cjs',
 ];
 
-// Custom resolver to handle @vercel/oidc and other problematic modules
-const defaultResolver = config.resolver.resolveRequest;
+// Store the original resolver
+const originalResolveRequest = config.resolver.resolveRequest;
+
+// Custom resolver to handle @vercel/oidc
 config.resolver.resolveRequest = (context, moduleName, platform) => {
-  // Resolve @vercel/oidc to the browser/react-native version
+  // Handle @vercel/oidc resolution - use browser version for React Native
   if (moduleName === '@vercel/oidc') {
+    const oidcPath = path.resolve(__dirname, 'node_modules/@vercel/oidc/dist/index-browser.js');
     return {
-      filePath: path.resolve(__dirname, 'node_modules/@vercel/oidc/dist/index-browser.js'),
+      filePath: oidcPath,
       type: 'sourceFile',
     };
   }
-  
-  // Use default resolver for everything else
-  if (defaultResolver) {
-    return defaultResolver(context, moduleName, platform);
+
+  // Use the original resolver for all other modules
+  if (originalResolveRequest) {
+    return originalResolveRequest(context, moduleName, platform);
   }
-  
+
+  // Fallback to default resolution
   return context.resolveRequest(context, moduleName, platform);
 };
+
+// Add explicit node module paths
+config.resolver.nodeModulesPaths = [
+  path.resolve(__dirname, 'node_modules'),
+];
 
 module.exports = wrapWithReanimatedMetroConfig(config);
