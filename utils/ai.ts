@@ -38,27 +38,36 @@ Focus areas: Leadership, business strategy, competition preparation, networking,
 
 // Helper function to get environment variables with fallbacks
 const getEnvVar = (key: string): string | undefined => {
-  // Try multiple sources for environment variables
-  const sources = [
-    process.env[key],
-    Constants.expoConfig?.extra?.[key],
-    Constants.manifest?.extra?.[key],
-    Constants.manifest2?.extra?.expoClient?.extra?.[key],
-    // @ts-ignore - Direct access to extra
-    Constants.extra?.[key]
-  ];
+  // Direct access to the extra config
+  const extra = Constants.expoConfig?.extra;
   
-  console.log(`🔎 Checking sources for ${key}:`, {
-    processEnv: process.env[key],
-    expoConfigExtra: Constants.expoConfig?.extra?.[key],
-    manifestExtra: Constants.manifest?.extra?.[key],
-    manifest2Extra: Constants.manifest2?.extra?.expoClient?.extra?.[key],
-    constantsExtra: (Constants as any).extra?.[key],
-  });
+  if (extra && typeof extra === 'object' && key in extra) {
+    const value = extra[key];
+    if (typeof value === 'string' && value.trim() !== '') {
+      console.log(`✅ Found ${key} in expoConfig.extra:`, value.substring(0, 20) + '...');
+      return value;
+    }
+  }
   
-  const value = sources.find(v => v !== undefined && v !== null && v !== '');
-  console.log(`✅ Found value for ${key}:`, value ? `${value.substring(0, 20)}...` : 'NOT FOUND');
-  return value;
+  // Fallback to specific process.env keys
+  if (key === 'EXPO_PUBLIC_KIKI_BASE_URL') {
+    const value = process.env.EXPO_PUBLIC_KIKI_BASE_URL;
+    if (value && value.trim() !== '') {
+      console.log(`✅ Found ${key} in process.env:`, value.substring(0, 20) + '...');
+      return value;
+    }
+  }
+  
+  if (key === 'EXPO_PUBLIC_KIKI_API_KEY') {
+    const value = process.env.EXPO_PUBLIC_KIKI_API_KEY;
+    if (value && value.trim() !== '') {
+      console.log(`✅ Found ${key} in process.env:`, value.substring(0, 20) + '...');
+      return value;
+    }
+  }
+  
+  console.error(`❌ Could not find ${key} in any source`);
+  return undefined;
 };
 
 // Helper function to properly construct API URL
