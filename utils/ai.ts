@@ -2,7 +2,6 @@ import { generateText } from 'ai';
 import { createOpenAI } from '@ai-sdk/openai';
 
 const customProvider = createOpenAI({
-  compatibility: 'strict',
   baseURL: process.env.EXPO_PUBLIC_KIKI_BASE_URL,
   apiKey: process.env.EXPO_PUBLIC_KIKI_API_KEY
 });

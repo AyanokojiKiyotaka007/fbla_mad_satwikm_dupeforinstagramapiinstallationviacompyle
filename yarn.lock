@@ -2298,7 +2298,7 @@
     "@urql/core" "^5.1.2"
     wonka "^6.3.2"
 
-"@vercel/oidc@3.0.3":
+"@vercel/oidc@3.0.3", "@vercel/oidc@^3.0.3":
   version "3.0.3"
   resolved "https://registry.yarnpkg.com/@vercel/oidc/-/oidc-3.0.3.tgz#82c2b6dd4d5c3b37dcb1189718cdeb9db402d052"
   integrity sha512-yNEQvPcVrK9sIe637+I0jD6leluPxzwJKx/Haw6F4H77CdDsszUn5V3o96LPziXkSNE2B83+Z3mjqGKBK/R6Gg==
