@@ -43,10 +43,21 @@ const getEnvVar = (key: string): string | undefined => {
     process.env[key],
     Constants.expoConfig?.extra?.[key],
     Constants.manifest?.extra?.[key],
-    Constants.manifest2?.extra?.expoClient?.extra?.[key]
+    Constants.manifest2?.extra?.expoClient?.extra?.[key],
+    // @ts-ignore - Direct access to extra
+    Constants.extra?.[key]
   ];
   
+  console.log(`🔎 Checking sources for ${key}:`, {
+    processEnv: process.env[key],
+    expoConfigExtra: Constants.expoConfig?.extra?.[key],
+    manifestExtra: Constants.manifest?.extra?.[key],
+    manifest2Extra: Constants.manifest2?.extra?.expoClient?.extra?.[key],
+    constantsExtra: (Constants as any).extra?.[key],
+  });
+  
   const value = sources.find(v => v !== undefined && v !== null && v !== '');
+  console.log(`✅ Found value for ${key}:`, value ? `${value.substring(0, 20)}...` : 'NOT FOUND');
   return value;
 };
 
@@ -77,6 +88,14 @@ export const generateAIResponse = async (
   onChunk?: (chunk: string) => void
 ): Promise<string> => {
   try {
+    // Debug: Log what Constants contains
+    console.log('🔍 Constants Debug:');
+    console.log('  - Constants.expoConfig:', Constants.expoConfig ? 'EXISTS' : 'MISSING');
+    console.log('  - Constants.expoConfig.extra:', Constants.expoConfig?.extra);
+    console.log('  - Constants.manifest:', Constants.manifest ? 'EXISTS' : 'MISSING');
+    console.log('  - Constants.manifest2:', Constants.manifest2 ? 'EXISTS' : 'MISSING');
+    console.log('  - Constants.extra:', (Constants as any).extra);
+    
     // Get environment variables with multiple fallback methods
     const baseURL = getEnvVar('EXPO_PUBLIC_KIKI_BASE_URL');
     const apiKey = getEnvVar('EXPO_PUBLIC_KIKI_API_KEY');
