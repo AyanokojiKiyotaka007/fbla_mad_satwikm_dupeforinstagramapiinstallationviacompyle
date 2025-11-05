@@ -92,7 +92,7 @@ export const generateAIResponse = async (
 
     // Log response details for debugging
     console.log('API Response Status:', response.status);
-    console.log('API Response Headers:', JSON.stringify(Object.fromEntries(response.headers.entries())));
+    console.log('API Response OK:', response.ok);
 
     if (!response.ok) {
       const errorText = await response.text();
