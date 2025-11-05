@@ -1,24 +1,36 @@
-import { Linking, Platform, Alert } from 'react-native';
+import { Linking, Alert } from 'react-native';
 import { Event } from '../types';
 
 /**
  * Formats a date string and time string into ISO format for calendar
- * @param dateStr - Date string like "Dec 15, 2024"
+ * @param dateStr - Date string like "Dec 15, 2024" or "2024-02-15"
  * @param timeStr - Time string like "3:00 PM - 5:00 PM"
  * @returns Object with start and end dates in ISO format
  */
 function parseEventDateTime(dateStr: string, timeStr: string): { start: string; end: string } {
   try {
-    // Parse the date
-    const dateParts = dateStr.replace(',', '').split(' ');
-    const monthMap: { [key: string]: number } = {
-      'Jan': 0, 'Feb': 1, 'Mar': 2, 'Apr': 3, 'May': 4, 'Jun': 5,
-      'Jul': 6, 'Aug': 7, 'Sep': 8, 'Oct': 9, 'Nov': 10, 'Dec': 11
-    };
-    
-    const month = monthMap[dateParts[0]];
-    const day = parseInt(dateParts[1]);
-    const year = parseInt(dateParts[2]);
+    let year: number;
+    let month: number;
+    let day: number;
+
+    // Check if date is in YYYY-MM-DD format
+    if (dateStr.includes('-') && dateStr.match(/^\d{4}-\d{2}-\d{2}$/)) {
+      const parts = dateStr.split('-');
+      year = parseInt(parts[0]);
+      month = parseInt(parts[1]) - 1; // JavaScript months are 0-indexed
+      day = parseInt(parts[2]);
+    } else {
+      // Parse date in "Dec 15, 2024" format
+      const dateParts = dateStr.replace(',', '').split(' ');
+      const monthMap: { [key: string]: number } = {
+        'Jan': 0, 'Feb': 1, 'Mar': 2, 'Apr': 3, 'May': 4, 'Jun': 5,
+        'Jul': 6, 'Aug': 7, 'Sep': 8, 'Oct': 9, 'Nov': 10, 'Dec': 11
+      };
+      
+      month = monthMap[dateParts[0]];
+      day = parseInt(dateParts[1]);
+      year = parseInt(dateParts[2]);
+    }
     
     // Parse the time
     const timeParts = timeStr.split(' - ');
