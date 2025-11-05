@@ -1,10 +1,10 @@
-import { generateText } from 'ai';
-import { createOpenAI } from '@ai-sdk/openai';
+// Simple AI utility using direct fetch API calls
+// This bypasses the problematic AI SDK dependencies
 
-const customProvider = createOpenAI({
-  baseURL: process.env.EXPO_PUBLIC_KIKI_BASE_URL,
-  apiKey: process.env.EXPO_PUBLIC_KIKI_API_KEY
-});
+export interface Message {
+  role: 'user' | 'assistant';
+  content: string;
+}
 
 // Helper function to chunk text into words
 const chunkTextIntoWords = (text: string): string[] => {
@@ -34,43 +34,59 @@ Tone: Professional yet friendly, motivational, and supportive. Keep responses co
 
 Focus areas: Leadership, business strategy, competition preparation, networking, career development, time management, and FBLA-specific guidance.`;
 
-export interface Message {
-  role: 'user' | 'assistant';
-  content: string;
-}
-
-// Generate AI response with chat history
+// Generate AI response with chat history using direct API call
 export const generateAIResponse = async (
   userMessage: string, 
   chatHistory: Message[],
   onChunk?: (chunk: string) => void
 ): Promise<string> => {
   try {
+    const baseURL = process.env.EXPO_PUBLIC_KIKI_BASE_URL;
+    const apiKey = process.env.EXPO_PUBLIC_KIKI_API_KEY;
+
+    if (!baseURL || !apiKey) {
+      throw new Error('API configuration missing');
+    }
+
     // Create messages array with system message and chat history
     const messages = [
       {
-        role: 'system' as const,
+        role: 'system',
         content: FBLA_SYSTEM_PROMPT
       },
-      ...chatHistory.map(msg => ({
-        role: msg.role as 'user' | 'assistant',
-        content: msg.content
-      })),
-      { role: 'user' as const, content: userMessage }
+      ...chatHistory,
+      { role: 'user', content: userMessage }
     ];
-    
-    // Generate complete response using messages
-    const response = await generateText({
-      model: customProvider('gpt-4o'),
-      messages: messages
+
+    // Make direct API call
+    const response = await fetch(`${baseURL}/chat/completions`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${apiKey}`
+      },
+      body: JSON.stringify({
+        model: 'gpt-4o',
+        messages: messages,
+        temperature: 0.7,
+        max_tokens: 500
+      })
     });
 
+    if (!response.ok) {
+      throw new Error(`API request failed: ${response.status}`);
+    }
+
+    const data = await response.json();
+    const aiResponse = data.choices?.[0]?.message?.content || "I'm having trouble responding right now.";
+
+    // Simulate streaming if callback provided
     if (onChunk) {
-      const words = chunkTextIntoWords(response.text);
+      const words = chunkTextIntoWords(aiResponse);
       await simulateStreaming(words, onChunk);
     }
 
-    return response.text;
+    return aiResponse;
   } catch (error) {
     console.error('Error generating AI response:', error);
     return "I'm having trouble connecting right now. Please try again in a moment.";
@@ -80,21 +96,42 @@ export const generateAIResponse = async (
 // Get motivational quote for idle state
 export const getMotivationalQuote = async (): Promise<string> => {
   try {
-    const response = await generateText({
-      model: customProvider('gpt-4o'),
-      messages: [
-        {
-          role: 'system',
-          content: 'You are a motivational business coach. Generate a single inspiring quote about leadership, business, or success. Keep it under 20 words. Do not include quotation marks or attribution.'
-        },
-        {
-          role: 'user',
-          content: 'Give me an inspiring business leadership quote.'
-        }
-      ]
+    const baseURL = process.env.EXPO_PUBLIC_KIKI_BASE_URL;
+    const apiKey = process.env.EXPO_PUBLIC_KIKI_API_KEY;
+
+    if (!baseURL || !apiKey) {
+      return 'Leadership is not about being in charge. It\'s about taking care of those in your charge.';
+    }
+
+    const response = await fetch(`${baseURL}/chat/completions`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${apiKey}`
+      },
+      body: JSON.stringify({
+        model: 'gpt-4o',
+        messages: [
+          {
+            role: 'system',
+            content: 'You are a motivational business coach. Generate a single inspiring quote about leadership, business, or success. Keep it under 20 words. Do not include quotation marks or attribution.'
+          },
+          {
+            role: 'user',
+            content: 'Give me an inspiring business leadership quote.'
+          }
+        ],
+        temperature: 0.8,
+        max_tokens: 50
+      })
     });
 
-    return response.text;
+    if (!response.ok) {
+      throw new Error('Failed to fetch quote');
+    }
+
+    const data = await response.json();
+    return data.choices?.[0]?.message?.content || 'Leadership is not about being in charge. It\'s about taking care of those in your charge.';
   } catch (error) {
     console.error('Error generating quote:', error);
     return 'Leadership is not about being in charge. It\'s about taking care of those in your charge.';
