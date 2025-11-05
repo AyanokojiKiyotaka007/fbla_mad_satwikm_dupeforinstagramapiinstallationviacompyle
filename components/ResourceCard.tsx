@@ -42,7 +42,7 @@ export default function ResourceCard({ resource, onDownload, index }: ResourceCa
         <View style={[styles.cardInner, { 
           borderColor: isDarkMode ? 'rgba(90, 159, 238, 0.4)' : 'rgba(255, 255, 255, 0.7)', 
           borderWidth: 1.5,
-          backgroundColor: 'transparent'
+          backgroundColor: isDarkMode ? 'transparent' : 'rgba(255, 255, 255, 0.25)'
         }]}>
           <View style={[styles.fileIcon, { backgroundColor: fileColor + '20' }]}>
             <MaterialIcons name={fileIcon} size={32} color={fileColor} />

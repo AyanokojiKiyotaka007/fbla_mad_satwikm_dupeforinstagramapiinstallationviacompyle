@@ -43,7 +43,7 @@ export default function NewsCard({ news, onLike, index }: NewsCardProps) {
         <View style={[styles.cardInner, { 
           borderColor: isDarkMode ? 'rgba(90, 159, 238, 0.4)' : 'rgba(255, 255, 255, 0.7)', 
           borderWidth: 1.5,
-          backgroundColor: 'transparent'
+          backgroundColor: isDarkMode ? 'transparent' : 'rgba(255, 255, 255, 0.25)'
         }]}>
           <View style={styles.header}>
             <View style={[styles.categoryIcon, { backgroundColor: categoryColor + '20' }]}>
