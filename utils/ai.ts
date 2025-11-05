@@ -81,12 +81,19 @@ export const generateAIResponse = async (
     const baseURL = getEnvVar('EXPO_PUBLIC_KIKI_BASE_URL');
     const apiKey = getEnvVar('EXPO_PUBLIC_KIKI_API_KEY');
 
+    // Debug logging to see what we're getting
+    console.log('🔍 Environment Variables Check:');
+    console.log('  - Base URL:', baseURL);
+    console.log('  - API Key:', apiKey ? `${apiKey.substring(0, 15)}...` : 'MISSING');
+
     // Validate environment variables with detailed error messages
     if (!baseURL || baseURL.trim() === '') {
+      console.error('❌ Base URL is missing or empty');
       return "I'm unable to connect to the AI service right now. The API configuration is missing. Please contact support.";
     }
 
     if (!apiKey || apiKey.trim() === '') {
+      console.error('❌ API Key is missing or empty');
       return "I'm unable to connect to the AI service right now. The API key is missing. Please contact support.";
     }
 
@@ -94,7 +101,9 @@ export const generateAIResponse = async (
     let apiUrl: string;
     try {
       apiUrl = constructApiUrl(baseURL);
-    } catch (urlError) {
+      console.log('✅ Constructed API URL:', apiUrl);
+    } catch {
+      console.error('❌ Failed to construct API URL');
       return "I'm having trouble with the API configuration. Please contact support.";
     }
 
@@ -107,6 +116,10 @@ export const generateAIResponse = async (
       ...chatHistory,
       { role: 'user', content: userMessage }
     ];
+
+    console.log('📤 Making API request...');
+    console.log('  - URL:', apiUrl);
+    console.log('  - Messages count:', messages.length);
 
     // Make direct API call
     const response = await fetch(apiUrl, {
@@ -123,7 +136,18 @@ export const generateAIResponse = async (
       })
     });
 
+    console.log('📥 API Response received:');
+    console.log('  - Status:', response.status);
+    console.log('  - Status Text:', response.statusText);
+    console.log('  - OK:', response.ok);
+
     if (!response.ok) {
+      // Get error details
+      const errorText = await response.text();
+      console.error('❌ API Error Response:');
+      console.error('  - Status:', response.status);
+      console.error('  - Body:', errorText);
+      
       // Provide user-friendly error messages based on status code
       if (response.status === 404) {
         return "I'm having trouble connecting to the AI service. Please try again later.";
@@ -137,6 +161,8 @@ export const generateAIResponse = async (
     }
 
     const data = await response.json();
+    console.log('✅ API Response parsed successfully');
+    
     const aiResponse = data.choices?.[0]?.message?.content || "I'm having trouble responding right now.";
 
     // Simulate streaming if callback provided
@@ -146,11 +172,9 @@ export const generateAIResponse = async (
     }
 
     return aiResponse;
-  } catch (error) {
-    // Log error for debugging but return user-friendly message
-    if (__DEV__) {
-      console.error('AI Error:', error instanceof Error ? error.message : 'Unknown error');
-    }
+  } catch {
+    // Return user-friendly message
+    console.error('❌ Unexpected error in generateAIResponse');
     return "I'm having trouble connecting right now. Please try again in a moment.";
   }
 };
