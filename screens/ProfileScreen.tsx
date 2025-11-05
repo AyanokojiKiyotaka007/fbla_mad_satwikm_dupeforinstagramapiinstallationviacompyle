@@ -161,7 +161,7 @@ export default function ProfileScreen() {
             <View style={[styles.profileInner, { 
               borderColor: isDarkMode ? 'rgba(90, 159, 238, 0.4)' : 'rgba(255, 255, 255, 0.7)', 
               borderWidth: 1.5,
-              backgroundColor: isDarkMode ? 'transparent' : 'rgba(255, 255, 255, 0.25)'
+              backgroundColor: isDarkMode ? 'transparent' : 'rgba(255, 255, 255, 0.9)'
             }]}>
               <View style={styles.avatarContainer}>
                 {profileImage ? (
@@ -198,7 +198,7 @@ export default function ProfileScreen() {
             <View style={[styles.statsInner, { 
               borderColor: isDarkMode ? 'rgba(90, 159, 238, 0.4)' : 'rgba(255, 255, 255, 0.7)', 
               borderWidth: 1.5,
-              backgroundColor: isDarkMode ? 'transparent' : 'rgba(255, 255, 255, 0.25)'
+              backgroundColor: isDarkMode ? 'transparent' : 'rgba(255, 255, 255, 0.9)'
             }]}>
               <View style={styles.statItem}>
                 <Text style={[styles.statValue, { color: colors.primary }]}>
@@ -227,7 +227,7 @@ export default function ProfileScreen() {
             <View style={[styles.infoInner, { 
               borderColor: isDarkMode ? 'rgba(90, 159, 238, 0.4)' : 'rgba(255, 255, 255, 0.7)', 
               borderWidth: 1.5,
-              backgroundColor: isDarkMode ? 'transparent' : 'rgba(255, 255, 255, 0.25)'
+              backgroundColor: isDarkMode ? 'transparent' : 'rgba(255, 255, 255, 0.9)'
             }]}>
               <Text style={[styles.sectionTitle, { color: colors.text }]}>Personal Information</Text>
               
@@ -249,7 +249,7 @@ export default function ProfileScreen() {
             <View style={[styles.settingsInner, { 
               borderColor: isDarkMode ? 'rgba(90, 159, 238, 0.4)' : 'rgba(255, 255, 255, 0.7)', 
               borderWidth: 1.5,
-              backgroundColor: isDarkMode ? 'transparent' : 'rgba(255, 255, 255, 0.25)'
+              backgroundColor: isDarkMode ? 'transparent' : 'rgba(255, 255, 255, 0.9)'
             }]}>
               <Text style={[styles.sectionTitle, { color: colors.text }]}>Settings</Text>
               

@@ -42,7 +42,7 @@ export default function ResourceCard({ resource, onDownload, index }: ResourceCa
         <View style={[styles.cardInner, { 
           borderColor: isDarkMode ? 'rgba(90, 159, 238, 0.4)' : 'rgba(255, 255, 255, 0.7)', 
           borderWidth: 1.5,
-          backgroundColor: isDarkMode ? 'transparent' : 'rgba(255, 255, 255, 0.25)'
+          backgroundColor: isDarkMode ? 'transparent' : 'rgba(255, 255, 255, 0.9)'
         }]}>
           <View style={[styles.fileIcon, { backgroundColor: fileColor + '20' }]}>
             <MaterialIcons name={fileIcon} size={32} color={fileColor} />
@@ -71,11 +71,11 @@ export default function ResourceCard({ resource, onDownload, index }: ResourceCa
           </View>
           
           <TouchableOpacity 
-            style={[styles.downloadButton, { backgroundColor: colors.primary + '20' }]} 
+            style={[styles.downloadButton, { backgroundColor: fileColor + '20' }]} 
             onPress={onDownload}
             activeOpacity={0.7}
           >
-            <MaterialIcons name="download" size={24} color={colors.primary} />
+            <MaterialIcons name="download" size={24} color={fileColor} />
           </TouchableOpacity>
         </View>
       </BlurView>
@@ -97,15 +97,17 @@ const styles = StyleSheet.create({
     borderRadius: 18,
   },
   fileIcon: {
-    width: 68,
-    height: 68,
+    width: 56,
+    height: 56,
     borderRadius: BORDER_RADIUS.md,
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: SPACING.md,
+    flexShrink: 0,
   },
   content: {
     flex: 1,
+    marginRight: SPACING.sm,
   },
   title: {
     ...TYPOGRAPHY.h3,
@@ -131,11 +133,11 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
   downloadButton: {
-    width: 52,
-    height: 52,
+    width: 48,
+    height: 48,
     borderRadius: BORDER_RADIUS.md,
     alignItems: 'center',
     justifyContent: 'center',
-    marginLeft: SPACING.sm,
+    flexShrink: 0,
   },
 });

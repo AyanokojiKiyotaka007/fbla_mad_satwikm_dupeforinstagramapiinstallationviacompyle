@@ -47,7 +47,7 @@ export default function EventCard({ event, onPress, index }: EventCardProps) {
           <View style={[styles.cardInner, { 
             borderColor: isDarkMode ? 'rgba(90, 159, 238, 0.4)' : 'rgba(255, 255, 255, 0.7)', 
             borderWidth: 1.5,
-            backgroundColor: isDarkMode ? 'transparent' : 'rgba(255, 255, 255, 0.25)'
+            backgroundColor: isDarkMode ? 'transparent' : 'rgba(255, 255, 255, 0.9)'
           }]}>
             <View style={[styles.categoryBadge, { backgroundColor: categoryColor }]}>
               <MaterialIcons name={categoryIcon} size={20} color="#FFFFFF" />

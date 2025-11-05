@@ -6,6 +6,7 @@ import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
 import { Event } from '../types';
 import { useTheme } from '../contexts/ThemeContext';
 import { SPACING, TYPOGRAPHY, BORDER_RADIUS, SHADOWS } from '../constants/theme';
+import { showCalendarOptions } from '../utils/calendar';
 
 interface EventDetailScreenProps {
   route: {
@@ -39,6 +40,10 @@ export default function EventDetailScreen({ route, navigation }: EventDetailScre
         : `You are now registered for "${event.title}"`,
       [{ text: 'OK' }]
     );
+  };
+
+  const handleAddToCalendar = () => {
+    showCalendarOptions(event);
   };
 
   return (
@@ -155,6 +160,7 @@ export default function EventDetailScreen({ route, navigation }: EventDetailScre
           <TouchableOpacity 
             style={[styles.calendarButton, { backgroundColor: colors.surface }, SHADOWS.medium]}
             activeOpacity={0.8}
+            onPress={handleAddToCalendar}
           >
             <MaterialIcons name="event" size={24} color={categoryColor} />
             <Text style={[styles.calendarButtonText, { color: categoryColor }]}>

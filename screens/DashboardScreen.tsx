@@ -97,7 +97,7 @@ export default function DashboardScreen({ navigation }: DashboardScreenProps) {
                   <View style={[styles.dateCardInner, { 
                     borderColor: isDarkMode ? 'rgba(90, 159, 238, 0.4)' : 'rgba(255, 255, 255, 0.7)', 
                     borderWidth: 1.5,
-                    backgroundColor: isDarkMode ? 'transparent' : 'rgba(255, 255, 255, 0.25)'
+                    backgroundColor: isDarkMode ? 'transparent' : 'rgba(255, 255, 255, 0.9)'
                   }]}>
                     <Text style={[styles.dateDay, { color: colors.primary }]}>{dayName}</Text>
                     <Text style={[styles.dateNumber, { color: colors.text }]}>{dayNumber}</Text>
@@ -119,7 +119,7 @@ export default function DashboardScreen({ navigation }: DashboardScreenProps) {
               <View style={[styles.quoteInner, { 
                 borderColor: isDarkMode ? 'rgba(90, 159, 238, 0.4)' : 'rgba(255, 255, 255, 0.7)', 
                 borderWidth: 1.5,
-                backgroundColor: isDarkMode ? 'transparent' : 'rgba(255, 255, 255, 0.25)'
+                backgroundColor: isDarkMode ? 'transparent' : 'rgba(255, 255, 255, 0.9)'
               }]}>
                 <RNAnimated.View style={{ opacity: quoteOpacity }}>
                   <Text style={[styles.quote, { color: colors.primary }]}>
@@ -159,7 +159,7 @@ export default function DashboardScreen({ navigation }: DashboardScreenProps) {
                   <View style={[styles.eventCardInner, { 
                     borderColor: isDarkMode ? 'rgba(90, 159, 238, 0.4)' : 'rgba(255, 255, 255, 0.7)', 
                     borderWidth: 1.5,
-                    backgroundColor: isDarkMode ? 'transparent' : 'rgba(255, 255, 255, 0.25)'
+                    backgroundColor: isDarkMode ? 'transparent' : 'rgba(255, 255, 255, 0.9)'
                   }]}>
                     <View style={styles.eventHeader}>
                       <View style={[styles.eventIconContainer, { backgroundColor: colors.primary }]}>
@@ -208,7 +208,7 @@ export default function DashboardScreen({ navigation }: DashboardScreenProps) {
                 <View style={[styles.notificationInner, { 
                   borderColor: isDarkMode ? 'rgba(90, 159, 238, 0.4)' : 'rgba(255, 255, 255, 0.7)', 
                   borderWidth: 1.5,
-                  backgroundColor: isDarkMode ? 'transparent' : 'rgba(255, 255, 255, 0.25)'
+                  backgroundColor: isDarkMode ? 'transparent' : 'rgba(255, 255, 255, 0.9)'
                 }]}>
                   <View style={[styles.notificationDot, { backgroundColor: colors.secondary }]} />
                   <Text style={[styles.notificationText, { color: colors.text }]}>
@@ -293,7 +293,7 @@ export default function DashboardScreen({ navigation }: DashboardScreenProps) {
                   <View style={[styles.socialButtonInner, { 
                     borderColor: isDarkMode ? 'rgba(90, 159, 238, 0.4)' : 'rgba(255, 255, 255, 0.7)', 
                     borderWidth: 1.5,
-                    backgroundColor: isDarkMode ? 'transparent' : 'rgba(255, 255, 255, 0.25)'
+                    backgroundColor: isDarkMode ? 'transparent' : 'rgba(255, 255, 255, 0.9)'
                   }]}>
                     <View style={[styles.socialIconGradient, { backgroundColor: '#1DA1F2' }]}>
                       <MaterialIcons name="tag" size={24} color="#FFFFFF" />
@@ -321,7 +321,7 @@ function QuickActionButton({ icon, color, onPress, colors, isDarkMode }: any) {
         <View style={[styles.quickActionInner, { 
           borderColor: isDarkMode ? 'rgba(90, 159, 238, 0.4)' : 'rgba(255, 255, 255, 0.7)', 
           borderWidth: 1.5,
-          backgroundColor: isDarkMode ? 'transparent' : 'rgba(255, 255, 255, 0.25)'
+          backgroundColor: isDarkMode ? 'transparent' : 'rgba(255, 255, 255, 0.9)'
         }]}>
           <View style={[styles.quickActionIcon, { backgroundColor: color + '20' }]}>
             <MaterialIcons name={icon} size={32} color={color} />
