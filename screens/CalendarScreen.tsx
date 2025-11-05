@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 import Animated, { FadeIn } from 'react-native-reanimated';
 import EventCard from '../components/EventCard';
 import { mockEvents } from '../data/mockData';
@@ -14,7 +15,7 @@ interface CalendarScreenProps {
 
 export default function CalendarScreen({ navigation }: CalendarScreenProps) {
   const [selectedFilter, setSelectedFilter] = useState<string>('all');
-  const { colors } = useTheme();
+  const { colors, isDarkMode } = useTheme();
 
   const filters = [
     { id: 'all', label: 'All Events', icon: 'event' as const },
@@ -30,6 +31,16 @@ export default function CalendarScreen({ navigation }: CalendarScreenProps) {
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['top']}>
+      {/* Full-screen gradient background */}
+      <LinearGradient
+        colors={isDarkMode 
+          ? ['#0A0E1A', '#1A1F2E', '#0F1419', '#0A0E1A']
+          : ['#E8F0FE', '#F0F5FF', '#FDFEFF', '#FFFFFF']
+        }
+        style={StyleSheet.absoluteFillObject}
+        locations={[0, 0.3, 0.7, 1]}
+      />
+      
       <View style={styles.header}>
         <Text style={[styles.headerTitle, { color: colors.text }]}>Event Calendar</Text>
         <TouchableOpacity style={[styles.addButton, { backgroundColor: colors.primary }]}>

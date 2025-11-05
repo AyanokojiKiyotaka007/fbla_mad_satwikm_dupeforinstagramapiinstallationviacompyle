@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { BlurView } from 'expo-blur';
+import { LinearGradient } from 'expo-linear-gradient';
 import Animated, { FadeInRight } from 'react-native-reanimated';
 import { Event } from '../types';
 import { useTheme } from '../contexts/ThemeContext';
@@ -37,47 +38,55 @@ export default function EventCard({ event, onPress, index }: EventCardProps) {
     <Animated.View entering={FadeInRight.delay(index * 100).springify()}>
       <TouchableOpacity 
         onPress={onPress}
-        activeOpacity={0.8}
+        activeOpacity={0.85}
       >
-        <BlurView intensity={isDarkMode ? 25 : 70} style={[styles.container, SHADOWS.medium]}>
-          <View style={[styles.cardInner, { borderColor: colors.glassBorder, borderWidth: 1 }]}>
-            <View style={[styles.categoryBadge, { backgroundColor: categoryColor }]}>
-              <MaterialIcons name={categoryIcon} size={20} color="#FFFFFF" />
-            </View>
-            
-            <View style={styles.content}>
-              <Text style={[styles.title, { color: colors.text }]} numberOfLines={2}>{event.title}</Text>
-              
-              <View style={styles.infoRow}>
-                <MaterialIcons name="calendar-today" size={14} color={colors.textSecondary} />
-                <Text style={[styles.infoText, { color: colors.textSecondary }]}>{event.date}</Text>
+        <BlurView intensity={isDarkMode ? 30 : 75} style={[styles.container, SHADOWS.medium]}>
+          <LinearGradient
+            colors={isDarkMode 
+              ? ['rgba(26, 31, 46, 0.5)', 'rgba(37, 42, 53, 0.4)']
+              : ['rgba(255, 255, 255, 0.6)', 'rgba(255, 255, 255, 0.4)']
+            }
+            style={styles.gradient}
+          >
+            <View style={[styles.cardInner, { borderColor: colors.glassBorder, borderWidth: 1.5 }]}>
+              <View style={[styles.categoryBadge, { backgroundColor: categoryColor }]}>
+                <MaterialIcons name={categoryIcon} size={20} color="#FFFFFF" />
               </View>
               
-              <View style={styles.infoRow}>
-                <MaterialIcons name="access-time" size={14} color={colors.textSecondary} />
-                <Text style={[styles.infoText, { color: colors.textSecondary }]}>{event.time}</Text>
-              </View>
-              
-              <View style={styles.infoRow}>
-                <MaterialIcons name="location-on" size={14} color={colors.textSecondary} />
-                <Text style={[styles.infoText, { color: colors.textSecondary }]} numberOfLines={1}>{event.location}</Text>
-              </View>
-              
-              <View style={[styles.footer, { borderTopColor: colors.divider }]}>
-                <View style={styles.attendeesContainer}>
-                  <MaterialIcons name="people" size={16} color={colors.textLight} />
-                  <Text style={[styles.attendeesText, { color: colors.textLight }]}>{event.attendees} attending</Text>
+              <View style={styles.content}>
+                <Text style={[styles.title, { color: colors.text }]} numberOfLines={2}>{event.title}</Text>
+                
+                <View style={styles.infoRow}>
+                  <MaterialIcons name="calendar-today" size={14} color={colors.textSecondary} />
+                  <Text style={[styles.infoText, { color: colors.textSecondary }]}>{event.date}</Text>
                 </View>
                 
-                {event.isRegistered && (
-                  <View style={[styles.registeredBadge, { backgroundColor: colors.success + '20' }]}>
-                    <MaterialIcons name="check-circle" size={14} color={colors.success} />
-                    <Text style={[styles.registeredText, { color: colors.success }]}>Registered</Text>
+                <View style={styles.infoRow}>
+                  <MaterialIcons name="access-time" size={14} color={colors.textSecondary} />
+                  <Text style={[styles.infoText, { color: colors.textSecondary }]}>{event.time}</Text>
+                </View>
+                
+                <View style={styles.infoRow}>
+                  <MaterialIcons name="location-on" size={14} color={colors.textSecondary} />
+                  <Text style={[styles.infoText, { color: colors.textSecondary }]} numberOfLines={1}>{event.location}</Text>
+                </View>
+                
+                <View style={[styles.footer, { borderTopColor: colors.divider }]}>
+                  <View style={styles.attendeesContainer}>
+                    <MaterialIcons name="people" size={16} color={colors.textLight} />
+                    <Text style={[styles.attendeesText, { color: colors.textLight }]}>{event.attendees} attending</Text>
                   </View>
-                )}
+                  
+                  {event.isRegistered && (
+                    <View style={[styles.registeredBadge, { backgroundColor: colors.success + '20' }]}>
+                      <MaterialIcons name="check-circle" size={14} color={colors.success} />
+                      <Text style={[styles.registeredText, { color: colors.success }]}>Registered</Text>
+                    </View>
+                  )}
+                </View>
               </View>
             </View>
-          </View>
+          </LinearGradient>
         </BlurView>
       </TouchableOpacity>
     </Animated.View>
@@ -91,6 +100,9 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.md,
     overflow: 'hidden',
   },
+  gradient: {
+    borderRadius: BORDER_RADIUS.lg,
+  },
   cardInner: {
     padding: SPACING.md,
   },
@@ -98,15 +110,15 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: SPACING.md,
     right: SPACING.md,
-    width: 40,
-    height: 40,
+    width: 42,
+    height: 42,
     borderRadius: BORDER_RADIUS.md,
     alignItems: 'center',
     justifyContent: 'center',
     zIndex: 1,
   },
   content: {
-    paddingRight: 48,
+    paddingRight: 50,
   },
   title: {
     ...TYPOGRAPHY.h3,
@@ -121,6 +133,7 @@ const styles = StyleSheet.create({
     ...TYPOGRAPHY.bodySmall,
     marginLeft: SPACING.xs,
     flex: 1,
+    fontWeight: '500',
   },
   footer: {
     flexDirection: 'row',
@@ -137,6 +150,7 @@ const styles = StyleSheet.create({
   attendeesText: {
     ...TYPOGRAPHY.caption,
     marginLeft: SPACING.xs,
+    fontWeight: '500',
   },
   registeredBadge: {
     flexDirection: 'row',

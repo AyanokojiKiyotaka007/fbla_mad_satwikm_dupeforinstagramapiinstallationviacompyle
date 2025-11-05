@@ -35,23 +35,28 @@ function TabNavigator() {
         tabBarInactiveTintColor: colors.textLight,
         tabBarStyle: {
           position: 'absolute',
-          backgroundColor: isDarkMode ? 'rgba(26, 31, 46, 0.8)' : 'rgba(255, 255, 255, 0.8)',
-          borderTopWidth: 1,
-          borderTopColor: colors.glassBorder,
+          backgroundColor: isDarkMode ? 'rgba(26, 31, 46, 0.85)' : 'rgba(255, 255, 255, 0.85)',
+          borderTopWidth: 1.5,
+          borderTopColor: isDarkMode ? colors.glassBorder : colors.border,
           paddingBottom: Platform.OS === 'ios' ? 20 : 8,
           paddingTop: 8,
           height: Platform.OS === 'ios' ? 88 : 68,
           elevation: 0,
+          shadowColor: isDarkMode ? colors.primary : '#000',
+          shadowOffset: { width: 0, height: -2 },
+          shadowOpacity: isDarkMode ? 0.15 : 0.08,
+          shadowRadius: 12,
         },
         tabBarBackground: () => (
           <BlurView
-            intensity={isDarkMode ? 80 : 90}
+            intensity={isDarkMode ? 85 : 95}
             style={{
               position: 'absolute',
               top: 0,
               left: 0,
               bottom: 0,
               right: 0,
+              backgroundColor: isDarkMode ? 'rgba(26, 31, 46, 0.3)' : 'rgba(255, 255, 255, 0.3)',
             }}
           />
         ),

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Linking } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 import Animated, { FadeIn } from 'react-native-reanimated';
 import ResourceCard from '../components/ResourceCard';
 import { mockResources } from '../data/mockData';
@@ -10,7 +11,7 @@ import { SPACING, TYPOGRAPHY, BORDER_RADIUS } from '../constants/theme';
 
 export default function ResourcesScreen() {
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
-  const { colors } = useTheme();
+  const { colors, isDarkMode } = useTheme();
 
   const categories = [
     { id: 'all', label: 'All Files' },
@@ -32,6 +33,16 @@ export default function ResourcesScreen() {
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['top']}>
+      {/* Full-screen gradient background */}
+      <LinearGradient
+        colors={isDarkMode 
+          ? ['#0A0E1A', '#1A1F2E', '#0F1419', '#0A0E1A']
+          : ['#E8F0FE', '#F0F5FF', '#FDFEFF', '#FFFFFF']
+        }
+        style={StyleSheet.absoluteFillObject}
+        locations={[0, 0.3, 0.7, 1]}
+      />
+      
       <View style={styles.header}>
         <Text style={[styles.headerTitle, { color: colors.text }]}>Resources</Text>
         <TouchableOpacity style={[styles.uploadButton, { backgroundColor: colors.accent }]}>

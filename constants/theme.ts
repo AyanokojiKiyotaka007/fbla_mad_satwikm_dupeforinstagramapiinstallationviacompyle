@@ -1,4 +1,4 @@
-// Light and Dark theme colors with glassmorphism support
+// Enhanced Light and Dark theme colors with refined glassmorphism
 export const LIGHT_COLORS = {
   primary: '#003DA5',
   primaryDark: '#002D7A',
@@ -7,54 +7,67 @@ export const LIGHT_COLORS = {
   secondaryDark: '#E6A519',
   accent: '#00A3E0',
   
-  background: '#F5F7FA',
+  // Refined background with full-screen gradient
+  background: '#F8FAFF',
   backgroundGradient1: '#E8F0FE',
-  backgroundGradient2: '#F0F7FF',
-  surface: 'rgba(255, 255, 255, 0.7)',
+  backgroundGradient2: '#F0F5FF',
+  backgroundGradient3: '#FDFEFF',
+  
+  // Enhanced glassmorphism surfaces
+  surface: 'rgba(255, 255, 255, 0.75)',
   surfaceSolid: '#FFFFFF',
-  card: 'rgba(255, 255, 255, 0.6)',
+  card: 'rgba(255, 255, 255, 0.65)',
   
-  text: '#1A1A1A',
-  textSecondary: '#6B7280',
-  textLight: '#9CA3AF',
+  // Crisp, high-contrast text colors
+  text: '#0A0F1C',
+  textSecondary: '#3D4A5C',
+  textLight: '#6B7A8F',
   
-  border: 'rgba(226, 232, 240, 0.5)',
-  divider: 'rgba(241, 245, 249, 0.5)',
+  border: 'rgba(226, 232, 240, 0.6)',
+  divider: 'rgba(226, 232, 240, 0.4)',
   
   success: '#10B981',
   warning: '#F59E0B',
   error: '#EF4444',
   info: '#3B82F6',
   
-  shadow: 'rgba(0, 0, 0, 0.08)',
+  shadow: 'rgba(0, 61, 165, 0.08)',
+  shadowMedium: 'rgba(0, 61, 165, 0.12)',
+  shadowStrong: 'rgba(0, 61, 165, 0.16)',
   overlay: 'rgba(0, 0, 0, 0.4)',
   
-  // Glassmorphism
-  glass: 'rgba(255, 255, 255, 0.65)',
-  glassBorder: 'rgba(255, 255, 255, 0.4)',
+  // Enhanced glassmorphism
+  glass: 'rgba(255, 255, 255, 0.7)',
+  glassBorder: 'rgba(255, 255, 255, 0.5)',
+  glassReflection: 'rgba(255, 255, 255, 0.9)',
 };
 
 export const DARK_COLORS = {
-  primary: '#4A90E2',
+  primary: '#5A9FEE',
   primaryDark: '#357ABD',
-  primaryLight: '#6BA3E8',
+  primaryLight: '#7BB3F2',
   secondary: '#FFB81C',
   secondaryDark: '#E6A519',
   accent: '#00A3E0',
   
-  background: '#0F1419',
-  backgroundGradient1: '#1A1F2E',
-  backgroundGradient2: '#0F1419',
-  surface: 'rgba(26, 31, 46, 0.7)',
+  // Refined dark background
+  background: '#0A0E1A',
+  backgroundGradient1: '#0F1419',
+  backgroundGradient2: '#1A1F2E',
+  backgroundGradient3: '#0F1419',
+  
+  // Enhanced dark glassmorphism
+  surface: 'rgba(26, 31, 46, 0.75)',
   surfaceSolid: '#1A1F2E',
-  card: 'rgba(37, 42, 53, 0.6)',
+  card: 'rgba(37, 42, 53, 0.65)',
   
-  text: '#FFFFFF',
-  textSecondary: '#9CA3AF',
-  textLight: '#6B7280',
+  // High-contrast dark text
+  text: '#F8FAFC',
+  textSecondary: '#CBD5E1',
+  textLight: '#94A3B8',
   
-  border: 'rgba(51, 65, 85, 0.5)',
-  divider: 'rgba(30, 41, 59, 0.5)',
+  border: 'rgba(71, 85, 105, 0.5)',
+  divider: 'rgba(51, 65, 85, 0.4)',
   
   success: '#10B981',
   warning: '#F59E0B',
@@ -62,11 +75,14 @@ export const DARK_COLORS = {
   info: '#3B82F6',
   
   shadow: 'rgba(0, 0, 0, 0.3)',
+  shadowMedium: 'rgba(0, 0, 0, 0.4)',
+  shadowStrong: 'rgba(0, 0, 0, 0.5)',
   overlay: 'rgba(0, 0, 0, 0.7)',
   
-  // Glassmorphism
-  glass: 'rgba(26, 31, 46, 0.65)',
-  glassBorder: 'rgba(255, 255, 255, 0.1)',
+  // Enhanced dark glassmorphism
+  glass: 'rgba(26, 31, 46, 0.7)',
+  glassBorder: 'rgba(90, 159, 238, 0.2)',
+  glassReflection: 'rgba(90, 159, 238, 0.1)',
 };
 
 export const SPACING = {
@@ -78,21 +94,25 @@ export const SPACING = {
   xxl: 48,
 };
 
+// Enhanced typography with better hierarchy
 export const TYPOGRAPHY = {
   h1: {
     fontSize: 32,
     fontWeight: '700' as const,
     lineHeight: 40,
+    letterSpacing: -0.5,
   },
   h2: {
     fontSize: 26,
     fontWeight: '700' as const,
     lineHeight: 34,
+    letterSpacing: -0.3,
   },
   h3: {
     fontSize: 20,
     fontWeight: '600' as const,
     lineHeight: 28,
+    letterSpacing: -0.2,
   },
   h4: {
     fontSize: 18,
@@ -102,6 +122,11 @@ export const TYPOGRAPHY = {
   body: {
     fontSize: 16,
     fontWeight: '400' as const,
+    lineHeight: 24,
+  },
+  bodyMedium: {
+    fontSize: 16,
+    fontWeight: '500' as const,
     lineHeight: 24,
   },
   bodySmall: {
@@ -114,28 +139,42 @@ export const TYPOGRAPHY = {
     fontWeight: '400' as const,
     lineHeight: 16,
   },
+  captionBold: {
+    fontSize: 12,
+    fontWeight: '600' as const,
+    lineHeight: 16,
+    letterSpacing: 0.5,
+  },
 };
 
+// Enhanced shadows with better depth
 export const SHADOWS = {
   small: {
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 3,
+    shadowOpacity: 0.08,
+    shadowRadius: 4,
     elevation: 2,
   },
   medium: {
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
+    shadowOpacity: 0.12,
+    shadowRadius: 12,
     elevation: 4,
   },
   large: {
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.12,
-    shadowRadius: 12,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.16,
+    shadowRadius: 24,
+    elevation: 8,
+  },
+  glow: {
+    shadowColor: '#003DA5',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.25,
+    shadowRadius: 16,
     elevation: 6,
   },
 };
