@@ -34,6 +34,14 @@ Tone: Professional yet friendly, motivational, and supportive. Keep responses co
 
 Focus areas: Leadership, business strategy, competition preparation, networking, career development, time management, and FBLA-specific guidance.`;
 
+// Helper function to properly construct API URL
+const constructApiUrl = (baseURL: string): string => {
+  // Remove trailing slash if present
+  const cleanBase = baseURL.endsWith('/') ? baseURL.slice(0, -1) : baseURL;
+  // Add the endpoint path
+  return `${cleanBase}/v1/chat/completions`;
+};
+
 // Generate AI response with chat history using direct API call
 export const generateAIResponse = async (
   userMessage: string, 
@@ -44,9 +52,18 @@ export const generateAIResponse = async (
     const baseURL = process.env.EXPO_PUBLIC_KIKI_BASE_URL;
     const apiKey = process.env.EXPO_PUBLIC_KIKI_API_KEY;
 
+    // Validate environment variables
     if (!baseURL || !apiKey) {
+      console.error('Missing API configuration:', { 
+        hasBaseURL: !!baseURL, 
+        hasApiKey: !!apiKey 
+      });
       throw new Error('API configuration missing');
     }
+
+    // Construct proper API URL
+    const apiUrl = constructApiUrl(baseURL);
+    console.log('Making API request to:', apiUrl);
 
     // Create messages array with system message and chat history
     const messages = [
@@ -58,9 +75,7 @@ export const generateAIResponse = async (
       { role: 'user', content: userMessage }
     ];
 
-    // Make direct API call - remove trailing slash and add correct endpoint
-    const apiUrl = baseURL.endsWith('/') ? `${baseURL}v1/chat/completions` : `${baseURL}/v1/chat/completions`;
-    
+    // Make direct API call
     const response = await fetch(apiUrl, {
       method: 'POST',
       headers: {
@@ -75,13 +90,24 @@ export const generateAIResponse = async (
       })
     });
 
+    // Log response details for debugging
+    console.log('API Response Status:', response.status);
+    console.log('API Response Headers:', JSON.stringify(Object.fromEntries(response.headers.entries())));
+
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('API Error:', response.status, errorText);
-      throw new Error(`API request failed: ${response.status}`);
+      console.error('API Error Details:', {
+        status: response.status,
+        statusText: response.statusText,
+        url: apiUrl,
+        errorBody: errorText
+      });
+      throw new Error(`API request failed: ${response.status} - ${errorText}`);
     }
 
     const data = await response.json();
+    console.log('API Response received successfully');
+    
     const aiResponse = data.choices?.[0]?.message?.content || "I'm having trouble responding right now.";
 
     // Simulate streaming if callback provided
@@ -93,6 +119,10 @@ export const generateAIResponse = async (
     return aiResponse;
   } catch (error) {
     console.error('Error generating AI response:', error);
+    if (error instanceof Error) {
+      console.error('Error message:', error.message);
+      console.error('Error stack:', error.stack);
+    }
     return "I'm having trouble connecting right now. Please try again in a moment.";
   }
 };
