@@ -97,50 +97,20 @@ export const generateAIResponse = async (
   }
 };
 
-// Get motivational quote for idle state
-export const getMotivationalQuote = async (): Promise<string> => {
-  try {
-    const baseURL = process.env.EXPO_PUBLIC_KIKI_BASE_URL;
-    const apiKey = process.env.EXPO_PUBLIC_KIKI_API_KEY;
+// Curated motivational quotes - no API call needed
+const MOTIVATIONAL_QUOTES = [
+  'Great leaders inspire action through vision and purpose.',
+  'Success is built on preparation, dedication, and continuous learning.',
+  'Leadership is about empowering others to achieve their best.',
+  'Innovation starts with curiosity and courage to try.',
+  'Your network is your net worth in business.',
+  'Excellence is not an act, but a habit.',
+  'The best way to predict the future is to create it.',
+  'Opportunities multiply as they are seized.',
+];
 
-    if (!baseURL || !apiKey) {
-      return 'Leadership is not about being in charge. It\'s about taking care of those in your charge.';
-    }
-
-    // Make direct API call - remove trailing slash and add correct endpoint
-    const apiUrl = baseURL.endsWith('/') ? `${baseURL}v1/chat/completions` : `${baseURL}/v1/chat/completions`;
-
-    const response = await fetch(apiUrl, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${apiKey}`
-      },
-      body: JSON.stringify({
-        model: 'gpt-4o',
-        messages: [
-          {
-            role: 'system',
-            content: 'You are a motivational business coach. Generate a single inspiring quote about leadership, business, or success. Keep it under 20 words. Do not include quotation marks or attribution.'
-          },
-          {
-            role: 'user',
-            content: 'Give me an inspiring business leadership quote.'
-          }
-        ],
-        temperature: 0.8,
-        max_tokens: 50
-      })
-    });
-
-    if (!response.ok) {
-      throw new Error('Failed to fetch quote');
-    }
-
-    const data = await response.json();
-    return data.choices?.[0]?.message?.content || 'Leadership is not about being in charge. It\'s about taking care of those in your charge.';
-  } catch (error) {
-    console.error('Error generating quote:', error);
-    return 'Leadership is not about being in charge. It\'s about taking care of those in your charge.';
-  }
+// Get motivational quote - now uses curated list instead of API
+export const getMotivationalQuote = (): string => {
+  const randomIndex = Math.floor(Math.random() * MOTIVATIONAL_QUOTES.length);
+  return MOTIVATIONAL_QUOTES[randomIndex];
 };

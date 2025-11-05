@@ -20,7 +20,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { generateAIResponse, getMotivationalQuote, Message } from '../utils/ai';
 import { mockEvents } from '../data/mockData';
 import { Event } from '../types';
-import { SPACING, TYPOGRAPHY, SHADOWS } from '../constants/theme';
+import { SPACING, SHADOWS } from '../constants/theme';
 
 interface AICoachScreenProps {
   navigation: any;
@@ -40,14 +40,9 @@ export default function AICoachScreen({ navigation }: AICoachScreenProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [streamingText, setStreamingText] = useState('');
   const [recommendedEvents, setRecommendedEvents] = useState<Event[]>([]);
-  const [motivationalQuote, setMotivationalQuote] = useState('');
+  const [motivationalQuote] = useState(getMotivationalQuote());
   const [showQuote, setShowQuote] = useState(true);
   const scrollViewRef = useRef<ScrollView>(null);
-
-  // Load motivational quote on mount
-  useEffect(() => {
-    loadMotivationalQuote();
-  }, []);
 
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
@@ -57,11 +52,6 @@ export default function AICoachScreen({ navigation }: AICoachScreenProps) {
       }, 100);
     }
   }, [messages, streamingText]);
-
-  const loadMotivationalQuote = async () => {
-    const quote = await getMotivationalQuote();
-    setMotivationalQuote(quote);
-  };
 
   const handleSendMessage = async () => {
     if (!inputText.trim() || isLoading) return;
@@ -278,46 +268,21 @@ export default function AICoachScreen({ navigation }: AICoachScreenProps) {
             showsVerticalScrollIndicator={false}
             keyboardShouldPersistTaps="handled"
           >
-            {/* Welcome Message */}
+            {/* Compact Welcome Message */}
             {messages.length === 0 && showQuote && (
               <Animated.View entering={FadeIn.delay(400).springify()} style={styles.welcomeContainer}>
-                <BlurView
-                  intensity={isDarkMode ? 50 : 95}
-                  tint={isDarkMode ? 'dark' : 'light'}
-                  style={[styles.welcomeBlur, SHADOWS.large]}
-                >
-                  <View
-                    style={[
-                      styles.welcomeInner,
-                      {
-                        borderColor: isDarkMode ? 'rgba(90, 159, 238, 0.5)' : 'rgba(255, 255, 255, 0.8)',
-                        borderWidth: 2,
-                        backgroundColor: isDarkMode ? 'rgba(26, 31, 46, 0.6)' : 'rgba(255, 255, 255, 0.95)'
-                      }
-                    ]}
-                  >
-                    <View style={[styles.welcomeIcon, { backgroundColor: colors.primary }]}>
-                      <MaterialIcons name="psychology" size={36} color="#FFFFFF" />
-                    </View>
-                    <Text style={[styles.welcomeTitle, { color: colors.text }]}>
-                      Welcome, {user?.name?.split(' ')[0] || 'Member'}!
-                    </Text>
-                    <Text style={[styles.welcomeSubtitle, { color: colors.textSecondary }]}>
-                      Your AI Coach for leadership growth, event prep, and competition guidance.
-                    </Text>
-                    {motivationalQuote && (
-                      <View style={styles.quoteContainer}>
-                        <MaterialIcons name="format-quote" size={24} color={colors.primary} style={styles.quoteIcon} />
-                        <Text style={[styles.quoteText, { color: colors.primary }]}>
-                          {motivationalQuote}
-                        </Text>
-                      </View>
-                    )}
-                    <Text style={[styles.welcomePrompt, { color: colors.textLight }]}>
-                      Ask me anything about FBLA events, leadership tips, or competition strategies!
-                    </Text>
-                  </View>
-                </BlurView>
+                <View style={[styles.welcomeIconCircle, { backgroundColor: colors.primary }]}>
+                  <MaterialIcons name="psychology" size={28} color="#FFFFFF" />
+                </View>
+                <Text style={[styles.welcomeTitle, { color: colors.text }]}>
+                  Hey {user?.name?.split(' ')[0] || 'there'}! 👋
+                </Text>
+                <Text style={[styles.welcomeSubtitle, { color: colors.textSecondary }]}>
+                  {motivationalQuote}
+                </Text>
+                <Text style={[styles.welcomePrompt, { color: colors.textLight }]}>
+                  Ask me about FBLA events, leadership tips, or competition strategies
+                </Text>
               </Animated.View>
             )}
 
@@ -433,35 +398,26 @@ const styles = StyleSheet.create({
   },
   messagesContent: {
     paddingHorizontal: SPACING.lg,
-    paddingTop: SPACING.sm,
+    paddingTop: SPACING.xl,
     paddingBottom: SPACING.xl,
   },
   welcomeContainer: {
-    marginBottom: SPACING.xl,
     alignItems: 'center',
+    paddingVertical: SPACING.xl * 2,
+    paddingHorizontal: SPACING.lg,
   },
-  welcomeBlur: {
+  welcomeIconCircle: {
+    width: 56,
+    height: 56,
     borderRadius: 28,
-    overflow: 'hidden',
-    width: '100%',
-  },
-  welcomeInner: {
-    padding: SPACING.xl * 1.5,
-    alignItems: 'center',
-    borderRadius: 28,
-  },
-  welcomeIcon: {
-    width: 72,
-    height: 72,
-    borderRadius: 36,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: SPACING.lg,
   },
   welcomeTitle: {
-    fontSize: 26,
+    fontSize: 24,
     fontWeight: '700',
-    marginBottom: SPACING.sm,
+    marginBottom: SPACING.md,
     textAlign: 'center',
     letterSpacing: 0.3,
   },
@@ -469,30 +425,15 @@ const styles = StyleSheet.create({
     fontSize: 16,
     lineHeight: 24,
     textAlign: 'center',
-    marginBottom: SPACING.xl,
-    paddingHorizontal: SPACING.md,
-  },
-  quoteContainer: {
-    paddingVertical: SPACING.lg,
-    paddingHorizontal: SPACING.xl,
     marginBottom: SPACING.lg,
-    alignItems: 'center',
-  },
-  quoteIcon: {
-    marginBottom: SPACING.xs,
-    opacity: 0.7,
-  },
-  quoteText: {
-    fontSize: 15,
     fontStyle: 'italic',
-    textAlign: 'center',
-    lineHeight: 22,
-    fontWeight: '500',
+    paddingHorizontal: SPACING.md,
   },
   welcomePrompt: {
     fontSize: 14,
     textAlign: 'center',
     paddingHorizontal: SPACING.md,
+    lineHeight: 20,
   },
   messageContainer: {
     marginBottom: SPACING.lg,
