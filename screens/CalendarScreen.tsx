@@ -30,7 +30,7 @@ export default function CalendarScreen({ navigation }: CalendarScreenProps) {
     : mockEvents.filter(e => e.category === selectedFilter);
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['top']}>
+    <SafeAreaView style={[styles.container, { backgroundColor: isDarkMode ? '#0F1419' : '#D4E3F7' }]} edges={['top']}>
       {/* Full-screen gradient background */}
       <LinearGradient
         colors={isDarkMode 

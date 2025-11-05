@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Dimensions, Animated as RNAnimated, Linking } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Animated as RNAnimated, Linking } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -8,7 +8,7 @@ import Animated, { FadeInDown, FadeInUp, FadeIn } from 'react-native-reanimated'
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { mockEvents } from '../data/mockData';
-import { SPACING, TYPOGRAPHY, SHADOWS, BORDER_RADIUS } from '../constants/theme';
+import { SPACING, TYPOGRAPHY, SHADOWS } from '../constants/theme';
 
 const { width, height } = Dimensions.get('window');
 
@@ -29,7 +29,6 @@ export default function DashboardScreen({ navigation }: DashboardScreenProps) {
   const { colors, isDarkMode } = useTheme();
   const [currentQuoteIndex, setCurrentQuoteIndex] = useState(0);
   const [currentDate, setCurrentDate] = useState(new Date());
-  const waveAnim = useRef(new RNAnimated.Value(0)).current;
   const quoteOpacity = useRef(new RNAnimated.Value(1)).current;
 
   const upcomingEvent = mockEvents.find(e => e.isRegistered);
@@ -38,21 +37,6 @@ export default function DashboardScreen({ navigation }: DashboardScreenProps) {
     const dateInterval = setInterval(() => {
       setCurrentDate(new Date());
     }, 60000);
-
-    RNAnimated.loop(
-      RNAnimated.sequence([
-        RNAnimated.timing(waveAnim, {
-          toValue: 1,
-          duration: 8000,
-          useNativeDriver: true,
-        }),
-        RNAnimated.timing(waveAnim, {
-          toValue: 0,
-          duration: 8000,
-          useNativeDriver: true,
-        }),
-      ])
-    ).start();
 
     const quoteInterval = setInterval(() => {
       RNAnimated.sequence([
@@ -75,12 +59,7 @@ export default function DashboardScreen({ navigation }: DashboardScreenProps) {
       clearInterval(dateInterval);
       clearInterval(quoteInterval);
     };
-  }, [waveAnim, quoteOpacity]);
-
-  const waveTranslate = waveAnim.interpolate({
-    inputRange: [0, 1],
-    outputRange: [0, 30],
-  });
+  }, [quoteOpacity]);
 
   const openSocialMedia = (url: string) => {
     Linking.openURL(url).catch(err => console.error('Error opening URL:', err));
@@ -92,40 +71,7 @@ export default function DashboardScreen({ navigation }: DashboardScreenProps) {
   const year = currentDate.getFullYear();
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.background }]}>
-      {/* Full-screen refined gradient - fills entire viewport */}
-      <LinearGradient
-        colors={isDarkMode 
-          ? ['#0A0E1A', '#1A1F2E', '#0F1419', '#0A0E1A']
-          : ['#E6EFFD', '#EEF4FF', '#F8FBFF', '#FFFFFF']
-        }
-        style={[StyleSheet.absoluteFillObject, { width: '100%', height: '100%' }]}
-        locations={[0, 0.35, 0.65, 1]}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 0, y: 1 }}
-      />
-
-      {/* Animated Wave Overlay with shimmer */}
-      <RNAnimated.View
-        style={[
-          styles.waveOverlay,
-          {
-            transform: [{ translateY: waveTranslate }],
-            opacity: isDarkMode ? 0.15 : 0.12,
-          },
-        ]}
-      >
-        <LinearGradient
-          colors={isDarkMode 
-            ? [colors.primary + '20', colors.accent + '25', colors.primary + '20']
-            : [colors.primary + '15', colors.accent + '18', colors.primary + '15']
-          }
-          style={StyleSheet.absoluteFillObject}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-        />
-      </RNAnimated.View>
-
+    <View style={[styles.container, { backgroundColor: isDarkMode ? '#0F1419' : '#D4E3F7' }]}>
       <SafeAreaView style={styles.safeArea} edges={['top']}>
         <ScrollView 
           showsVerticalScrollIndicator={false}
@@ -391,15 +337,6 @@ function QuickActionButton({ icon, color, onPress, colors, isDarkMode }: any) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-  },
-  waveOverlay: {
-    position: 'absolute',
-    top: 0,
-    left: -50,
-    right: -50,
-    height: height * 0.6,
-    borderBottomLeftRadius: width,
-    borderBottomRightRadius: width,
   },
   safeArea: {
     flex: 1,

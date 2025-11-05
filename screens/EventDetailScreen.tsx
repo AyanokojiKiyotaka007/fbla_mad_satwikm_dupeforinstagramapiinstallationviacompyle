@@ -19,7 +19,7 @@ interface EventDetailScreenProps {
 export default function EventDetailScreen({ route, navigation }: EventDetailScreenProps) {
   const { event } = route.params;
   const [isRegistered, setIsRegistered] = useState(event.isRegistered);
-  const { colors } = useTheme();
+  const { colors, isDarkMode } = useTheme();
   
   const categoryColors = {
     meeting: colors.info,
@@ -42,7 +42,7 @@ export default function EventDetailScreen({ route, navigation }: EventDetailScre
   };
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['top']}>
+    <SafeAreaView style={[styles.container, { backgroundColor: isDarkMode ? '#0F1419' : '#D4E3F7' }]} edges={['top']}>
       <View style={styles.header}>
         <TouchableOpacity 
           style={styles.backButton}

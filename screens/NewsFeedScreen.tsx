@@ -41,19 +41,7 @@ export default function NewsFeedScreen() {
     : newsItems.filter(item => item.category === selectedCategory);
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['top']}>
-      {/* Full-screen gradient background */}
-      <LinearGradient
-        colors={isDarkMode 
-          ? ['#0A0E1A', '#1A1F2E', '#0F1419', '#0A0E1A']
-          : ['#E6EFFD', '#EEF4FF', '#F8FBFF', '#FFFFFF']
-        }
-        style={[StyleSheet.absoluteFillObject, { width: '100%', height: '100%' }]}
-        locations={[0, 0.35, 0.65, 1]}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 0, y: 1 }}
-      />
-      
+    <SafeAreaView style={[styles.container, { backgroundColor: isDarkMode ? '#0F1419' : '#D4E3F7' }]} edges={['top']}>
       <View style={styles.header}>
         <Text style={[styles.headerTitle, { color: colors.text }]}>News Feed</Text>
         <TouchableOpacity style={styles.searchButton}>
