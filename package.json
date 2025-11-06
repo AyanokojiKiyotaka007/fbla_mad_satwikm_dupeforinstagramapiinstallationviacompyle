@@ -10,6 +10,7 @@
     "lint": "expo lint"
   },
   "dependencies": {
+    "@ai-sdk/openai": "1.0.0",
     "@basictech/expo": "^0.0.5",
     "@expo-google-fonts/inter": "^0.4.1",
     "@expo-google-fonts/playfair-display": "^0.4.1",
@@ -20,6 +21,7 @@
     "@react-navigation/bottom-tabs": "^7.3.10",
     "@react-navigation/native": "^7.1.6",
     "@react-navigation/native-stack": "^7.3.16",
+    "ai": "4.0.0",
     "expo": "54.0.22",
     "expo-blur": "~15.0.7",
     "expo-camera": "~17.0.9",
