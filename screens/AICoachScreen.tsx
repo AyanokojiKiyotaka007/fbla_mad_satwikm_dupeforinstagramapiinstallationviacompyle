@@ -30,6 +30,7 @@ interface ChatMessage extends Message {
   id: string;
   timestamp: Date;
   isStreaming?: boolean;
+  isError?: boolean;
 }
 
 export default function AICoachScreen({ navigation }: AICoachScreenProps) {
@@ -42,6 +43,7 @@ export default function AICoachScreen({ navigation }: AICoachScreenProps) {
   const [recommendedEvents, setRecommendedEvents] = useState<Event[]>([]);
   const [motivationalQuote] = useState(getMotivationalQuote());
   const [showQuote, setShowQuote] = useState(true);
+  const [lastUserMessage, setLastUserMessage] = useState('');
   const scrollViewRef = useRef<ScrollView>(null);
 
   // Auto-scroll to bottom when new messages arrive
@@ -53,23 +55,33 @@ export default function AICoachScreen({ navigation }: AICoachScreenProps) {
     }
   }, [messages, streamingText]);
 
-  const handleSendMessage = async () => {
-    if (!inputText.trim() || isLoading) return;
+  const handleSendMessage = async (retryMessage?: string) => {
+    const messageToSend = retryMessage || inputText.trim();
+    
+    if (!messageToSend || isLoading) return;
 
-    const userMessage = inputText.trim();
-    setInputText('');
+    if (!retryMessage) {
+      setInputText('');
+      setLastUserMessage(messageToSend);
+    }
+    
     setShowQuote(false);
     Keyboard.dismiss();
 
-    // Add user message
-    const newUserMessage: ChatMessage = {
-      id: Date.now().toString(),
-      role: 'user',
-      content: userMessage,
-      timestamp: new Date()
-    };
+    // Add user message (only if not retrying)
+    if (!retryMessage) {
+      const newUserMessage: ChatMessage = {
+        id: Date.now().toString(),
+        role: 'user',
+        content: messageToSend,
+        timestamp: new Date()
+      };
+      setMessages(prev => [...prev, newUserMessage]);
+    } else {
+      // Remove the last error message if retrying
+      setMessages(prev => prev.filter(msg => !msg.isError));
+    }
 
-    setMessages(prev => [...prev, newUserMessage]);
     setIsLoading(true);
 
     // Create streaming placeholder
@@ -85,26 +97,33 @@ export default function AICoachScreen({ navigation }: AICoachScreenProps) {
     setMessages(prev => [...prev, streamingMessage]);
     setStreamingText('');
 
-    // Get chat history for context
-    const chatHistory: Message[] = messages.map(msg => ({
-      role: msg.role,
-      content: msg.content
-    }));
+    // Get chat history for context (exclude error messages)
+    const chatHistory: Message[] = messages
+      .filter(msg => !msg.isError)
+      .map(msg => ({
+        role: msg.role,
+        content: msg.content
+      }));
 
     // Generate AI response with streaming
     const response = await generateAIResponse(
-      userMessage,
+      messageToSend,
       chatHistory,
       (chunk) => {
         setStreamingText(prev => prev + chunk);
       }
     );
 
+    // Check if response is an error message
+    const isErrorResponse = response.includes('having trouble') || 
+                           response.includes('unable to connect') ||
+                           response.includes('try again');
+
     // Replace streaming message with final response
     setMessages(prev => 
       prev.map(msg => 
         msg.id === streamingMessageId 
-          ? { ...msg, content: response, isStreaming: false }
+          ? { ...msg, content: response, isStreaming: false, isError: isErrorResponse }
           : msg
       )
     );
@@ -113,9 +132,23 @@ export default function AICoachScreen({ navigation }: AICoachScreenProps) {
     setIsLoading(false);
 
     // Check if user asked about events and show recommendations
-    if (userMessage.toLowerCase().includes('event')) {
+    if (messageToSend.toLowerCase().includes('event')) {
       recommendEvents();
     }
+  };
+
+  const handleRetry = () => {
+    if (lastUserMessage) {
+      handleSendMessage(lastUserMessage);
+    }
+  };
+
+  const handleSubmit = () => {
+    handleSendMessage();
+  };
+
+  const handleSendPress = () => {
+    handleSendMessage();
   };
 
   const recommendEvents = () => {
@@ -152,18 +185,29 @@ export default function AICoachScreen({ navigation }: AICoachScreenProps) {
               {
                 borderColor: isUser 
                   ? (isDarkMode ? 'rgba(90, 159, 238, 0.6)' : 'rgba(0, 61, 165, 0.4)')
+                  : message.isError
+                  ? 'rgba(255, 59, 48, 0.5)'
                   : (isDarkMode ? 'rgba(90, 159, 238, 0.5)' : 'rgba(255, 255, 255, 0.8)'),
                 borderWidth: 1.5,
                 backgroundColor: isUser
                   ? (isDarkMode ? 'rgba(90, 159, 238, 0.2)' : 'rgba(0, 61, 165, 0.1)')
+                  : message.isError
+                  ? 'rgba(255, 59, 48, 0.1)'
                   : (isDarkMode ? 'rgba(26, 31, 46, 0.6)' : 'rgba(255, 255, 255, 0.95)')
               }
             ]}
           >
             {!isUser && (
               <View style={[styles.aiIconContainer]}>
-                <View style={[styles.aiIcon, { backgroundColor: colors.primary }]}>
-                  <MaterialIcons name="psychology" size={18} color="#FFFFFF" />
+                <View style={[
+                  styles.aiIcon, 
+                  { backgroundColor: message.isError ? '#FF3B30' : colors.primary }
+                ]}>
+                  <MaterialIcons 
+                    name={message.isError ? 'error-outline' : 'psychology'} 
+                    size={18} 
+                    color="#FFFFFF" 
+                  />
                 </View>
               </View>
             )}
@@ -181,6 +225,16 @@ export default function AICoachScreen({ navigation }: AICoachScreenProps) {
                 <Text style={{ color: colors.primary }}>▊</Text>
               )}
             </Text>
+            {message.isError && !message.isStreaming && (
+              <TouchableOpacity
+                onPress={handleRetry}
+                style={[styles.retryButton, { backgroundColor: colors.primary }]}
+                activeOpacity={0.7}
+              >
+                <MaterialIcons name="refresh" size={16} color="#FFFFFF" />
+                <Text style={styles.retryButtonText}>Retry</Text>
+              </TouchableOpacity>
+            )}
           </View>
         </BlurView>
       </Animated.View>
@@ -326,11 +380,11 @@ export default function AICoachScreen({ navigation }: AICoachScreenProps) {
                   multiline
                   maxLength={500}
                   editable={!isLoading}
-                  onSubmitEditing={handleSendMessage}
+                  onSubmitEditing={handleSubmit}
                   blurOnSubmit={false}
                 />
                 <TouchableOpacity
-                  onPress={handleSendMessage}
+                  onPress={handleSendPress}
                   disabled={!inputText.trim() || isLoading}
                   activeOpacity={0.7}
                   style={[
@@ -468,6 +522,21 @@ const styles = StyleSheet.create({
     fontSize: 16,
     lineHeight: 24,
     letterSpacing: 0.2,
+  },
+  retryButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 16,
+    marginTop: 8,
+    alignSelf: 'flex-start',
+  },
+  retryButtonText: {
+    color: '#FFFFFF',
+    fontSize: 14,
+    fontWeight: '600',
   },
   recommendationsContainer: {
     marginTop: SPACING.xl * 1.5,

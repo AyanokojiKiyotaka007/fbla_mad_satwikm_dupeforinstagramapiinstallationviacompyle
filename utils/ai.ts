@@ -1,12 +1,16 @@
-// Simple AI utility using direct fetch API calls
-// This bypasses the problematic AI SDK dependencies
-
+// AI utility with comprehensive debugging, retry logic, and error handling
 import Constants from 'expo-constants';
 
 export interface Message {
   role: 'user' | 'assistant';
   content: string;
 }
+
+// Request tracking for debugging
+let requestCounter = 0;
+
+// Cache for last successful response
+let lastSuccessfulResponse: string | null = null;
 
 // Helper function to chunk text into words
 const chunkTextIntoWords = (text: string): string[] => {
@@ -16,8 +20,8 @@ const chunkTextIntoWords = (text: string): string[] => {
 // Helper function to simulate streaming with delays
 const simulateStreaming = async (words: string[], onChunk: (chunk: string) => void) => {
   for (const word of words) {
-    await new Promise(resolve => setTimeout(resolve, 50)); // 50ms delay between words
-    onChunk(word + ' '); // Add space after each word
+    await new Promise(resolve => setTimeout(resolve, 50));
+    onChunk(word + ' ');
   }
 };
 
@@ -36,41 +40,74 @@ Tone: Professional yet friendly, motivational, and supportive. Keep responses co
 
 Focus areas: Leadership, business strategy, competition preparation, networking, career development, time management, and FBLA-specific guidance.`;
 
-// Hardcoded fallback values (from .env.local)
+// Hardcoded fallback values
 const FALLBACK_BASE_URL = 'https://kiki-unkey-proxy.chris-d9a.workers.dev';
 const FALLBACK_API_KEY = 'proj_f2af9daa_3ZR2SDrop5YD4nSLzVq5ANbj';
 
+// Helper to mask sensitive data for logging
+const maskToken = (token: string): string => {
+  if (!token || token.length < 8) return '***';
+  return `${token.substring(0, 4)}...${token.substring(token.length - 4)}`;
+};
+
 // Helper function to validate and get environment variables
 const getEnvVar = (key: string): string => {
+  const requestId = requestCounter;
+  console.log(`\n🔍 [Request ${requestId}] Getting env var: ${key}`);
+  
   let value: string | undefined;
 
-  // Try process.env first (most reliable)
+  // Try process.env first
   if (key === 'EXPO_PUBLIC_KIKI_BASE_URL') {
     value = process.env.EXPO_PUBLIC_KIKI_BASE_URL;
+    console.log(`  📋 process.env.${key}:`, value ? `"${value}"` : 'undefined');
   } else if (key === 'EXPO_PUBLIC_KIKI_API_KEY') {
     value = process.env.EXPO_PUBLIC_KIKI_API_KEY;
+    console.log(`  📋 process.env.${key}:`, value ? maskToken(value) : 'undefined');
   }
 
   // Validate the value
-  if (value && value.trim() !== '' && !value.includes('"router"')) {
+  if (value && value.trim() !== '' && !value.includes('"router"') && !value.includes('{"origin"')) {
+    console.log(`  ✅ Valid value found in process.env`);
     return value.trim();
   }
 
   // Try expoConfig.extra as fallback
+  console.log(`  🔄 Checking Constants.expoConfig.extra...`);
   const extra = Constants.expoConfig?.extra;
-  if (extra && typeof extra === 'object' && key in extra) {
-    const extraValue = extra[key];
-    if (typeof extraValue === 'string' && extraValue.trim() !== '' && !extraValue.includes('"router"')) {
-      return extraValue.trim();
+  
+  if (extra && typeof extra === 'object') {
+    console.log(`  📦 expoConfig.extra exists, keys:`, Object.keys(extra));
+    
+    if (key in extra) {
+      const extraValue = extra[key];
+      console.log(`  📋 expoConfig.extra.${key}:`, 
+        key.includes('API_KEY') ? maskToken(String(extraValue)) : `"${extraValue}"`
+      );
+      
+      if (typeof extraValue === 'string' && 
+          extraValue.trim() !== '' && 
+          !extraValue.includes('"router"') &&
+          !extraValue.includes('{"origin"')) {
+        console.log(`  ✅ Valid value found in expoConfig.extra`);
+        return extraValue.trim();
+      } else {
+        console.log(`  ❌ Value in expoConfig.extra is invalid or corrupted`);
+      }
+    } else {
+      console.log(`  ❌ Key "${key}" not found in expoConfig.extra`);
     }
+  } else {
+    console.log(`  ❌ expoConfig.extra is not available`);
   }
 
   // Use hardcoded fallback
+  console.log(`  🔄 Using hardcoded fallback value`);
   if (key === 'EXPO_PUBLIC_KIKI_BASE_URL') {
-    console.warn('⚠️ Using fallback base URL');
+    console.log(`  ✅ Fallback base URL: ${FALLBACK_BASE_URL}`);
     return FALLBACK_BASE_URL;
   } else if (key === 'EXPO_PUBLIC_KIKI_API_KEY') {
-    console.warn('⚠️ Using fallback API key');
+    console.log(`  ✅ Fallback API key: ${maskToken(FALLBACK_API_KEY)}`);
     return FALLBACK_API_KEY;
   }
 
@@ -79,18 +116,194 @@ const getEnvVar = (key: string): string => {
 
 // Helper function to properly construct API URL
 const constructApiUrl = (baseURL: string): string => {
+  console.log(`  🔧 Constructing API URL from base: "${baseURL}"`);
+  
   // Remove trailing slash if present
   const cleanBase = baseURL.endsWith('/') ? baseURL.slice(0, -1) : baseURL;
+  console.log(`  🔧 Clean base URL: "${cleanBase}"`);
   
   // Validate URL format
   try {
-    new URL(cleanBase);
-  } catch {
+    const urlObj = new URL(cleanBase);
+    console.log(`  ✅ Valid URL format - Protocol: ${urlObj.protocol}, Host: ${urlObj.host}`);
+  } catch (error) {
+    console.error(`  ❌ Invalid URL format:`, error);
     throw new Error(`Invalid base URL format: ${cleanBase}`);
   }
   
   // Add the endpoint path
-  return `${cleanBase}/v1/chat/completions`;
+  const fullUrl = `${cleanBase}/v1/chat/completions`;
+  console.log(`  ✅ Full API URL: "${fullUrl}"`);
+  return fullUrl;
+};
+
+// Sleep helper for retry delays
+const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
+// Validate response structure
+const validateResponse = (data: any): { valid: boolean; error?: string } => {
+  if (!data) {
+    return { valid: false, error: 'Response data is null or undefined' };
+  }
+  
+  if (!data.choices || !Array.isArray(data.choices)) {
+    return { valid: false, error: 'Response missing "choices" array' };
+  }
+  
+  if (data.choices.length === 0) {
+    return { valid: false, error: 'Response "choices" array is empty' };
+  }
+  
+  const firstChoice = data.choices[0];
+  if (!firstChoice.message) {
+    return { valid: false, error: 'First choice missing "message" object' };
+  }
+  
+  if (!firstChoice.message.content || typeof firstChoice.message.content !== 'string') {
+    return { valid: false, error: 'Message content is missing or not a string' };
+  }
+  
+  if (firstChoice.message.content.trim() === '') {
+    return { valid: false, error: 'Message content is empty' };
+  }
+  
+  return { valid: true };
+};
+
+// Main API call with retry logic
+const makeApiRequest = async (
+  apiUrl: string,
+  apiKey: string,
+  messages: any[],
+  requestId: number,
+  attempt: number = 1
+): Promise<string> => {
+  const maxAttempts = 3;
+  
+  console.log(`\n📤 [Request ${requestId}] Attempt ${attempt}/${maxAttempts}`);
+  console.log(`  🌐 URL: ${apiUrl}`);
+  console.log(`  🔑 API Key: ${maskToken(apiKey)}`);
+  console.log(`  📨 Messages count: ${messages.length}`);
+  console.log(`  📝 User message preview: "${messages[messages.length - 1].content.substring(0, 50)}..."`);
+  
+  const requestBody = {
+    model: 'gpt-4o',
+    messages: messages,
+    temperature: 0.7,
+    max_tokens: 500
+  };
+  
+  console.log(`  📦 Request body:`, JSON.stringify(requestBody, null, 2).substring(0, 300) + '...');
+  
+  try {
+    const startTime = Date.now();
+    
+    // Set timeout for request
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
+    
+    const response = await fetch(apiUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${apiKey}`
+      },
+      body: JSON.stringify(requestBody),
+      signal: controller.signal
+    });
+    
+    clearTimeout(timeoutId);
+    const duration = Date.now() - startTime;
+    
+    console.log(`\n📥 [Request ${requestId}] Response received (${duration}ms)`);
+    console.log(`  📊 Status: ${response.status} ${response.statusText}`);
+    console.log(`  ✓ OK: ${response.ok}`);
+    console.log(`  📋 Headers:`, {
+      'content-type': response.headers.get('content-type'),
+      'content-length': response.headers.get('content-length')
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error(`  ❌ Error response body:`, errorText.substring(0, 500));
+      
+      // Retry on 429 or 5xx errors
+      if ((response.status === 429 || response.status >= 500) && attempt < maxAttempts) {
+        const delay = Math.pow(2, attempt) * 1000; // Exponential backoff
+        console.log(`  🔄 Retrying after ${delay}ms...`);
+        await sleep(delay);
+        return makeApiRequest(apiUrl, apiKey, messages, requestId, attempt + 1);
+      }
+      
+      // Return specific error messages
+      if (response.status === 404) {
+        throw new Error('API endpoint not found (404). Please check the base URL configuration.');
+      } else if (response.status === 401 || response.status === 403) {
+        throw new Error('Authentication failed. Please check your API key.');
+      } else if (response.status === 429) {
+        throw new Error('Rate limit exceeded. Please try again in a moment.');
+      } else if (response.status >= 500) {
+        throw new Error('AI service is temporarily unavailable. Please try again.');
+      }
+      
+      throw new Error(`API request failed with status ${response.status}`);
+    }
+
+    // Parse response
+    const data = await response.json();
+    console.log(`  ✅ Response parsed successfully`);
+    console.log(`  📦 Response structure:`, {
+      hasChoices: !!data.choices,
+      choicesLength: data.choices?.length,
+      hasMessage: !!data.choices?.[0]?.message,
+      hasContent: !!data.choices?.[0]?.message?.content
+    });
+    
+    // Validate response structure
+    const validation = validateResponse(data);
+    if (!validation.valid) {
+      console.error(`  ❌ Invalid response structure: ${validation.error}`);
+      console.error(`  📦 Full response:`, JSON.stringify(data, null, 2).substring(0, 500));
+      throw new Error(`Invalid API response: ${validation.error}`);
+    }
+    
+    const aiResponse = data.choices[0].message.content;
+    console.log(`  ✅ AI response extracted (${aiResponse.length} chars)`);
+    console.log(`  📝 Response preview: "${aiResponse.substring(0, 100)}..."`);
+    
+    // Cache successful response
+    lastSuccessfulResponse = aiResponse;
+    
+    return aiResponse;
+    
+  } catch (error) {
+    console.error(`\n❌ [Request ${requestId}] Error in attempt ${attempt}:`, error);
+    
+    // Check if it's a timeout
+    if (error instanceof Error && error.name === 'AbortError') {
+      console.error(`  ⏱️ Request timed out after 15 seconds`);
+      
+      if (attempt < maxAttempts) {
+        const delay = Math.pow(2, attempt) * 1000;
+        console.log(`  🔄 Retrying after ${delay}ms...`);
+        await sleep(delay);
+        return makeApiRequest(apiUrl, apiKey, messages, requestId, attempt + 1);
+      }
+      
+      throw new Error('Request timed out. Please check your internet connection.');
+    }
+    
+    // Retry on network errors
+    if (attempt < maxAttempts && error instanceof Error && 
+        (error.message.includes('network') || error.message.includes('fetch'))) {
+      const delay = Math.pow(2, attempt) * 1000;
+      console.log(`  🔄 Network error, retrying after ${delay}ms...`);
+      await sleep(delay);
+      return makeApiRequest(apiUrl, apiKey, messages, requestId, attempt + 1);
+    }
+    
+    throw error;
+  }
 };
 
 // Generate AI response with chat history using direct API call
@@ -99,18 +312,28 @@ export const generateAIResponse = async (
   chatHistory: Message[],
   onChunk?: (chunk: string) => void
 ): Promise<string> => {
+  const requestId = ++requestCounter;
+  
+  console.log(`\n${'='.repeat(80)}`);
+  console.log(`🚀 [Request ${requestId}] Starting AI request`);
+  console.log(`${'='.repeat(80)}`);
+  
   try {
     // Get environment variables with fallbacks
     const baseURL = getEnvVar('EXPO_PUBLIC_KIKI_BASE_URL');
     const apiKey = getEnvVar('EXPO_PUBLIC_KIKI_API_KEY');
 
-    // Validate we have values
+    // Final validation
     if (!baseURL || baseURL.trim() === '') {
-      return "I'm unable to connect to the AI service. Configuration error. Please contact support.";
+      console.error(`  ❌ Base URL is empty after all fallback attempts`);
+      return lastSuccessfulResponse || 
+        "I'm unable to connect to the AI service. Configuration error. Please contact support.";
     }
 
     if (!apiKey || apiKey.trim() === '') {
-      return "I'm unable to connect to the AI service. Authentication error. Please contact support.";
+      console.error(`  ❌ API Key is empty after all fallback attempts`);
+      return lastSuccessfulResponse || 
+        "I'm unable to connect to the AI service. Authentication error. Please contact support.";
     }
 
     // Construct API URL
@@ -126,52 +349,49 @@ export const generateAIResponse = async (
       { role: 'user', content: userMessage }
     ];
 
-    // Make API call
-    const response = await fetch(apiUrl, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${apiKey}`
-      },
-      body: JSON.stringify({
-        model: 'gpt-4o',
-        messages: messages,
-        temperature: 0.7,
-        max_tokens: 500
-      })
-    });
-
-    if (!response.ok) {
-      // Handle error responses
-      if (response.status === 404) {
-        return "I'm having trouble connecting to the AI service. Please try again later.";
-      } else if (response.status === 401 || response.status === 403) {
-        return "I'm having trouble authenticating with the AI service. Please contact support.";
-      } else if (response.status >= 500) {
-        return "The AI service is temporarily unavailable. Please try again in a moment.";
-      }
-      
-      return "I'm having trouble connecting right now. Please try again in a moment.";
-    }
-
-    const data = await response.json();
-    const aiResponse = data.choices?.[0]?.message?.content || "I'm having trouble responding right now.";
+    // Make API request with retry logic
+    const aiResponse = await makeApiRequest(apiUrl, apiKey, messages, requestId);
 
     // Simulate streaming if callback provided
     if (onChunk) {
+      console.log(`  🌊 Simulating streaming response...`);
       const words = chunkTextIntoWords(aiResponse);
       await simulateStreaming(words, onChunk);
     }
 
+    console.log(`\n✅ [Request ${requestId}] Request completed successfully`);
+    console.log(`${'='.repeat(80)}\n`);
+    
     return aiResponse;
+    
   } catch (error) {
-    // Log error for debugging but return user-friendly message
-    console.error('AI Error:', error instanceof Error ? error.message : 'Unknown error');
+    console.error(`\n❌ [Request ${requestId}] Final error:`, error);
+    console.log(`${'='.repeat(80)}\n`);
+    
+    // Return user-friendly message with cached response if available
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    
+    if (lastSuccessfulResponse) {
+      console.log(`  💾 Returning last successful response as fallback`);
+      return lastSuccessfulResponse;
+    }
+    
+    // Return specific error message
+    if (errorMessage.includes('404')) {
+      return "I'm having trouble connecting to the AI service. The endpoint may be incorrect. Please try again later.";
+    } else if (errorMessage.includes('Authentication')) {
+      return "I'm having trouble authenticating with the AI service. Please contact support.";
+    } else if (errorMessage.includes('timeout')) {
+      return "The request took too long. Please check your internet connection and try again.";
+    } else if (errorMessage.includes('Rate limit')) {
+      return "Too many requests. Please wait a moment and try again.";
+    }
+    
     return "I'm having trouble connecting right now. Please try again in a moment.";
   }
 };
 
-// Curated motivational quotes - no API call needed
+// Curated motivational quotes
 const MOTIVATIONAL_QUOTES = [
   'Great leaders inspire action through vision and purpose.',
   'Success is built on preparation, dedication, and continuous learning.',
@@ -183,7 +403,7 @@ const MOTIVATIONAL_QUOTES = [
   'Opportunities multiply as they are seized.',
 ];
 
-// Get motivational quote - now uses curated list instead of API
+// Get motivational quote
 export const getMotivationalQuote = (): string => {
   const randomIndex = Math.floor(Math.random() * MOTIVATIONAL_QUOTES.length);
   return MOTIVATIONAL_QUOTES[randomIndex];
