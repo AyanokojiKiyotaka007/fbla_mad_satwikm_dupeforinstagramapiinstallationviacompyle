@@ -66,10 +66,17 @@ const getEnvVar = (key: string): string => {
     console.log(`  📋 process.env.${key}:`, value ? maskToken(value) : 'undefined');
   }
 
-  // Validate the value
-  if (value && value.trim() !== '' && !value.includes('"router"') && !value.includes('{"origin"')) {
+  // Validate the value - must be a proper string, not just quotes or special chars
+  if (value && 
+      value.trim() !== '' && 
+      value.length > 5 && // Must be longer than just a quote or two
+      !value.includes('"router"') && 
+      !value.includes('{"origin"') &&
+      (key === 'EXPO_PUBLIC_KIKI_API_KEY' || value.startsWith('http'))) { // Base URL must start with http
     console.log(`  ✅ Valid value found in process.env`);
     return value.trim();
+  } else if (value) {
+    console.log(`  ❌ Value in process.env is invalid: length=${value.length}, starts with http=${value.startsWith('http')}`);
   }
 
   // Try expoConfig.extra as fallback
@@ -87,8 +94,10 @@ const getEnvVar = (key: string): string => {
       
       if (typeof extraValue === 'string' && 
           extraValue.trim() !== '' && 
+          extraValue.length > 5 &&
           !extraValue.includes('"router"') &&
-          !extraValue.includes('{"origin"')) {
+          !extraValue.includes('{"origin"') &&
+          (key === 'EXPO_PUBLIC_KIKI_API_KEY' || extraValue.startsWith('http'))) {
         console.log(`  ✅ Valid value found in expoConfig.extra`);
         return extraValue.trim();
       } else {
