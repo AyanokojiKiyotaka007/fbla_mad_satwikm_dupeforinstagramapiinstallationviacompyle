@@ -61,22 +61,19 @@ const getEnvVar = (key: string): string => {
   if (key === 'EXPO_PUBLIC_KIKI_BASE_URL') {
     value = process.env.EXPO_PUBLIC_KIKI_BASE_URL;
     console.log(`  📋 process.env.${key}:`, value ? `"${value}"` : 'undefined');
+    console.log(`  📏 Length: ${value?.length || 0}, Trimmed length: ${value?.trim().length || 0}`);
   } else if (key === 'EXPO_PUBLIC_KIKI_API_KEY') {
     value = process.env.EXPO_PUBLIC_KIKI_API_KEY;
     console.log(`  📋 process.env.${key}:`, value ? maskToken(value) : 'undefined');
+    console.log(`  📏 Length: ${value?.length || 0}, Trimmed length: ${value?.trim().length || 0}`);
   }
 
-  // Validate the value - must be a proper string, not just quotes or special chars
-  if (value && 
-      value.trim() !== '' && 
-      value.length > 5 && // Must be longer than just a quote or two
-      !value.includes('"router"') && 
-      !value.includes('{"origin"') &&
-      (key === 'EXPO_PUBLIC_KIKI_API_KEY' || value.startsWith('http'))) { // Base URL must start with http
+  // Validate the value - must be at least 10 characters for a valid URL/key
+  if (value && value.trim().length > 10 && !value.includes('"router"') && !value.includes('{"origin"')) {
     console.log(`  ✅ Valid value found in process.env`);
     return value.trim();
   } else if (value) {
-    console.log(`  ❌ Value in process.env is invalid: length=${value.length}, starts with http=${value.startsWith('http')}`);
+    console.log(`  ❌ Value in process.env is too short or invalid (length: ${value.trim().length})`);
   }
 
   // Try expoConfig.extra as fallback
@@ -91,17 +88,16 @@ const getEnvVar = (key: string): string => {
       console.log(`  📋 expoConfig.extra.${key}:`, 
         key.includes('API_KEY') ? maskToken(String(extraValue)) : `"${extraValue}"`
       );
+      console.log(`  📏 Length: ${String(extraValue).length}, Trimmed length: ${String(extraValue).trim().length}`);
       
       if (typeof extraValue === 'string' && 
-          extraValue.trim() !== '' && 
-          extraValue.length > 5 &&
+          extraValue.trim().length > 10 &&
           !extraValue.includes('"router"') &&
-          !extraValue.includes('{"origin"') &&
-          (key === 'EXPO_PUBLIC_KIKI_API_KEY' || extraValue.startsWith('http'))) {
+          !extraValue.includes('{"origin"')) {
         console.log(`  ✅ Valid value found in expoConfig.extra`);
         return extraValue.trim();
       } else {
-        console.log(`  ❌ Value in expoConfig.extra is invalid or corrupted`);
+        console.log(`  ❌ Value in expoConfig.extra is too short or invalid (length: ${String(extraValue).trim().length})`);
       }
     } else {
       console.log(`  ❌ Key "${key}" not found in expoConfig.extra`);
