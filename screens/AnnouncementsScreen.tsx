@@ -6,7 +6,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import SocialPostCard from '../components/SocialPostCard';
-import { fetchNationalTweets, fetchChapterTweets } from '../utils/twitter';
+import { fetchNationalPosts, fetchChapterPosts } from '../utils/instagram';
 import { SocialPost } from '../types';
 import { useTheme } from '../contexts/ThemeContext';
 import { SPACING, TYPOGRAPHY, BORDER_RADIUS, SHADOWS } from '../constants/theme';
@@ -14,20 +14,20 @@ import { SPACING, TYPOGRAPHY, BORDER_RADIUS, SHADOWS } from '../constants/theme'
 type TabType = 'national' | 'chapter';
 
 const TAB_STORAGE_KEY = '@announcements_last_tab';
-const CACHE_KEY_NATIONAL = '@announcements_cache_national';
-const CACHE_KEY_CHAPTER = '@announcements_cache_chapter';
+const CACHE_KEY_NATIONAL = '@announcements_national_cache';
+const CACHE_KEY_CHAPTER = '@announcements_chapter_cache';
 const CACHE_EXPIRY = 5 * 60 * 1000; // 5 minutes
 
 export default function AnnouncementsScreen() {
   const [activeTab, setActiveTab] = useState<TabType>('national');
   const [nationalPosts, setNationalPosts] = useState<SocialPost[]>([]);
   const [chapterPosts, setChapterPosts] = useState<SocialPost[]>([]);
-  const [refreshing, setRefreshing] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { colors, isDarkMode } = useTheme();
 
-  // Load cached data and last viewed tab on mount
+  // Load cached data and fetch fresh data on mount
   useEffect(() => {
     loadLastTab();
     loadCachedData();
@@ -60,20 +60,20 @@ export default function AnnouncementsScreen() {
 
   const loadCachedData = async () => {
     try {
-      const [cachedNational, cachedChapter] = await Promise.all([
+      const [nationalCache, chapterCache] = await Promise.all([
         AsyncStorage.getItem(CACHE_KEY_NATIONAL),
         AsyncStorage.getItem(CACHE_KEY_CHAPTER),
       ]);
 
-      if (cachedNational) {
-        const { data, timestamp } = JSON.parse(cachedNational);
+      if (nationalCache) {
+        const { data, timestamp } = JSON.parse(nationalCache);
         if (Date.now() - timestamp < CACHE_EXPIRY) {
           setNationalPosts(data);
         }
       }
 
-      if (cachedChapter) {
-        const { data, timestamp } = JSON.parse(cachedChapter);
+      if (chapterCache) {
+        const { data, timestamp } = JSON.parse(chapterCache);
         if (Date.now() - timestamp < CACHE_EXPIRY) {
           setChapterPosts(data);
         }
@@ -99,8 +99,8 @@ export default function AnnouncementsScreen() {
       setError(null);
       
       const [national, chapter] = await Promise.all([
-        fetchNationalTweets(),
-        fetchChapterTweets(),
+        fetchNationalPosts(),
+        fetchChapterPosts(),
       ]);
 
       if (national.length > 0) {
@@ -114,20 +114,20 @@ export default function AnnouncementsScreen() {
       }
 
       if (national.length === 0 && chapter.length === 0) {
-        setError('Unable to load posts. Please check your connection.');
+        setError('Unable to load posts. Please try again later.');
       }
     } catch (err) {
       console.error('Error fetching posts:', err);
-      setError('Failed to load posts. Please try again later.');
+      setError('Failed to load posts. Please check your connection.');
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
   };
 
   const handleRefresh = async () => {
     setRefreshing(true);
     await fetchAllPosts();
-    setRefreshing(false);
   };
 
   const handleLike = (id: string) => {
@@ -200,7 +200,7 @@ export default function AnnouncementsScreen() {
           <View>
             <Text style={[styles.headerTitle, { color: colors.text }]}>Announcements</Text>
             <Text style={[styles.headerSubtitle, { color: colors.textLight }]}>
-              Live from Twitter/X
+              Live from Instagram
             </Text>
           </View>
           <TouchableOpacity 
@@ -268,66 +268,68 @@ export default function AnnouncementsScreen() {
         </Animated.View>
 
         {/* Posts Feed */}
-        <ScrollView
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={styles.feedContainer}
-          refreshControl={
-            <RefreshControl
-              refreshing={refreshing}
-              onRefresh={handleRefresh}
-              tintColor={colors.primary}
-              colors={[colors.primary]}
-            />
-          }
-        >
-          {loading ? (
-            <View style={styles.loadingContainer}>
-              <ActivityIndicator size="large" color={colors.primary} />
-              <Text style={[styles.loadingText, { color: colors.textLight }]}>
-                Loading posts...
-              </Text>
-            </View>
-          ) : error ? (
-            <Animated.View 
-              entering={FadeIn.delay(400)}
-              style={[styles.emptyState, { backgroundColor: colors.surface }]}
-            >
-              <MaterialIcons name="error-outline" size={64} color={colors.error} />
-              <Text style={[styles.emptyTitle, { color: colors.text }]}>
-                {error}
-              </Text>
-              <TouchableOpacity
-                style={[styles.retryButton, { backgroundColor: colors.primary }]}
-                onPress={handleRefresh}
-              >
-                <Text style={styles.retryButtonText}>Try Again</Text>
-              </TouchableOpacity>
-            </Animated.View>
-          ) : currentPosts.length > 0 ? (
-            currentPosts.map((post, index) => (
-              <SocialPostCard
-                key={post.id}
-                post={post}
-                index={index}
-                onLike={handleLike}
-                onRetweet={handleRetweet}
+        {loading ? (
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator size="large" color={colors.primary} />
+            <Text style={[styles.loadingText, { color: colors.textLight }]}>
+              Loading posts...
+            </Text>
+          </View>
+        ) : (
+          <ScrollView
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={styles.feedContainer}
+            refreshControl={
+              <RefreshControl
+                refreshing={refreshing}
+                onRefresh={handleRefresh}
+                tintColor={colors.primary}
+                colors={[colors.primary]}
               />
-            ))
-          ) : (
-            <Animated.View 
-              entering={FadeIn.delay(400)}
-              style={[styles.emptyState, { backgroundColor: colors.surface }]}
-            >
-              <MaterialIcons name="inbox" size={64} color={colors.textLight} />
-              <Text style={[styles.emptyTitle, { color: colors.text }]}>
-                No posts available
-              </Text>
-              <Text style={[styles.emptySubtitle, { color: colors.textLight }]}>
-                Pull down to refresh
-              </Text>
-            </Animated.View>
-          )}
-        </ScrollView>
+            }
+          >
+            {error ? (
+              <Animated.View 
+                entering={FadeIn.delay(400)}
+                style={[styles.emptyState, { backgroundColor: colors.surface }]}
+              >
+                <MaterialIcons name="error-outline" size={64} color={colors.error} />
+                <Text style={[styles.emptyTitle, { color: colors.text }]}>
+                  {error}
+                </Text>
+                <TouchableOpacity 
+                  style={[styles.retryButton, { backgroundColor: colors.primary }]}
+                  onPress={handleRefresh}
+                >
+                  <Text style={styles.retryButtonText}>Retry</Text>
+                </TouchableOpacity>
+              </Animated.View>
+            ) : currentPosts.length > 0 ? (
+              currentPosts.map((post, index) => (
+                <SocialPostCard
+                  key={post.id}
+                  post={post}
+                  index={index}
+                  onLike={handleLike}
+                  onRetweet={handleRetweet}
+                />
+              ))
+            ) : (
+              <Animated.View 
+                entering={FadeIn.delay(400)}
+                style={[styles.emptyState, { backgroundColor: colors.surface }]}
+              >
+                <MaterialIcons name="inbox" size={64} color={colors.textLight} />
+                <Text style={[styles.emptyTitle, { color: colors.text }]}>
+                  No posts available
+                </Text>
+                <Text style={[styles.emptySubtitle, { color: colors.textLight }]}>
+                  Check back later for updates
+                </Text>
+              </Animated.View>
+            )}
+          </ScrollView>
+        )}
       </SafeAreaView>
     </View>
   );
@@ -391,18 +393,19 @@ const styles = StyleSheet.create({
     ...TYPOGRAPHY.bodySmall,
     fontWeight: '600',
   },
-  feedContainer: {
-    paddingTop: SPACING.sm,
-    paddingBottom: 100,
-  },
   loadingContainer: {
-    marginTop: SPACING.xxl,
-    alignItems: 'center',
+    flex: 1,
     justifyContent: 'center',
+    alignItems: 'center',
+    paddingBottom: 100,
   },
   loadingText: {
     ...TYPOGRAPHY.body,
     marginTop: SPACING.md,
+  },
+  feedContainer: {
+    paddingTop: SPACING.sm,
+    paddingBottom: 100,
   },
   emptyState: {
     marginHorizontal: SPACING.lg,

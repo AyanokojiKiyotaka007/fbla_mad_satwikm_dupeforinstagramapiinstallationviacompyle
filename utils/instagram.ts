@@ -1,4 +1,3 @@
-
 import { SocialPost } from '../types';
 
 // Instagram public API endpoints
