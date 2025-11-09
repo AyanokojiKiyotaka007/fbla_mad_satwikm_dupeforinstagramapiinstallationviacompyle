@@ -22,6 +22,23 @@ export interface NewsItem {
   isLiked: boolean;
 }
 
+export interface SocialPost {
+  id: string;
+  username: string;
+  handle: string;
+  profileImage?: string;
+  content: string;
+  timestamp: string;
+  likes: number;
+  retweets: number;
+  replies: number;
+  images?: string[];
+  videoThumbnail?: string;
+  videoUrl?: string;
+  isLiked?: boolean;
+  isRetweeted?: boolean;
+}
+
 export interface Resource {
   id: string;
   title: string;

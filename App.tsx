@@ -16,7 +16,7 @@ import SignInScreen from './screens/SignInScreen';
 import SignUpScreen from './screens/SignUpScreen';
 import DashboardScreen from './screens/DashboardScreen';
 import CalendarScreen from './screens/CalendarScreen';
-import NewsFeedScreen from './screens/NewsFeedScreen';
+import AnnouncementsScreen from './screens/AnnouncementsScreen';
 import ResourcesScreen from './screens/ResourcesScreen';
 import ProfileScreen from './screens/ProfileScreen';
 import EventDetailScreen from './screens/EventDetailScreen';
@@ -87,12 +87,11 @@ function TabNavigator() {
         }}
       />
       <Tab.Screen
-        name="NewsFeed"
-        component={NewsFeedScreen}
+        name="Announcements"
+        component={AnnouncementsScreen}
         options={{
-          tabBarLabel: 'News',
           tabBarIcon: ({ color, size }) => (
-            <MaterialIcons name="article" size={size} color={color} />
+            <MaterialIcons name="campaign" size={size} color={color} />
           ),
         }}
       />

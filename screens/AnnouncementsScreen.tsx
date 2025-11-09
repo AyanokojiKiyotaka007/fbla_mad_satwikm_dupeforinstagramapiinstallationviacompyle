@@ -1,0 +1,314 @@
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, RefreshControl } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { MaterialIcons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
+import Animated, { FadeIn, FadeInDown, useAnimatedStyle, withSpring } from 'react-native-reanimated';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import SocialPostCard from '../components/SocialPostCard';
+import { mockNationalPosts, mockChapterPosts } from '../data/mockData';
+import { SocialPost } from '../types';
+import { useTheme } from '../contexts/ThemeContext';
+import { SPACING, TYPOGRAPHY, BORDER_RADIUS, SHADOWS } from '../constants/theme';
+
+type TabType = 'national' | 'chapter';
+
+const TAB_STORAGE_KEY = '@announcements_last_tab';
+
+export default function AnnouncementsScreen() {
+  const [activeTab, setActiveTab] = useState<TabType>('national');
+  const [nationalPosts, setNationalPosts] = useState<SocialPost[]>(mockNationalPosts);
+  const [chapterPosts, setChapterPosts] = useState<SocialPost[]>(mockChapterPosts);
+  const [refreshing, setRefreshing] = useState(false);
+  const { colors, isDarkMode } = useTheme();
+
+  // Load last viewed tab on mount
+  useEffect(() => {
+    loadLastTab();
+  }, []);
+
+  // Save tab when it changes
+  useEffect(() => {
+    saveLastTab(activeTab);
+  }, [activeTab]);
+
+  const loadLastTab = async () => {
+    try {
+      const savedTab = await AsyncStorage.getItem(TAB_STORAGE_KEY);
+      if (savedTab === 'national' || savedTab === 'chapter') {
+        setActiveTab(savedTab);
+      }
+    } catch (error) {
+      console.error('Error loading last tab:', error);
+    }
+  };
+
+  const saveLastTab = async (tab: TabType) => {
+    try {
+      await AsyncStorage.setItem(TAB_STORAGE_KEY, tab);
+    } catch (error) {
+      console.error('Error saving last tab:', error);
+    }
+  };
+
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    // Simulate API refresh
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    setRefreshing(false);
+  };
+
+  const handleLike = (id: string) => {
+    if (activeTab === 'national') {
+      setNationalPosts(prev => prev.map(post => {
+        if (post.id === id) {
+          return {
+            ...post,
+            isLiked: !post.isLiked,
+            likes: post.isLiked ? post.likes - 1 : post.likes + 1,
+          };
+        }
+        return post;
+      }));
+    } else {
+      setChapterPosts(prev => prev.map(post => {
+        if (post.id === id) {
+          return {
+            ...post,
+            isLiked: !post.isLiked,
+            likes: post.isLiked ? post.likes - 1 : post.likes + 1,
+          };
+        }
+        return post;
+      }));
+    }
+  };
+
+  const handleRetweet = (id: string) => {
+    if (activeTab === 'national') {
+      setNationalPosts(prev => prev.map(post => {
+        if (post.id === id) {
+          return {
+            ...post,
+            isRetweeted: !post.isRetweeted,
+            retweets: post.isRetweeted ? post.retweets - 1 : post.retweets + 1,
+          };
+        }
+        return post;
+      }));
+    } else {
+      setChapterPosts(prev => prev.map(post => {
+        if (post.id === id) {
+          return {
+            ...post,
+            isRetweeted: !post.isRetweeted,
+            retweets: post.isRetweeted ? post.retweets - 1 : post.retweets + 1,
+          };
+        }
+        return post;
+      }));
+    }
+  };
+
+  const currentPosts = activeTab === 'national' ? nationalPosts : chapterPosts;
+
+  return (
+    <View style={styles.container}>
+      <LinearGradient
+        colors={isDarkMode 
+          ? [colors.backgroundGradient1, colors.backgroundGradient2, colors.backgroundGradient3, colors.backgroundGradient4]
+          : [colors.backgroundGradient1, colors.backgroundGradient2, colors.backgroundGradient3, colors.backgroundGradient4]
+        }
+        style={StyleSheet.absoluteFillObject}
+      />
+      
+      <SafeAreaView style={styles.safeArea} edges={['top']}>
+        {/* Header */}
+        <Animated.View entering={FadeIn.duration(600)} style={styles.header}>
+          <View>
+            <Text style={[styles.headerTitle, { color: colors.text }]}>Announcements</Text>
+            <Text style={[styles.headerSubtitle, { color: colors.textLight }]}>
+              Stay updated with FBLA
+            </Text>
+          </View>
+          <TouchableOpacity 
+            style={[styles.refreshButton, { backgroundColor: colors.surface }]}
+            onPress={handleRefresh}
+          >
+            <MaterialIcons name="refresh" size={22} color={colors.primary} />
+          </TouchableOpacity>
+        </Animated.View>
+
+        {/* Tab Navigation */}
+        <Animated.View entering={FadeInDown.delay(200).springify()} style={styles.tabContainer}>
+          <View style={[styles.tabBar, { 
+            backgroundColor: isDarkMode ? 'rgba(26, 31, 46, 0.7)' : 'rgba(255, 255, 255, 0.8)',
+            borderColor: isDarkMode ? 'rgba(90, 159, 238, 0.3)' : 'rgba(255, 255, 255, 0.6)',
+          }]}>
+            <TouchableOpacity
+              style={[
+                styles.tab,
+                activeTab === 'national' && [styles.activeTab, { backgroundColor: colors.primary }]
+              ]}
+              onPress={() => setActiveTab('national')}
+              activeOpacity={0.7}
+            >
+              <MaterialIcons 
+                name="public" 
+                size={20} 
+                color={activeTab === 'national' ? '#FFFFFF' : colors.textLight} 
+              />
+              <Text style={[
+                styles.tabText,
+                { color: activeTab === 'national' ? '#FFFFFF' : colors.textSecondary }
+              ]}>
+                National Updates
+              </Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[
+                styles.tab,
+                activeTab === 'chapter' && [styles.activeTab, { backgroundColor: colors.primary }]
+              ]}
+              onPress={() => setActiveTab('chapter')}
+              activeOpacity={0.7}
+            >
+              <MaterialIcons 
+                name="school" 
+                size={20} 
+                color={activeTab === 'chapter' ? '#FFFFFF' : colors.textLight} 
+              />
+              <Text style={[
+                styles.tabText,
+                { color: activeTab === 'chapter' ? '#FFFFFF' : colors.textSecondary }
+              ]}>
+                Chapter Updates
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </Animated.View>
+
+        {/* Posts Feed */}
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.feedContainer}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={handleRefresh}
+              tintColor={colors.primary}
+              colors={[colors.primary]}
+            />
+          }
+        >
+          {currentPosts.length > 0 ? (
+            currentPosts.map((post, index) => (
+              <SocialPostCard
+                key={post.id}
+                post={post}
+                index={index}
+                onLike={handleLike}
+                onRetweet={handleRetweet}
+              />
+            ))
+          ) : (
+            <Animated.View 
+              entering={FadeIn.delay(400)}
+              style={[styles.emptyState, { backgroundColor: colors.surface }]}
+            >
+              <MaterialIcons name="inbox" size={64} color={colors.textLight} />
+              <Text style={[styles.emptyTitle, { color: colors.text }]}>
+                No posts available
+              </Text>
+              <Text style={[styles.emptySubtitle, { color: colors.textLight }]}>
+                Check back later for updates
+              </Text>
+            </Animated.View>
+          )}
+        </ScrollView>
+      </SafeAreaView>
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+  safeArea: {
+    flex: 1,
+  },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: SPACING.lg,
+    paddingVertical: SPACING.md,
+  },
+  headerTitle: {
+    ...TYPOGRAPHY.h2,
+    marginBottom: 4,
+  },
+  headerSubtitle: {
+    ...TYPOGRAPHY.bodySmall,
+    fontWeight: '500',
+  },
+  refreshButton: {
+    width: 44,
+    height: 44,
+    borderRadius: BORDER_RADIUS.md,
+    alignItems: 'center',
+    justifyContent: 'center',
+    ...SHADOWS.small,
+  },
+  tabContainer: {
+    paddingHorizontal: SPACING.lg,
+    marginBottom: SPACING.md,
+  },
+  tabBar: {
+    flexDirection: 'row',
+    borderRadius: BORDER_RADIUS.lg,
+    padding: 6,
+    borderWidth: 1.5,
+    ...SHADOWS.small,
+  },
+  tab: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: SPACING.sm,
+    paddingHorizontal: SPACING.xs,
+    borderRadius: BORDER_RADIUS.md,
+    gap: SPACING.xs,
+  },
+  activeTab: {
+    ...SHADOWS.small,
+  },
+  tabText: {
+    ...TYPOGRAPHY.bodySmall,
+    fontWeight: '600',
+  },
+  feedContainer: {
+    paddingTop: SPACING.sm,
+    paddingBottom: 100,
+  },
+  emptyState: {
+    marginHorizontal: SPACING.lg,
+    marginTop: SPACING.xxl,
+    padding: SPACING.xl,
+    borderRadius: BORDER_RADIUS.xl,
+    alignItems: 'center',
+    ...SHADOWS.medium,
+  },
+  emptyTitle: {
+    ...TYPOGRAPHY.h3,
+    marginTop: SPACING.md,
+    marginBottom: SPACING.xs,
+  },
+  emptySubtitle: {
+    ...TYPOGRAPHY.body,
+    textAlign: 'center',
+  },
+});
