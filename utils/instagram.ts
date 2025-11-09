@@ -1,13 +1,7 @@
 import { SocialPost } from '../types';
 
-// Instagram public API endpoints
+// Instagram base URL
 const INSTAGRAM_BASE = 'https://www.instagram.com';
-
-// Proxy services to bypass CORS (these are public proxies)
-const PROXY_SERVICES = [
-  'https://api.allorigins.win/raw?url=',
-  'https://corsproxy.io/?',
-];
 
 // Format timestamp to relative time
 function getRelativeTime(timestamp: number): string {
@@ -23,241 +17,196 @@ function getRelativeTime(timestamp: number): string {
   return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 }
 
-// Generate sample posts as fallback
-function generateSamplePosts(username: string): SocialPost[] {
-  const isNational = username === 'fbla_pbl';
-  const displayName = isNational ? 'FBLA National' : 'FBLA NCHS';
-  const handle = `@${username}`;
-
-  const nationalSamples = [
-    {
-      id: 'sample_n1',
-      username: displayName,
-      handle,
-      content: '🎉 Congratulations to all our National Leadership Conference qualifiers! Your hard work and dedication have paid off. See you this summer! #FBLA #NLC2024 #FutureLeaders',
-      timestamp: '2h ago',
-      likes: 1247,
-      retweets: 0,
-      replies: 89,
-      isLiked: false,
-      isRetweeted: false,
-    },
-    {
-      id: 'sample_n2',
-      username: displayName,
-      handle,
-      content: '📢 Registration for the Spring Leadership Conference is now open! Don\'t miss this opportunity to network, learn, and compete. Early bird pricing ends March 1st. Link in bio! #FBLA #Leadership',
-      timestamp: '5h ago',
-      likes: 892,
-      retweets: 0,
-      replies: 54,
-      isLiked: false,
-      isRetweeted: false,
-    },
-    {
-      id: 'sample_n3',
-      username: displayName,
-      handle,
-      content: '💼 Meet our Corporate Partner Spotlight: Microsoft! Learn how they\'re supporting FBLA members with internships, mentorship, and career opportunities. #FBLAPartners #CareerReady',
-      timestamp: '1d ago',
-      likes: 2156,
-      retweets: 0,
-      replies: 123,
-      isLiked: false,
-      isRetweeted: false,
-    },
-    {
-      id: 'sample_n4',
-      username: displayName,
-      handle,
-      content: '🏆 Competitive Events Tip: Start preparing NOW! Review the guidelines, practice your presentation skills, and work with your team. Success comes from preparation. #FBLA #CompetitiveEvents',
-      timestamp: '2d ago',
-      likes: 1534,
-      retweets: 0,
-      replies: 67,
-      isLiked: false,
-      isRetweeted: false,
-    },
-    {
-      id: 'sample_n5',
-      username: displayName,
-      handle,
-      content: '🌟 Scholarship Alert! Applications for the FBLA National Scholarship Program are now open. Over $100,000 in scholarships available. Apply by April 15th! #FBLAScholarships',
-      timestamp: '3d ago',
-      likes: 3421,
-      retweets: 0,
-      replies: 234,
-      isLiked: false,
-      isRetweeted: false,
-    },
-  ];
-
-  const chapterSamples = [
-    {
-      id: 'sample_c1',
-      username: displayName,
-      handle,
-      content: '🎊 HUGE congratulations to our members who placed at Regionals! 5 first place, 3 second place, and 2 third place finishes! We\'re heading to State! 🏆 #NCHSFBLA #RegionalChamps',
-      timestamp: '3h ago',
-      likes: 234,
-      retweets: 0,
-      replies: 45,
-      isLiked: false,
-      isRetweeted: false,
-    },
-    {
-      id: 'sample_c2',
-      username: displayName,
-      handle,
-      content: '📅 Reminder: Chapter meeting THIS Thursday at 3:30 PM in Room 204. We\'ll be discussing State Competition prep and fundraising ideas. Pizza will be provided! 🍕',
-      timestamp: '6h ago',
-      likes: 156,
-      retweets: 0,
-      replies: 28,
-      isLiked: false,
-      isRetweeted: false,
-    },
-    {
-      id: 'sample_c3',
-      username: displayName,
-      handle,
-      content: '💙 Thank you to everyone who participated in our community service project! We collected 500+ items for the local food bank. This is what FBLA is all about! #CommunityService',
-      timestamp: '1d ago',
-      likes: 289,
-      retweets: 0,
-      replies: 52,
-      isLiked: false,
-      isRetweeted: false,
-    },
-    {
-      id: 'sample_c4',
-      username: displayName,
-      handle,
-      content: '🎤 Guest speaker alert! Next week, we\'re hosting Sarah Chen, CEO of TechStart Inc., for a workshop on entrepreneurship. This is a members-only event - don\'t miss it!',
-      timestamp: '2d ago',
-      likes: 198,
-      retweets: 0,
-      replies: 31,
-      isLiked: false,
-      isRetweeted: false,
-    },
-    {
-      id: 'sample_c5',
-      username: displayName,
-      handle,
-      content: '📸 Throwback to our amazing networking social last month! Great connections were made and friendships formed. Can\'t wait for the next one! #NCHSFBLA #Networking',
-      timestamp: '4d ago',
-      likes: 267,
-      retweets: 0,
-      replies: 38,
-      isLiked: false,
-      isRetweeted: false,
-    },
-  ];
-
-  return isNational ? nationalSamples : chapterSamples;
-}
-
-// Fetch Instagram posts with multiple fallback strategies
+// Fetch Instagram posts using web scraping
 async function fetchInstagramPosts(username: string): Promise<SocialPost[]> {
-  // Strategy 1: Try direct API call
   try {
-    const response = await fetch(`${INSTAGRAM_BASE}/${username}/?__a=1&__d=dis`, {
+    console.log(`🔍 Fetching Instagram posts for @${username}...`);
+    
+    // Fetch the Instagram profile page
+    const response = await fetch(`${INSTAGRAM_BASE}/${username}/`, {
       headers: {
-        'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 14_0 like Mac OS X) AppleWebKit/605.1.15',
-        'Accept': 'application/json',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+        'Accept-Language': 'en-US,en;q=0.5',
+        'Connection': 'keep-alive',
       },
     });
 
-    if (response.ok) {
-      const data = await response.json();
-      const posts = extractPostsFromData(data, username);
-      if (posts.length > 0) {
-        console.log(`✅ Successfully fetched ${posts.length} posts from Instagram API`);
-        return posts;
-      }
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
     }
+
+    const html = await response.text();
+    console.log(`✅ Fetched HTML for @${username} (${html.length} chars)`);
+
+    // Extract JSON data from the HTML
+    const posts = extractPostsFromHTML(html, username);
+    
+    if (posts.length > 0) {
+      console.log(`✅ Successfully extracted ${posts.length} posts from @${username}`);
+      return posts;
+    }
+
+    console.log(`⚠️ No posts found for @${username}`);
+    return [];
   } catch (error) {
-    console.log('Direct API failed, trying proxy...');
+    console.error(`❌ Error fetching Instagram posts for @${username}:`, error);
+    throw error;
   }
-
-  // Strategy 2: Try with CORS proxy
-  for (const proxy of PROXY_SERVICES) {
-    try {
-      const url = encodeURIComponent(`${INSTAGRAM_BASE}/${username}/?__a=1`);
-      const response = await fetch(`${proxy}${url}`, {
-        headers: {
-          'Accept': 'application/json',
-        },
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        const posts = extractPostsFromData(data, username);
-        if (posts.length > 0) {
-          console.log(`✅ Successfully fetched ${posts.length} posts via proxy`);
-          return posts;
-        }
-      }
-    } catch (error) {
-      console.log(`Proxy ${proxy} failed, trying next...`);
-      continue;
-    }
-  }
-
-  // Strategy 3: Use sample data as fallback
-  console.log('⚠️ All API methods failed, using sample data');
-  return generateSamplePosts(username);
 }
 
-// Extract posts from Instagram API response
-function extractPostsFromData(data: any, username: string): SocialPost[] {
+// Extract posts from HTML
+function extractPostsFromHTML(html: string, username: string): SocialPost[] {
   const posts: SocialPost[] = [];
   
   try {
-    // Try multiple data structures
-    const user = data?.graphql?.user || data?.data?.user || data?.user;
-    if (!user) return [];
-
-    const edges = user.edge_owner_to_timeline_media?.edges || 
-                  user.timeline_media?.edges ||
-                  [];
-    
-    for (let i = 0; i < Math.min(edges.length, 10); i++) {
-      const node = edges[i].node;
+    // Method 1: Extract from window._sharedData
+    const sharedDataStart = html.indexOf('window._sharedData = ');
+    if (sharedDataStart !== -1) {
+      const jsonStart = sharedDataStart + 'window._sharedData = '.length;
+      const jsonEnd = html.indexOf(';</script>', jsonStart);
       
-      // Extract caption
-      const captionEdges = node.edge_media_to_caption?.edges || [];
-      const caption = captionEdges.length > 0 ? captionEdges[0].node.text : '';
-
-      const post: SocialPost = {
-        id: node.shortcode || node.id || `ig_${i}`,
-        username: username === 'fbla_pbl' ? 'FBLA National' : 'FBLA NCHS',
-        handle: `@${username}`,
-        content: caption,
-        timestamp: getRelativeTime(node.taken_at_timestamp || Date.now() / 1000),
-        likes: node.edge_liked_by?.count || node.like_count || 0,
-        retweets: 0,
-        replies: node.edge_media_to_comment?.count || node.comment_count || 0,
-        isLiked: false,
-        isRetweeted: false,
-      };
-
-      // Add media
-      if (node.is_video) {
-        post.videoThumbnail = node.thumbnail_src || node.display_url;
-        post.videoUrl = `${INSTAGRAM_BASE}/p/${node.shortcode}/`;
-      } else if (node.display_url) {
-        post.images = [node.display_url];
+      if (jsonEnd !== -1) {
+        try {
+          const jsonStr = html.substring(jsonStart, jsonEnd);
+          const sharedData = JSON.parse(jsonStr);
+          console.log('📦 Found window._sharedData');
+          const extractedPosts = extractFromSharedData(sharedData, username);
+          if (extractedPosts.length > 0) {
+            return extractedPosts;
+          }
+        } catch (parseError) {
+          console.log('⚠️ Failed to parse _sharedData');
+        }
       }
-
-      posts.push(post);
     }
+
+    // Method 2: Look for embedded JSON in script tags
+    const scriptStart = html.indexOf('<script type="application/json"');
+    if (scriptStart !== -1) {
+      const contentStart = html.indexOf('>', scriptStart) + 1;
+      const contentEnd = html.indexOf('</script>', contentStart);
+      
+      if (contentEnd !== -1) {
+        try {
+          const jsonStr = html.substring(contentStart, contentEnd);
+          const jsonData = JSON.parse(jsonStr);
+          console.log('🔍 Found embedded JSON data');
+          const extractedPosts = extractFromEmbeddedData(jsonData, username);
+          if (extractedPosts.length > 0) {
+            return extractedPosts;
+          }
+        } catch (parseError) {
+          console.log('⚠️ Failed to parse embedded JSON');
+        }
+      }
+    }
+
+    console.log('⚠️ Could not extract posts from HTML');
   } catch (error) {
-    console.error('Error extracting posts:', error);
+    console.error('Error extracting posts from HTML:', error);
   }
 
   return posts;
+}
+
+// Extract posts from _sharedData
+function extractFromSharedData(data: any, username: string): SocialPost[] {
+  const posts: SocialPost[] = [];
+  
+  try {
+    const user = data?.entry_data?.ProfilePage?.[0]?.graphql?.user;
+    if (!user) return [];
+
+    const edges = user.edge_owner_to_timeline_media?.edges || [];
+    
+    for (let i = 0; i < Math.min(edges.length, 10); i++) {
+      const node = edges[i].node;
+      const post = createPostFromNode(node, username);
+      if (post) posts.push(post);
+    }
+  } catch (error) {
+    console.error('Error extracting from shared data:', error);
+  }
+
+  return posts;
+}
+
+// Extract posts from embedded data
+function extractFromEmbeddedData(data: any, username: string): SocialPost[] {
+  const posts: SocialPost[] = [];
+  
+  try {
+    // Navigate through the data structure to find posts
+    const findPosts = (obj: any): any[] => {
+      if (!obj || typeof obj !== 'object') return [];
+      
+      // Check if this object has edges (Instagram's post structure)
+      if (obj.edges && Array.isArray(obj.edges)) {
+        return obj.edges;
+      }
+      
+      // Check for timeline_media
+      if (obj.edge_owner_to_timeline_media?.edges) {
+        return obj.edge_owner_to_timeline_media.edges;
+      }
+      
+      // Recursively search through the object
+      for (const key in obj) {
+        const result = findPosts(obj[key]);
+        if (result.length > 0) return result;
+      }
+      
+      return [];
+    };
+
+    const edges = findPosts(data);
+    
+    for (let i = 0; i < Math.min(edges.length, 10); i++) {
+      const node = edges[i].node || edges[i];
+      const post = createPostFromNode(node, username);
+      if (post) posts.push(post);
+    }
+  } catch (error) {
+    console.error('Error extracting from embedded data:', error);
+  }
+
+  return posts;
+}
+
+// Create a SocialPost from an Instagram node
+function createPostFromNode(node: any, username: string): SocialPost | null {
+  try {
+    // Extract caption
+    const captionEdges = node.edge_media_to_caption?.edges || [];
+    const caption = captionEdges.length > 0 ? captionEdges[0].node.text : '';
+
+    const post: SocialPost = {
+      id: node.shortcode || node.id || `ig_${Date.now()}`,
+      username: username === 'fbla_pbl' ? 'FBLA National' : 'FBLA NCHS',
+      handle: `@${username}`,
+      content: caption || 'View this post on Instagram',
+      timestamp: getRelativeTime(node.taken_at_timestamp || Date.now() / 1000),
+      likes: node.edge_liked_by?.count || node.edge_media_preview_like?.count || 0,
+      retweets: 0,
+      replies: node.edge_media_to_comment?.count || node.edge_media_preview_comment?.count || 0,
+      isLiked: false,
+      isRetweeted: false,
+    };
+
+    // Add media
+    if (node.is_video) {
+      post.videoThumbnail = node.thumbnail_src || node.display_url;
+      post.videoUrl = `${INSTAGRAM_BASE}/p/${node.shortcode}/`;
+    } else if (node.display_url || node.thumbnail_src) {
+      post.images = [node.display_url || node.thumbnail_src];
+    }
+
+    return post;
+  } catch (error) {
+    console.error('Error creating post from node:', error);
+    return null;
+  }
 }
 
 // Fetch posts for FBLA National Instagram
