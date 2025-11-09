@@ -103,22 +103,28 @@ export default function AnnouncementsScreen() {
         fetchChapterPosts(),
       ]);
 
+      // Always set posts, even if empty
+      setNationalPosts(national);
+      setChapterPosts(chapter);
+
+      // Cache the data
       if (national.length > 0) {
-        setNationalPosts(national);
         cacheData(CACHE_KEY_NATIONAL, national);
       }
-
       if (chapter.length > 0) {
-        setChapterPosts(chapter);
         cacheData(CACHE_KEY_CHAPTER, chapter);
       }
 
+      // Only show error if both are empty
       if (national.length === 0 && chapter.length === 0) {
         setError('Unable to load posts. Please try again later.');
       }
     } catch (err) {
       console.error('Error fetching posts:', err);
-      setError('Failed to load posts. Please check your connection.');
+      // Don't set error if we have cached data
+      if (nationalPosts.length === 0 && chapterPosts.length === 0) {
+        setError('Failed to load posts. Please check your connection.');
+      }
     } finally {
       setLoading(false);
       setRefreshing(false);
