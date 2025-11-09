@@ -19,9 +19,10 @@ export default function SocialPostCard({ post, index, onLike, onRetweet }: Socia
   const { colors, isDarkMode } = useTheme();
 
   const handleOpenPost = async () => {
-    const twitterUrl = `https://twitter.com/${post.handle.replace('@', '')}/status/${post.id}`;
+    // For Instagram posts, construct the Instagram URL
+    const instagramUrl = `https://www.instagram.com/p/${post.id}/`;
     try {
-      await WebBrowser.openBrowserAsync(twitterUrl);
+      await WebBrowser.openBrowserAsync(instagramUrl);
     } catch (error) {
       console.error('Error opening browser:', error);
     }

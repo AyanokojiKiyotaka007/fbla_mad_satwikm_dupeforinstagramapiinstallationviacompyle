@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, RefreshControl } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, RefreshControl, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
-import Animated, { FadeIn, FadeInDown, useAnimatedStyle, withSpring } from 'react-native-reanimated';
+import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import SocialPostCard from '../components/SocialPostCard';
-import { mockNationalPosts, mockChapterPosts } from '../data/mockData';
+import { fetchNationalTweets, fetchChapterTweets } from '../utils/twitter';
 import { SocialPost } from '../types';
 import { useTheme } from '../contexts/ThemeContext';
 import { SPACING, TYPOGRAPHY, BORDER_RADIUS, SHADOWS } from '../constants/theme';
@@ -14,17 +14,24 @@ import { SPACING, TYPOGRAPHY, BORDER_RADIUS, SHADOWS } from '../constants/theme'
 type TabType = 'national' | 'chapter';
 
 const TAB_STORAGE_KEY = '@announcements_last_tab';
+const CACHE_KEY_NATIONAL = '@announcements_cache_national';
+const CACHE_KEY_CHAPTER = '@announcements_cache_chapter';
+const CACHE_EXPIRY = 5 * 60 * 1000; // 5 minutes
 
 export default function AnnouncementsScreen() {
   const [activeTab, setActiveTab] = useState<TabType>('national');
-  const [nationalPosts, setNationalPosts] = useState<SocialPost[]>(mockNationalPosts);
-  const [chapterPosts, setChapterPosts] = useState<SocialPost[]>(mockChapterPosts);
+  const [nationalPosts, setNationalPosts] = useState<SocialPost[]>([]);
+  const [chapterPosts, setChapterPosts] = useState<SocialPost[]>([]);
   const [refreshing, setRefreshing] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const { colors, isDarkMode } = useTheme();
 
-  // Load last viewed tab on mount
+  // Load cached data and last viewed tab on mount
   useEffect(() => {
     loadLastTab();
+    loadCachedData();
+    fetchAllPosts();
   }, []);
 
   // Save tab when it changes
@@ -51,10 +58,75 @@ export default function AnnouncementsScreen() {
     }
   };
 
+  const loadCachedData = async () => {
+    try {
+      const [cachedNational, cachedChapter] = await Promise.all([
+        AsyncStorage.getItem(CACHE_KEY_NATIONAL),
+        AsyncStorage.getItem(CACHE_KEY_CHAPTER),
+      ]);
+
+      if (cachedNational) {
+        const { data, timestamp } = JSON.parse(cachedNational);
+        if (Date.now() - timestamp < CACHE_EXPIRY) {
+          setNationalPosts(data);
+        }
+      }
+
+      if (cachedChapter) {
+        const { data, timestamp } = JSON.parse(cachedChapter);
+        if (Date.now() - timestamp < CACHE_EXPIRY) {
+          setChapterPosts(data);
+        }
+      }
+    } catch (error) {
+      console.error('Error loading cached data:', error);
+    }
+  };
+
+  const cacheData = async (key: string, data: SocialPost[]) => {
+    try {
+      await AsyncStorage.setItem(
+        key,
+        JSON.stringify({ data, timestamp: Date.now() })
+      );
+    } catch (error) {
+      console.error('Error caching data:', error);
+    }
+  };
+
+  const fetchAllPosts = async () => {
+    try {
+      setError(null);
+      
+      const [national, chapter] = await Promise.all([
+        fetchNationalTweets(),
+        fetchChapterTweets(),
+      ]);
+
+      if (national.length > 0) {
+        setNationalPosts(national);
+        cacheData(CACHE_KEY_NATIONAL, national);
+      }
+
+      if (chapter.length > 0) {
+        setChapterPosts(chapter);
+        cacheData(CACHE_KEY_CHAPTER, chapter);
+      }
+
+      if (national.length === 0 && chapter.length === 0) {
+        setError('Unable to load posts. Please check your connection.');
+      }
+    } catch (err) {
+      console.error('Error fetching posts:', err);
+      setError('Failed to load posts. Please try again later.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleRefresh = async () => {
     setRefreshing(true);
-    // Simulate API refresh
-    await new Promise(resolve => setTimeout(resolve, 1500));
+    await fetchAllPosts();
     setRefreshing(false);
   };
 
@@ -128,14 +200,20 @@ export default function AnnouncementsScreen() {
           <View>
             <Text style={[styles.headerTitle, { color: colors.text }]}>Announcements</Text>
             <Text style={[styles.headerSubtitle, { color: colors.textLight }]}>
-              Stay updated with FBLA
+              Live from Twitter/X
             </Text>
           </View>
           <TouchableOpacity 
             style={[styles.refreshButton, { backgroundColor: colors.surface }]}
             onPress={handleRefresh}
+            disabled={refreshing}
           >
-            <MaterialIcons name="refresh" size={22} color={colors.primary} />
+            <MaterialIcons 
+              name="refresh" 
+              size={22} 
+              color={colors.primary}
+              style={refreshing ? { opacity: 0.5 } : {}}
+            />
           </TouchableOpacity>
         </Animated.View>
 
@@ -162,7 +240,7 @@ export default function AnnouncementsScreen() {
                 styles.tabText,
                 { color: activeTab === 'national' ? '#FFFFFF' : colors.textSecondary }
               ]}>
-                National Updates
+                National
               </Text>
             </TouchableOpacity>
 
@@ -183,7 +261,7 @@ export default function AnnouncementsScreen() {
                 styles.tabText,
                 { color: activeTab === 'chapter' ? '#FFFFFF' : colors.textSecondary }
               ]}>
-                Chapter Updates
+                Chapter
               </Text>
             </TouchableOpacity>
           </View>
@@ -202,7 +280,30 @@ export default function AnnouncementsScreen() {
             />
           }
         >
-          {currentPosts.length > 0 ? (
+          {loading ? (
+            <View style={styles.loadingContainer}>
+              <ActivityIndicator size="large" color={colors.primary} />
+              <Text style={[styles.loadingText, { color: colors.textLight }]}>
+                Loading posts...
+              </Text>
+            </View>
+          ) : error ? (
+            <Animated.View 
+              entering={FadeIn.delay(400)}
+              style={[styles.emptyState, { backgroundColor: colors.surface }]}
+            >
+              <MaterialIcons name="error-outline" size={64} color={colors.error} />
+              <Text style={[styles.emptyTitle, { color: colors.text }]}>
+                {error}
+              </Text>
+              <TouchableOpacity
+                style={[styles.retryButton, { backgroundColor: colors.primary }]}
+                onPress={handleRefresh}
+              >
+                <Text style={styles.retryButtonText}>Try Again</Text>
+              </TouchableOpacity>
+            </Animated.View>
+          ) : currentPosts.length > 0 ? (
             currentPosts.map((post, index) => (
               <SocialPostCard
                 key={post.id}
@@ -222,7 +323,7 @@ export default function AnnouncementsScreen() {
                 No posts available
               </Text>
               <Text style={[styles.emptySubtitle, { color: colors.textLight }]}>
-                Check back later for updates
+                Pull down to refresh
               </Text>
             </Animated.View>
           )}
@@ -294,6 +395,15 @@ const styles = StyleSheet.create({
     paddingTop: SPACING.sm,
     paddingBottom: 100,
   },
+  loadingContainer: {
+    marginTop: SPACING.xxl,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  loadingText: {
+    ...TYPOGRAPHY.body,
+    marginTop: SPACING.md,
+  },
   emptyState: {
     marginHorizontal: SPACING.lg,
     marginTop: SPACING.xxl,
@@ -306,9 +416,21 @@ const styles = StyleSheet.create({
     ...TYPOGRAPHY.h3,
     marginTop: SPACING.md,
     marginBottom: SPACING.xs,
+    textAlign: 'center',
   },
   emptySubtitle: {
     ...TYPOGRAPHY.body,
     textAlign: 'center',
+  },
+  retryButton: {
+    marginTop: SPACING.md,
+    paddingHorizontal: SPACING.lg,
+    paddingVertical: SPACING.sm,
+    borderRadius: BORDER_RADIUS.md,
+  },
+  retryButtonText: {
+    ...TYPOGRAPHY.bodyMedium,
+    color: '#FFFFFF',
+    fontWeight: '600',
   },
 });
